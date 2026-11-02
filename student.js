@@ -58,8 +58,10 @@
     $('studentName').value = store.get('mc_name');
     $('studentPhone').value = store.get('mc_phone');
 
+    const TEMP_QUICK = true;
     if (!IS_TEST) {
-        $('quickBtn').style.display = 'none';
+        /* مؤقت للتجارب: الدخول السريع ظاهر في الغرفة الحقيقية — لإزالته اجعل TEMP_QUICK=false */
+        if (!TEMP_QUICK) $('quickBtn').style.display = 'none';
         $('studentSecret').type = 'text'; $('studentSecret').placeholder = 'كود الاشتراك'; $('studentSecret').autocomplete = 'off';
         $('secretErr').textContent = '';
         if (firebase.auth) firebase.auth().signInAnonymously().then(c => { myId = c.user.uid; authReady = true; })
@@ -87,7 +89,7 @@
             if (sec !== SECRET) { $('secretErr').style.display = 'block'; return; }
         } else {
             if (!authReady) { toast('جارٍ الاتصال… حاول بعد لحظة', 'a'); return; }
-            try { await checkAccess(); }
+            try { if (!(quick && TEMP_QUICK)) await checkAccess(); }
             catch (e) { $('secretErr').style.display = 'block'; $('secretErr').textContent = '❌ ' + (e.message && e.message.indexOf('PERMISSION') < 0 ? e.message : 'تعذر التحقق، حاول لاحقًا'); return; }
         }
         $('secretErr').style.display = 'none';
@@ -114,7 +116,7 @@
         const dev = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows PC' : /Macintosh/.test(ua) ? 'Mac' : 'طالب';
         if (!$('studentName').value.trim()) $('studentName').value = dev;
         if (!$('studentPhone').value.trim()) $('studentPhone').value = '000';
-        $('studentSecret').value = SECRET;
+        if (IS_TEST) $('studentSecret').value = SECRET;
         submitEntry(true);
     }
     $('entryBtn').addEventListener('click', () => submitEntry(false));
