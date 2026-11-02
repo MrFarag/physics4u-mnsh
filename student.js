@@ -54,11 +54,12 @@
     $('studentName').value = store.get('mc_name');
     $('studentPhone').value = store.get('mc_phone');
 
-    function submitEntry() {
+    function submitEntry(quick) {
         const name = $('studentName').value.trim();
         const phone = $('studentPhone').value.trim();
         const sec = $('studentSecret').value.trim();
         if (!name) { $('studentName').focus(); toast('الرجاء إدخال الاسم', 'a'); return; }
+        if (!quick && name.split(/\s+/).length < 3) { $('studentName').focus(); toast('اكتب الاسم الثلاثي: الأول والثاني والأخير', 'a'); return; }
         if (sec !== SECRET) { $('secretErr').style.display = 'block'; return; }
         $('secretErr').style.display = 'none';
         myName = name; myPhone = phone;
@@ -85,16 +86,17 @@
         if (!$('studentName').value.trim()) $('studentName').value = dev;
         if (!$('studentPhone').value.trim()) $('studentPhone').value = '000';
         $('studentSecret').value = SECRET;
-        submitEntry();
+        submitEntry(true);
     }
-    $('entryBtn').addEventListener('click', submitEntry);
+    $('entryBtn').addEventListener('click', () => submitEntry(false));
     $('quickBtn').addEventListener('click', quickEntry);
-    $('studentSecret').addEventListener('keydown', e => { if (e.key === 'Enter') submitEntry(); });
+    $('studentSecret').addEventListener('keydown', e => { if (e.key === 'Enter') submitEntry(false); });
 
     function enter() {
         if (entered) return; entered = true;
         $('entryScreen').classList.add('hidden');
         toast('✅ مرحبًا ' + myName);
+        $('welcome').textContent = 'مرحبًا بك يا ' + myName + ' في حصة Mr. Farag Physics 🌟';
         ref('joinRequests/' + myId).remove();
 
         /* الحضور: يُعاد تسجيله عند كل إعادة اتصال */
@@ -160,7 +162,8 @@
         b.classList.toggle('on', st === 'requesting');
         b.classList.toggle('live', st === 'allowed');
         b.classList.toggle('muted', st === 'muted');
-        const txt = { idle: 'مايك', requesting: 'بانتظار الإذن', allowed: 'يُسمع', muted: 'مكتوم' }[st];
+        b.classList.toggle('tmuted', st === 'tmuted');
+        const txt = { idle: 'مايك', requesting: 'بانتظار الإذن', allowed: 'يُسمع', muted: 'مكتوم', tmuted: 'كتمك المدرس' }[st];
         b.innerHTML = '<svg viewBox="0 0 24 24" class="mic-svg"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>' + txt + '</span><b class="mic-dots"><i></i><i></i><i></i><i></i></b>';
         if (st === 'allowed' && sStream && !lvAn) {
             try {
@@ -204,7 +207,7 @@
                 ref('micRequests/' + myId).remove();
                 if (!sPc) await startMicRTC();
             } else {
-                if (wasAllowed) stopMic();                           /* المدرس أوقفه */
+                if (wasAllowed) { stopMic(); setMicState('tmuted'); }   /* المدرس كتمه: رمادي فاتح، وضغطة منه تعيد الطلب */
                 else setMicState(micOn ? 'requesting' : 'idle');
             }
         });
@@ -253,6 +256,20 @@
         }
     }
     $('micBtn').addEventListener('click', toggleMic);
+
+    /* ── رسالة للمدرس ── */
+    let lastMsg = 0;
+    $('msgBtn').addEventListener('click', () => { $('msgModal').style.display = 'flex'; $('msgText').focus(); });
+    $('msgCancel').addEventListener('click', () => { $('msgModal').style.display = 'none'; });
+    $('msgText').addEventListener('input', () => { $('msgCnt').textContent = $('msgText').value.length + '/300'; });
+    $('msgSend').addEventListener('click', () => {
+        const t = $('msgText').value.trim(); if (!t || !approved) return;
+        if (Date.now() - lastMsg < 5000) { toast('انتظر قليلًا قبل إرسال رسالة أخرى', 'a'); return; }
+        lastMsg = Date.now();
+        ref('messages').push({ id: myId, name: myName, text: t.slice(0, 300), ts: Date.now() });
+        $('msgText').value = ''; $('msgCnt').textContent = '0/300'; $('msgModal').style.display = 'none';
+        toast('✅ تم إرسال رسالتك للمدرس');
+    });
 
 
     /* ════════ ما يُظهره المدرس: vis + الملف + الحفظ ════════ */

@@ -47,6 +47,7 @@
 <!-- ═══ الشريط العلوي ═══ -->
 <header class="top-bar">
   <div class="brand"><a class="wa-btn" href="https://wa.me/201141010981" target="_blank" title="واتساب">💬</a><span class="brand-name" id="brandName">Mr. Farag | Physics</span></div>
+  <div class="welcome" id="welcome"></div>
   <div class="stats">
     <span class="live"><i class="dot-live"></i>مباشر</span>
     <span title="الطلاب المتصلون">👥 <b id="cnt">0</b></span>
@@ -87,6 +88,7 @@
   <button class="bb bb-text" id="saveBtn" title="حفظ" style="display:none">💾 حفظ</button>
   <button class="bb" id="panelBtn" title="إظهار/إخفاء الشرائح">🗂</button>
   <button class="bb bb-text" id="micBtn" title="اطلب المايك للتحدث">🎤 مايك</button>
+  <button class="bb bb-text" id="msgBtn" title="أرسل رسالة للمدرس">✉ رسالة</button>
   <button class="bb bb-text" id="handBtn" title="رفع اليد">✋ يد</button>
   <button class="bb" id="fsBtn" title="ملء الشاشة">⛶</button>
 </footer>
@@ -95,6 +97,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<div class="msg-modal" id="msgModal" style="display:none"><div class="msg-box"><div class="msg-t">رسالة إلى المدرس</div><textarea id="msgText" maxlength="300" placeholder="اكتب رسالتك هنا (حتى 300 حرف)…"></textarea><div class="msg-row"><span id="msgCnt">0/300</span><button class="entry-btn" id="msgSend" type="button">إرسال</button><button class="entry-btn msg-cancel" id="msgCancel" type="button">إغلاق</button></div></div></div>
 <div class="save-menu" id="saveMenu" style="display:none"></div>
 <audio id="audioEl" autoplay playsinline></audio>
 <script src="render.js"></script>
