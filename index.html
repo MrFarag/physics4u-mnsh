@@ -100,6 +100,8 @@
 <div class="msg-modal" id="msgModal" style="display:none"><div class="msg-box"><div class="msg-t">رسالة إلى المدرس</div><textarea id="msgText" maxlength="300" placeholder="اكتب رسالتك هنا (حتى 300 حرف)…"></textarea><div class="msg-row"><span id="msgCnt">0/300</span><button class="entry-btn" id="msgSend" type="button">إرسال</button><button class="entry-btn msg-cancel" id="msgCancel" type="button">إغلاق</button></div></div></div>
 <div class="save-menu" id="saveMenu" style="display:none"></div>
 <audio id="audioEl" autoplay playsinline></audio>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="config.js"></script>
 <script src="render.js"></script>
 <script src="student.js"></script>
 <script>(function(){var r=new URLSearchParams(location.search).get("room");if(r)document.getElementById("homeLink").href="home.html?room="+encodeURIComponent(r);})();</script>

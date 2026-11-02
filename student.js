@@ -10,21 +10,25 @@
     const SECRET = '135';   /* تنبيه: يُفحص هنا فقط — الحماية الحقيقية في قواعد Firebase */
 
     /* ── Firebase + الغرفة التجريبية (?room=test) ── */
-    firebase.initializeApp({
+    const CFG = window.MC_CONFIG || {};
+    firebase.initializeApp(CFG.firebase || {
         apiKey: 'AIzaSyB7E4NsGQbCehVSQ3Kj97yExRZwpHzTOl8',
         databaseURL: 'https://myclaive-default-rtdb.firebaseio.com'
     });
     const db = firebase.database();
-    const ROOM = (new URLSearchParams(location.search).get('room') || '').replace(/[.#$\[\]\/]/g, '_');
-    const BASE = ROOM ? 'rooms/' + ROOM + '/' : '';
+    const LIVE_ROOM = CFG.liveRoom || 'live';
+    const ROOM = (new URLSearchParams(location.search).get('room') || LIVE_ROOM).replace(/[.#$\[\]\/]/g, '_');
+    const IS_TEST = ROOM === 'test';          /* التجريبية: بلا حساب ولا أكواد */
+    const BASE = 'rooms/' + ROOM + '/';
     const ref = p => db.ref(BASE + p);
     const $ = id => document.getElementById(id);
     const toArr = o => Array.isArray(o) ? o.filter(Boolean) : Object.values(o || {});
 
-    if (ROOM) $('brandName').textContent = 'تجريبي: ' + ROOM;
+    if (ROOM !== LIVE_ROOM) $('brandName').textContent = 'تجريبي: ' + ROOM;
 
     /* ── حالة الطالب ── */
-    const myId = 's' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    let myId = 's' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);   /* في الغرفة الحقيقية يصبح معرّف حسابي (uid) */
+    let authReady = IS_TEST || !firebase.auth;
     let myName = '', myPhone = '';
     let approved = false, entered = false;
     let order = [];            /* ترتيب الشرائح من المدرس */
@@ -54,13 +58,38 @@
     $('studentName').value = store.get('mc_name');
     $('studentPhone').value = store.get('mc_phone');
 
-    function submitEntry(quick) {
+    if (!IS_TEST) {
+        $('quickBtn').style.display = 'none';
+        $('studentSecret').type = 'text'; $('studentSecret').placeholder = 'كود الاشتراك'; $('studentSecret').autocomplete = 'off';
+        $('secretErr').textContent = '';
+        if (firebase.auth) firebase.auth().signInAnonymously().then(c => { myId = c.user.uid; authReady = true; })
+            .catch(e => { $('secretErr').style.display = 'block'; $('secretErr').textContent = '❌ تعذر الاتصال بالخادم، حدّث الصفحة'; });
+    }
+    async function checkAccess() {          /* الغرفة الحقيقية: يلزم اشتراك في البث (كود يخصّني) */
+        const ok = (await db.ref('access/' + myId + '/live').once('value')).exists();
+        if (ok) return true;
+        const code = $('studentSecret').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!code) throw new Error('اكتب كود الاشتراك الذي أرسله لك المدرس');
+        const c = (await db.ref('codes/' + code).once('value')).val();
+        if (!c || c.item !== 'live') throw new Error('الكود غير صحيح');
+        if (c.uid && c.uid !== myId) throw new Error('هذا الكود مستخدم من طالب آخر');
+        if (!c.uid) await db.ref('codes/' + code + '/uid').set(myId);
+        await db.ref('access/' + myId + '/live').set(code);
+        return true;
+    }
+    async function submitEntry(quick) {
         const name = $('studentName').value.trim();
         const phone = $('studentPhone').value.trim();
         const sec = $('studentSecret').value.trim();
         if (!name) { $('studentName').focus(); toast('الرجاء إدخال الاسم', 'a'); return; }
         if (!quick && name.split(/\s+/).length < 3) { $('studentName').focus(); toast('اكتب الاسم الثلاثي: الأول والثاني والأخير', 'a'); return; }
-        if (sec !== SECRET) { $('secretErr').style.display = 'block'; return; }
+        if (IS_TEST) {
+            if (sec !== SECRET) { $('secretErr').style.display = 'block'; return; }
+        } else {
+            if (!authReady) { toast('جارٍ الاتصال… حاول بعد لحظة', 'a'); return; }
+            try { await checkAccess(); }
+            catch (e) { $('secretErr').style.display = 'block'; $('secretErr').textContent = '❌ ' + (e.message && e.message.indexOf('PERMISSION') < 0 ? e.message : 'تعذر التحقق، حاول لاحقًا'); return; }
+        }
         $('secretErr').style.display = 'none';
         myName = name; myPhone = phone;
         store.set('mc_name', name); store.set('mc_phone', phone);

@@ -51,3 +51,8 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 18px
 .soon { text-align: center; padding: 40px 10px; color: var(--muted); }
 .soon big { display: block; font-size: 44px; margin-bottom: 8px; }
 @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+
+.sample-note { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.4); color: #fbbf24; border-radius: 10px; padding: 6px 12px; font-size: 12px; margin-bottom: 12px; }
+.btn.green { background: linear-gradient(135deg,#16a34a,#15803d); color: #fff; }
+.row .bt { display: flex; gap: 6px; }
+.badge-lock { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.55); padding: 2px 10px; border-radius: 99px; font-size: 12px; }
