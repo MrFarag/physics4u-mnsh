@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MyClass - الطالب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="student.css">
+</head>
+<body>
+
+<!-- ═══ شاشة الدخول ═══ -->
+<div id="entryScreen" class="entry-screen">
+  <div class="entry-card">
+    <div class="entry-logo">⚛️ MASTER PHYSICS</div>
+    <a href="home.html" id="homeLink" style="position:absolute;top:10px;right:14px;font-size:12px;color:#94a3b8;text-decoration:none">← الرئيسية</a>
+    <div class="entry-sub">WITH MR. FARAG | ONLINE LESSONS</div>
+    <div id="formPart">
+      <input type="text" id="studentName" class="entry-field" placeholder="الاسم الثلاثي" autocomplete="name">
+      <div class="wa-field">
+        <span>+20</span>
+        <input type="text" id="studentPhone" placeholder="رقم الواتس (1012345678)" inputmode="numeric">
+      </div>
+      <input type="password" id="studentSecret" class="entry-field" placeholder="الرقم السري">
+      <div id="secretErr" class="entry-err">❌ الرقم السري غير صحيح</div>
+      <div class="entry-btns">
+        <button id="entryBtn" class="entry-btn" type="button">تسجيل</button>
+        <button id="quickBtn" class="entry-btn entry-btn-quick" type="button">⚡ دخول سريع</button>
+      </div>
+    </div>
+    <div id="waitPart" style="display:none">
+      <div class="entry-marquee-wrap">
+        <div class="entry-marquee">
+          بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ &nbsp;✦&nbsp; رَبِّ زِدْنِي عِلْمًا &nbsp;✦&nbsp;
+          العلم نور والجهل ظلام &nbsp;✦&nbsp; من جدَّ وجد ومن زرع حصد &nbsp;✦&nbsp;
+          اطلب العلم من المهد إلى اللحد &nbsp;✦&nbsp; بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ &nbsp;✦&nbsp;
+        </div>
+      </div>
+      <div class="wait-msg" id="waitMsg">⏳ بانتظار موافقة المدرس...</div>
+    </div>
+    <div class="entry-foot">واتساب: @MrFaragPhysics</div>
+  </div>
+</div>
+
+<!-- ═══ الشريط العلوي ═══ -->
+<header class="top-bar">
+  <div class="brand"><a class="wa-btn" href="https://wa.me/201141010981" target="_blank" title="واتساب">💬</a><span class="brand-name" id="brandName">Mr. Farag | Physics</span></div>
+  <div class="stats">
+    <span class="live"><i class="dot-live"></i>مباشر</span>
+    <span title="الطلاب المتصلون">👥 <b id="cnt">0</b></span>
+    <span title="مدة وجودك في الحصة">🕒 <b id="sessionTimer">00:00</b></span>
+  </div>
+</header>
+
+<!-- ═══ المنطقة الرئيسية ═══ -->
+<main class="main-area">
+  <aside class="slides-panel" id="slidesPanel">
+    <div class="sp-head"><span>الشرائح</span><span class="sp-count" id="slidesCount">0</span></div>
+    <div class="sp-list" id="slidesList"></div>
+  </aside>
+
+  <section class="view-area">
+    <div class="view-wrap" id="viewWrap">
+      <div id="slideBox"><canvas id="baseCv"></canvas><canvas id="liveCv"></canvas></div>
+      <div class="view-empty" id="viewEmpty">⏳ بانتظار المدرس لبدء الشرح...</div>
+    </div>
+    <div class="file-view" id="fileView" style="display:none"><div class="fv-top"><span id="fvName"></span><span id="fvPg"></span></div><div class="fv-body" id="fvBody"><img id="fvImg" alt=""></div></div>
+    <div class="hidden-msg" id="hiddenMsg" style="display:none"><div><big>🙈</big>المدرس أخفى المحتوى مؤقتًا<small>الصوت مستمر — انتظر حتى يُظهره</small></div></div>
+    <button class="follow-btn" id="followBtn" type="button" style="display:none">↩ العودة لشريحة المدرس</button>
+  </section>
+</main>
+
+<!-- ═══ الشريط السفلي ═══ -->
+<footer class="bot">
+  <button class="bb" id="prevBtn" title="الشريحة السابقة">▶</button>
+  <span class="bb-txt"><b id="curNum">0</b> / <b id="totNum">0</b></span>
+  <button class="bb" id="nextBtn" title="الشريحة التالية">◀</button>
+  <span class="bb-sep"></span>
+  <button class="bb" id="zoomOut" title="تصغير">−</button>
+  <span class="bb-txt" id="zoomVal">100%</span>
+  <button class="bb" id="zoomIn" title="تكبير">+</button>
+  <button class="bb bb-text" id="fitBtn" title="تبديل طريقة العرض: 100% / ملاءمة العرض / الصفحة كاملة">ملاءمة العرض</button>
+  <span class="bb-sep"></span>
+  <button class="bb bb-text" id="fileBtn" title="التبديل بين السبورة والملف" style="display:none">📄 الملف</button>
+  <button class="bb bb-text" id="saveBtn" title="حفظ" style="display:none">💾 حفظ</button>
+  <button class="bb" id="panelBtn" title="إظهار/إخفاء الشرائح">🗂</button>
+  <button class="bb bb-text" id="micBtn" title="اطلب المايك للتحدث">🎤 مايك</button>
+  <button class="bb bb-text" id="handBtn" title="رفع اليد">✋ يد</button>
+  <button class="bb" id="fsBtn" title="ملء الشاشة">⛶</button>
+</footer>
+
+<div id="toastBox"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<div class="save-menu" id="saveMenu" style="display:none"></div>
+<audio id="audioEl" autoplay playsinline></audio>
+<script src="render.js"></script>
+<script src="student.js"></script>
+<script>(function(){var r=new URLSearchParams(location.search).get("room");if(r)document.getElementById("homeLink").href="home.html?room="+encodeURIComponent(r);})();</script>
+</body>
+</html>

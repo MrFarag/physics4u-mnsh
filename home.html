@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyClass - الرئيسية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+<header class="hd">
+  <div class="brand">⚛️ MASTER PHYSICS <small id="roomTag"></small></div>
+  <nav>
+    <a href="#live">بث مباشر</a><a href="#courses">الدورات</a><a href="#free">دروس مجانية</a><a href="#videos">فيديوهات</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" id="live">
+    <div class="hero-txt">
+      <h1>تعلّم الفيزياء مع <span id="tName"></span></h1>
+      <p>حصص مباشرة، دورات مسجّلة، ودروس مجانية — كل ما تحتاجه في مكان واحد.</p>
+    </div>
+    <div class="live-card" id="liveCard">
+      <div class="live-state"><span class="dot" id="liveDot"></span><b id="liveTxt">جارٍ التحقق…</b></div>
+      <p id="liveSub">ادخل الحصة المباشرة عند بدئها.</p>
+      <a class="btn gold" id="joinBtn" href="index.html">🎥 الدخول إلى البث المباشر</a>
+      <div class="sched" id="sched"></div>
+    </div>
+  </section>
+
+  <section id="courses"><h2>الدورات</h2><div class="grid" id="courseGrid"></div></section>
+  <section id="free"><h2>دروس مجانية <em>مجانًا</em></h2><div class="grid" id="freeGrid"></div></section>
+  <section id="videos"><h2>فيديوهات مجانية</h2><div class="grid vids" id="vidGrid"></div></section>
+</main>
+
+<footer>© Mr. Farag Physics · المحتوى الحالي عينات تجريبية</footer>
+
+<div class="modal" id="modal"><div class="mbox"><button class="mx" id="mx">✕</button><div id="mbody"></div></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="home-data.js"></script>
+<script src="home.js"></script>
+</body>
+</html>
