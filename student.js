@@ -40,6 +40,7 @@
     let segs = [];             /* رسم القلم المباشر الذي لم تصل صفحته بعد */
     let shapePrev = null;      /* معاينة الشكل أثناء سحبه */
     let shownSlide = null;
+    const SESS = Math.random().toString(36).slice(2) + Date.now().toString(36);
     const DEV = (function () { const u = navigator.userAgent; const os = /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? (/Mobile/.test(u) ? 'موبايل Android' : 'تابلت Android') : /Windows/.test(u) ? 'كمبيوتر Windows' : /Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'جهاز'; const br = /Edg\//.test(u) ? 'Edge' : /OPR\//.test(u) ? 'Opera' : /Chrome\//.test(u) ? 'Chrome' : /Safari\//.test(u) ? 'Safari' : /Firefox\//.test(u) ? 'Firefox' : ''; return os + (br ? ' · ' + br : ''); })();
 
     function toast(msg, cls) {
@@ -55,7 +56,7 @@
     };
 
     /* ════════ الدخول ════════ */
-    $('studentName').value = store.get('mc_name');
+    { const sn = store.get('mc_name'); $('studentName').value = (/^(Windows PC|Mac|iPhone|iPad|Android|Linux|طالب)$/i.test(sn) || (sn || '').split(/\s+/).length < 2) ? '' : sn; }
     $('studentPhone').value = store.get('mc_phone');
 
     const TEMP_QUICK = true;
@@ -99,11 +100,11 @@
         $('formPart').style.display = 'none';
         $('waitPart').style.display = 'block';
 
-        ref('joinRequests/' + myId).set({ id: myId, name: myName, phone: myPhone, dev: DEV, ts: Date.now() });
+        ref('joinRequests/' + myId).set({ id: myId, name: myName, phone: myPhone, dev: DEV, sess: SESS, ts: Date.now() });
         ref('joinRequests/' + myId).onDisconnect().remove();
 
         ref('approvedStudents/' + myId).on('value', snap => {
-            if (snap.exists() && !approved) { approved = true; enter(); }
+            if (snap.exists() && !approved && snap.val().sess === SESS) { approved = true; enter(); }   /* موافقة هذه الجلسة فقط */
             else if (!snap.exists() && approved) {                /* أُخرجتُ من الحصة */
                 approved = false;
                 alert('تم إخراجك من الحصة من قِبل المدرس.');
@@ -302,7 +303,7 @@
 
 
     /* ════════ ما يُظهره المدرس: vis + الملف + الحفظ ════════ */
-    let vis = { board: true, file: false, save: false, slides: true }, fileMeta = null, viewMode = 'board', fileShown = false;
+    let vis = { board: true, file: false, save: false, slides: false }, fileMeta = null, viewMode = 'board', fileShown = false;
     const fileBg = {}, fileStr = {};
     function buildFile(n) {
         const im = fileBg[n]; if (!fileMeta || !im) return;
@@ -328,10 +329,10 @@
     }
     function listenShare() {
         ref('vis').on('value', snap => {
-            const v = snap.val() || { board: true, file: false, save: false, slides: true };
+            const v = snap.val() || { board: true, file: false, save: false, slides: false };
             if (v.file && !vis.file) fileShown = false;          /* أظهر المدرس الملف → ينتقل إليه عند جاهزيته */
             if (!v.file) { viewMode = 'board'; fileShown = false; }
-            vis = { board: v.board !== false, file: !!v.file, save: !!v.save, slides: v.slides !== false };
+            vis = { board: v.board !== false, file: !!v.file, save: !!v.save, slides: v.slides === true };
             { const pn = $('slidesPanel'); if (pn) { pn.classList.toggle('hide', !vis.slides); requestAnimationFrame(() => { try { renderMain(); } catch (e) {} }); } }
             applyVis();
         });
