@@ -40,7 +40,7 @@
     let segs = [];             /* رسم القلم المباشر الذي لم تصل صفحته بعد */
     let shapePrev = null;      /* معاينة الشكل أثناء سحبه */
     let shownSlide = null;
-    let handUp = false;
+    const DEV = (function () { const u = navigator.userAgent; const os = /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? (/Mobile/.test(u) ? 'موبايل Android' : 'تابلت Android') : /Windows/.test(u) ? 'كمبيوتر Windows' : /Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'جهاز'; const br = /Edg\//.test(u) ? 'Edge' : /OPR\//.test(u) ? 'Opera' : /Chrome\//.test(u) ? 'Chrome' : /Safari\//.test(u) ? 'Safari' : /Firefox\//.test(u) ? 'Firefox' : ''; return os + (br ? ' · ' + br : ''); })();
 
     function toast(msg, cls) {
         const t = document.createElement('div');
@@ -84,7 +84,7 @@
         const phone = $('studentPhone').value.trim();
         const sec = $('studentSecret').value.trim();
         if (!name) { $('studentName').focus(); toast('الرجاء إدخال الاسم', 'a'); return; }
-        if (!quick && name.split(/\s+/).length < 3) { $('studentName').focus(); toast('اكتب الاسم الثلاثي: الأول والثاني والأخير', 'a'); return; }
+        if (name.split(/\s+/).length < 2) { $('studentName').focus(); toast('اكتب اسمك الثنائي على الأقل: الأول والأخير', 'a'); return; }
         if (IS_TEST) {
             if (sec !== SECRET) { $('secretErr').style.display = 'block'; return; }
         } else {
@@ -99,7 +99,7 @@
         $('formPart').style.display = 'none';
         $('waitPart').style.display = 'block';
 
-        ref('joinRequests/' + myId).set({ id: myId, name: myName, phone: myPhone, ts: Date.now() });
+        ref('joinRequests/' + myId).set({ id: myId, name: myName, phone: myPhone, dev: DEV, ts: Date.now() });
         ref('joinRequests/' + myId).onDisconnect().remove();
 
         ref('approvedStudents/' + myId).on('value', snap => {
@@ -114,8 +114,8 @@
     function quickEntry() {
         const ua = navigator.userAgent;
         const dev = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows PC' : /Macintosh/.test(ua) ? 'Mac' : 'طالب';
-        if (!$('studentName').value.trim()) $('studentName').value = dev;
-        if (!$('studentPhone').value.trim()) $('studentPhone').value = '000';
+                if (!$('studentPhone').value.trim()) $('studentPhone').value = '000';
+        if ($('studentName').value.trim().split(/\s+/).length < 2) { $('studentName').focus(); toast('اكتب اسمك الثنائي على الأقل أولًا', 'a'); return; }
         if (IS_TEST) $('studentSecret').value = SECRET;
         submitEntry(true);
     }
@@ -135,12 +135,10 @@
             if (!s.val()) return;
             const p = ref('onlineStudents/' + myId);
             p.onDisconnect().remove();
-            p.set({ name: myName, online: true });
-            ref('handRaised/' + myId).onDisconnect().remove();
+            p.set({ name: myName, online: true, dev: DEV });
         });
         ref('onlineStudents').on('value', s => { $('cnt').textContent = Object.keys(s.val() || {}).length; });
         /* المدرس قد ينزل يدي */
-        ref('handRaised/' + myId).on('value', s => { handUp = !!s.val(); $('handBtn').classList.toggle('on', handUp); });
 
         connectAudio(); watchMicPermission(); listenShare();
         listen();
@@ -194,7 +192,7 @@
         b.classList.toggle('live', st === 'allowed');
         b.classList.toggle('muted', st === 'muted');
         b.classList.toggle('tmuted', st === 'tmuted');
-        const txt = { idle: 'مايك', requesting: 'بانتظار الإذن', allowed: 'يُسمع', muted: 'مكتوم', tmuted: 'كتمك المدرس' }[st];
+        const txt = { idle: 'مايك', requesting: 'بانتظار الإذن', allowed: 'يُسمع', muted: 'مكتوم', tmuted: '' }[st];
         b.innerHTML = '<svg viewBox="0 0 24 24" class="mic-svg"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>' + txt + '</span><b class="mic-dots"><i></i><i></i><i></i><i></i></b>';
         if (st === 'allowed' && sStream && !lvAn) {
             try {
@@ -304,16 +302,19 @@
 
 
     /* ════════ ما يُظهره المدرس: vis + الملف + الحفظ ════════ */
-    let vis = { board: true, file: false, save: false }, fileMeta = null, viewMode = 'board';
+    let vis = { board: true, file: false, save: false, slides: true }, fileMeta = null, viewMode = 'board', fileShown = false;
     const fileBg = {}, fileStr = {};
     function buildFile(n) {
         const im = fileBg[n]; if (!fileMeta || !im) return;
         const st = fileStr[n] || { s: [], ts: 0 };
         pagesData['F' + n] = { bg: '#ffffff', g: 0, s: st.s, i: [], w: fileMeta.bw, h: fileMeta.bh, ts: st.ts, zoom: fileMeta.zoom || 1, bgImg: im };
         if (viewMode === 'file' && String(fileMeta.cur) === String(n)) renderMain();
+        else if (vis.file && viewMode === 'board' && !fileShown && String(fileMeta.cur) === String(n)) { fileShown = true; viewMode = 'file'; applyVis(); }
     }
     function applyVis() {
         const fileOk = !!(vis.file && fileMeta && fileMeta.n);
+        const fileReady = fileOk && !!pagesData['F' + fileMeta.cur];
+        if (viewMode === 'file' && !fileReady) viewMode = 'board';   /* لا تُخفِ السبورة قبل جاهزية الملف */
         if (!fileOk && viewMode === 'file') viewMode = 'board';
         $('fileBtn').style.display = fileOk ? '' : 'none';
         $('fileBtn').textContent = viewMode === 'file' ? '🖍 السبورة' : '📄 الملف';
@@ -327,17 +328,18 @@
     }
     function listenShare() {
         ref('vis').on('value', snap => {
-            const v = snap.val() || { board: true, file: false, save: false };
-            if (v.file && !vis.file) viewMode = 'file';          /* أظهر المدرس الملف → انتقل إليه */
-            if (!v.file) viewMode = 'board';
-            vis = { board: v.board !== false, file: !!v.file, save: !!v.save };
+            const v = snap.val() || { board: true, file: false, save: false, slides: true };
+            if (v.file && !vis.file) fileShown = false;          /* أظهر المدرس الملف → ينتقل إليه عند جاهزيته */
+            if (!v.file) { viewMode = 'board'; fileShown = false; }
+            vis = { board: v.board !== false, file: !!v.file, save: !!v.save, slides: v.slides !== false };
+            { const pn = $('slidesPanel'); if (pn) { pn.classList.toggle('hide', !vis.slides); requestAnimationFrame(() => { try { renderMain(); } catch (e) {} }); } }
             applyVis();
         });
         ref('fileShare/meta').on('value', snap => {
             const m = snap.val(), was = !!(fileMeta && fileMeta.n);
             fileMeta = m;
             if (!m) { for (const k in fileBg) { delete fileBg[k]; delete fileStr[k]; delete pagesData['F' + k]; } }
-            else { Object.keys(fileBg).forEach(buildFile); if (vis.file && !was) viewMode = 'file'; }
+            else { Object.keys(fileBg).forEach(buildFile); if (vis.file && !was) fileShown = false; }
             applyVis();
         });
         ref('fileShare/pages').on('value', snap => {                 /* خلفيات الصفحات */
@@ -689,13 +691,28 @@
     $('fsBtn').addEventListener('click', () => {
         document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => { });
     });
-    $('handBtn').addEventListener('click', () => {
-        if (!approved) return;
-        handUp = !handUp;
-        $('handBtn').classList.toggle('on', handUp);
-        if (handUp) ref('handRaised/' + myId).set(true); else ref('handRaised/' + myId).remove();
-    });
+
     const panel = $('slidesPanel');
-    if (window.innerWidth < 700) panel.classList.add('hide');
-    $('panelBtn').addEventListener('click', () => { panel.classList.toggle('hide'); requestAnimationFrame(renderMain); });
+})();
+
+
+/* ════════ حماية المحتوى (قدر المستطاع داخل المتصفح) ════════ */
+(function () {
+    const sh = document.createElement('div'); sh.id = 'shield';
+    sh.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:none';
+    document.body.appendChild(sh);
+    const flash = ms => { sh.style.display = 'block'; setTimeout(() => sh.style.display = 'none', ms || 1500); };
+    const st = document.createElement('style');
+    st.textContent = '@media print{body{display:none!important}} body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} textarea,input{-webkit-user-select:text;user-select:text}';
+    document.head.appendChild(st);
+    document.addEventListener('contextmenu', e => { if (!/INPUT|TEXTAREA/.test(e.target.tagName)) e.preventDefault(); });
+    document.addEventListener('dragstart', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+        const k = e.key, c = e.ctrlKey || e.metaKey;
+        if (k === 'PrintScreen') { flash(); try { navigator.clipboard.writeText(''); } catch (x) {} e.preventDefault(); }
+        if (c && /^[psu]$/i.test(k)) e.preventDefault();
+        if (e.metaKey && e.shiftKey && /^[345]$/.test(k)) { flash(2500); e.preventDefault(); }
+    });
+    document.addEventListener('keyup', e => { if (e.key === 'PrintScreen') { flash(); try { navigator.clipboard.writeText(''); } catch (x) {} } });
+    try { if (navigator.mediaDevices) navigator.mediaDevices.getDisplayMedia = () => Promise.reject(new DOMException('blocked', 'NotAllowedError')); } catch (e) {}
 })();
