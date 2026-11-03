@@ -14,7 +14,7 @@ window.HOME = {
         { id: 'c4', title: 'مراجعة نهائية شاملة', level: 'الصف الثالث الثانوي', lessons: 10, hours: 8, price: 250, color: '#b45309', icon: '📝' }
     ],
     freeLessons: [
-        { id: 'f1', title: 'قوانين نيوتن للحركة', level: 'أول ثانوي', mins: 25, video: '' },
+        { id: 'f1', title: 'حالات تكوّن الصور بالعدسة المحدبة', level: 'ثالث ثانوي', mins: 1, video: 'VTW34mZcNas' },
         { id: 'f2', title: 'قانون أوم والدوائر البسيطة', level: 'ثاني ثانوي', mins: 30, video: '' },
         { id: 'f3', title: 'المجال المغناطيسي', level: 'ثاني ثانوي', mins: 28, video: '' },
         { id: 'f4', title: 'الظاهرة الكهروضوئية', level: 'ثالث ثانوي', mins: 35, video: '' }

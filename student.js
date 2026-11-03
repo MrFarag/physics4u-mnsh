@@ -195,6 +195,7 @@
         b.classList.toggle('tmuted', st === 'tmuted');
         const txt = { idle: 'مايك', requesting: 'بانتظار الإذن', allowed: 'يُسمع', muted: 'مكتوم', tmuted: '' }[st];
         b.innerHTML = '<svg viewBox="0 0 24 24" class="mic-svg"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>' + txt + '</span><b class="mic-dots"><i></i><i></i><i></i><i></i></b>';
+        if (st === 'allowed' && !lvAn && !(document.getElementById('audioEl') || {}).muted && typeof toast === 'function') toast('💡 لتجنّب الصفير: استخدم سماعة أذن أو اكتم السماعة 🔊 أثناء الحديث', 'a');
         if (st === 'allowed' && sStream && !lvAn) {
             try {
                 lvCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -716,4 +717,17 @@
     });
     document.addEventListener('keyup', e => { if (e.key === 'PrintScreen') { flash(); try { navigator.clipboard.writeText(''); } catch (x) {} } });
     try { if (navigator.mediaDevices) navigator.mediaDevices.getDisplayMedia = () => Promise.reject(new DOMException('blocked', 'NotAllowedError')); } catch (e) {}
+})();
+
+
+/* سماعة الطالب: كتم/تشغيل صوت المدرس */
+(function () {
+    const b = document.getElementById('spkBtn'); if (!b) return;
+    b.addEventListener('click', () => {
+        const a = document.getElementById('audioEl'); if (!a) return;
+        a.muted = !a.muted;
+        b.classList.toggle('off', a.muted);
+        b.title = a.muted ? 'السماعة مكتومة — اضغط لسماع المدرس' : 'سماعة: كتم/تشغيل صوت المدرس';
+        if (!a.muted && a.srcObject && a.paused) a.play().catch(() => {});
+    });
 })();

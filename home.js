@@ -5,8 +5,8 @@
     const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const waLink = t => 'https://wa.me/' + H.whatsapp + '?text=' + encodeURIComponent(t);
     try { firebase.initializeApp(CFG.firebase || { apiKey: 'AIzaSyB7E4NsGQbCehVSQ3Kj97yExRZwpHzTOl8', databaseURL: 'https://myclaive-default-rtdb.firebaseio.com' }); } catch (e) {}
-    $('tName').textContent = H.teacher;
-    if (ROOM !== (CFG.liveRoom || 'live')) { $('roomTag').textContent = 'تجريبي: ' + ROOM; $('joinBtn').href = 'index.html?room=' + encodeURIComponent(ROOM); }
+    $('tName').textContent = H.teacher; { const f = document.getElementById('fabLive'); if (f && ROOM !== (CFG.liveRoom || 'live')) f.href = 'live.html?room=' + encodeURIComponent(ROOM); }
+    if (ROOM !== (CFG.liveRoom || 'live')) { $('roomTag').textContent = 'تجريبي: ' + ROOM; $('joinBtn').href = 'live.html?room=' + encodeURIComponent(ROOM); }
 
     $('sched').innerHTML = '<b>مواعيد الحصص</b>' + H.schedule.map(s => '<div><span>' + esc(s.day) + ' ' + esc(s.time) + '</span><span>' + esc(s.title) + '</span></div>').join('');
 
