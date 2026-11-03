@@ -12,7 +12,7 @@
 
     function openVideo(v) {
         $('mbody').innerHTML = '<h3 style="margin-bottom:10px">' + esc(v.title) + '</h3>' + (v.video
-            ? '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(v.video) + '?rel=0" allowfullscreen></iframe>'
+            ? '<iframe src="https://www.youtube.com/embed/' + encodeURIComponent(v.video) + '?rel=0&origin=' + encodeURIComponent(location.origin) + '" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe><p style="margin-top:8px;font-size:12px"><a style="color:#7dd3fc" target="_blank" rel="noopener" href="https://youtu.be/' + encodeURIComponent(v.video) + '">إن لم يعمل الفيديو: شاهده على يوتيوب ↗</a></p>'
             : '<div class="soon"><big>🎬</big>هذا الفيديو عيّنة تجريبية — سيُضاف المحتوى الحقيقي قريبًا</div>');
         $('modal').classList.add('on');
     }
