@@ -159,6 +159,8 @@
         { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
         { urls: 'turns:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
     ];
+    function addCand(pc, c) { if (!pc || !c) return; if (pc.remoteDescription && pc.remoteDescription.type) pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {}); else (pc._q = pc._q || []).push(c); }
+    function flushCand(pc) { (pc._q || []).splice(0).forEach(c => pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {})); }
     let tPc = null, sPc = null, sStream = null, micOn = false, micAllowed = false;
 
     /* استقبال صوت المدرس */
@@ -175,12 +177,12 @@
             ref('rtc/t2s_ice/' + myId).off();
             ref('rtc/t2s_ice/' + myId).on('child_added', s => {
                 const c = s.val(); s.ref.remove();
-                if (c && tPc === pc) pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
+                if (c && tPc === pc) addCand(pc, c);
             });
-            await pc.setRemoteDescription(new RTCSessionDescription(off));
+            await pc.setRemoteDescription(new RTCSessionDescription(off)); flushCand(pc);
             const ans = await pc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: false });
             await pc.setLocalDescription(ans);
-            ref('rtc/s2t_answer/' + myId).set({ sdp: ans.sdp, type: ans.type, ts: Date.now() });
+            ref('rtc/s2t_answer/' + myId).set({ sdp: ans.sdp, type: ans.type, ts: Date.now(), for: off.ts });
         });
         document.addEventListener('click', () => { const a = $('audioEl'); if (a.srcObject && a.paused) a.play().catch(() => {}); });
     }
@@ -194,7 +196,9 @@
         b.classList.toggle('muted', st === 'muted');
         b.classList.toggle('tmuted', st === 'tmuted');
         const txt = { idle: 'مايك', requesting: 'بانتظار الإذن', allowed: 'يُسمع', muted: 'مكتوم', tmuted: '' }[st];
-        b.innerHTML = '<svg viewBox="0 0 24 24" class="mic-svg"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg><span>' + txt + '</span><b class="mic-dots"><i></i><i></i><i></i><i></i></b>';
+        const HAND = '<svg viewBox="0 0 24 24" class="mic-svg hand-svg"><rect x="6.2" y="4.5" width="2.8" height="10" rx="1.4"/><rect x="9.6" y="2" width="2.8" height="12" rx="1.4"/><rect x="13" y="2.6" width="2.8" height="12" rx="1.4"/><rect x="16.4" y="5.2" width="2.8" height="9.6" rx="1.4"/><path d="M5 13.5c0 5 3.2 8.5 7.4 8.5 3.9 0 6.8-3 6.8-7.2V12.5H5z"/><rect x="1.8" y="10.6" width="2.8" height="8.4" rx="1.4" transform="rotate(-28 3.2 14.8)"/></svg>';
+        const MIC = '<svg viewBox="0 0 24 24" class="mic-svg"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+        b.innerHTML = MIC + '<span>' + txt + '</span><b class="mic-dots"><i></i><i></i><i></i><i></i></b>';
         if (st === 'allowed' && !lvAn && !(document.getElementById('audioEl') || {}).muted && typeof toast === 'function') toast('💡 لتجنّب الصفير: استخدم سماعة أذن أو اكتم السماعة 🔊 أثناء الحديث', 'a');
         if (st === 'allowed' && sStream && !lvAn) {
             try {
@@ -249,7 +253,7 @@
         if (sPc) return;
         const pc = sPc = new RTCPeerConnection({ iceServers: ICE });
         sStream.getTracks().forEach(t => pc.addTrack(t, sStream));
-        pc.getSenders().forEach(sn => { try { const pr = sn.getParameters(); if (!pr.encodings || !pr.encodings.length) pr.encodings = [{}]; pr.encodings[0].maxBitrate = 96000; pr.encodings[0].priority = 'high'; sn.setParameters(pr).catch(() => {}); } catch (e) {} });
+        pc.getSenders().forEach(sn => { try { const pr = sn.getParameters(); if (!pr.encodings || !pr.encodings.length) pr.encodings = [{}]; pr.encodings[0].maxBitrate = 64000; pr.encodings[0].priority = 'high'; sn.setParameters(pr).catch(() => {}); } catch (e) {} });
         pc.onicecandidate = e => { if (e.candidate) ref('rtc/s2t_stu_ice/' + myId).push(e.candidate.toJSON()); };
         pc.onconnectionstatechange = () => {
             if (sPc === pc && ['failed', 'disconnected'].includes(pc.connectionState)) {
@@ -260,16 +264,17 @@
         ref('rtc/t2s_stu_ice/' + myId).off();
         ref('rtc/t2s_stu_ice/' + myId).on('child_added', s => {
             const c = s.val(); s.ref.remove();
-            if (c && sPc === pc) pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {});
+            if (c && sPc === pc) addCand(pc, c);
         });
+        const oTs = Date.now();
         ref('rtc/t2s_stu_answer/' + myId).off();
         ref('rtc/t2s_stu_answer/' + myId).on('value', s => {
             const a = s.val();
-            if (a && a.sdp && sPc === pc && pc.signalingState === 'have-local-offer') pc.setRemoteDescription(new RTCSessionDescription(a)).catch(() => {});
+            if (a && a.sdp && (a.for == null || a.for === oTs) && sPc === pc && pc.signalingState === 'have-local-offer') pc.setRemoteDescription(new RTCSessionDescription(a)).then(() => flushCand(pc)).catch(() => {});
         });
         const off = await pc.createOffer({ offerToReceiveAudio: false });
         await pc.setLocalDescription(off);
-        ref('rtc/s2t_stu_offer/' + myId).set({ sdp: off.sdp, type: off.type, ts: Date.now() });
+        ref('rtc/s2t_stu_offer/' + myId).set({ sdp: off.sdp, type: off.type, ts: oTs });
     }
     async function toggleMic() {
         if (!approved) return;
@@ -289,6 +294,16 @@
         }
     }
     $('micBtn').addEventListener('click', toggleMic);
+    /* سماعة الطالب: يُبلَّغ المدرس، وكتمها يكتم المايك تلقائيًا */
+    window.__stuSpk = function (muted) {
+        if (!approved) return;
+        if (muted) { ref('spkMuted/' + myId).set(true); ref('spkMuted/' + myId).onDisconnect().remove(); } else ref('spkMuted/' + myId).remove();
+        if (muted && micOn && micAllowed && !selfMuted) {
+            selfMuted = true;
+            if (sStream) sStream.getAudioTracks().forEach(t => { t.enabled = false; });
+            ref('micSelf/' + myId).set(true); setMicState('muted');
+        }
+    };
 
     /* ── رسالة للمدرس ── */
     let lastMsg = 0;
@@ -768,6 +783,7 @@
         b.classList.toggle('off', a.muted);
         b.title = a.muted ? 'السماعة مكتومة — اضغط لسماع المدرس' : 'سماعة: كتم/تشغيل صوت المدرس';
         if (!a.muted && a.srcObject && a.paused) a.play().catch(() => {});
+        if (window.__stuSpk) window.__stuSpk(a.muted);
     });
 })();
 

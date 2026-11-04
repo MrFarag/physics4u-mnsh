@@ -57,8 +57,8 @@ button { font-family: inherit; }
 
 .view-area { flex: 1; min-width: 0; position: relative; display: flex; }
 .view-wrap { flex: 1; overflow: auto; background: #070b14; display: flex; }
-#slideBox { position: relative; display: none; margin: 19px auto; outline: 3px solid rgba(230,199,90,.55); flex-shrink: 0; background: #0a101d; }
-.fit-width #slideBox { margin: 19px auto; }
+#slideBox { position: relative; display: none; margin: 4px auto 19px; outline: 3px solid rgba(230,199,90,.55); flex-shrink: 0; background: #0a101d; }
+.fit-width #slideBox { margin: 4px auto 19px; }
 #baseCv, #liveCv { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
 #liveCv { pointer-events: none; }
 .view-empty { margin: auto; color: var(--muted); font-size: 15px; font-weight: 600; text-align: center; padding: 20px; }
@@ -154,3 +154,11 @@ button { font-family: inherit; }
 .sb-hw { background: linear-gradient(135deg,#f59e0b,#b45309); }
 .side-bar.hide { display: none; }
 @media (max-width: 700px) { .side-bar { width: 150px; min-width: 150px; } }
+html { color-scheme: dark; }
+
+#micBtn .hand-svg { fill: currentColor; stroke: none; }
+#micBtn .mic-dots { display: inline-flex !important; visibility: hidden; }
+#micBtn.live .mic-dots { visibility: visible; }
+#micBtn .mic-dots i { background: #86efac; opacity: .25; box-shadow: none; }
+#micBtn .mic-dots i.lit { opacity: 1; box-shadow: 0 0 5px #86efac; }
+#micBtn.live .mic-dots i { animation: none; }
