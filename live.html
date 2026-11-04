@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="student.css">
+  <link rel="stylesheet" href="student.css?v=12">
 </head>
 <body>
 
@@ -18,7 +18,8 @@
     <a href="index.html" id="homeLink" style="position:absolute;top:10px;right:14px;font-size:12px;color:#94a3b8;text-decoration:none">← الرئيسية</a>
     <div class="entry-sub">WITH MR. FARAG | ONLINE LESSONS</div>
     <div id="formPart">
-      <input type="text" id="studentName" class="entry-field" placeholder="الاسم الثلاثي" autocomplete="name">
+      <input type="text" id="studentName" class="entry-field" placeholder="الاسم (ثنائي على الأقل)" autocomplete="name">
+      <button id="quickBtn" class="entry-btn entry-btn-quick" type="button" style="width:100%;margin:6px 0 10px">🔴 الدخول إلى البث المباشر</button>
       <div class="wa-field">
         <span>+20</span>
         <input type="text" id="studentPhone" placeholder="رقم الواتس (1012345678)" inputmode="numeric">
@@ -27,7 +28,6 @@
       <div id="secretErr" class="entry-err">❌ الرقم السري غير صحيح</div>
       <div class="entry-btns">
         <button id="entryBtn" class="entry-btn" type="button">تسجيل</button>
-        <button id="quickBtn" class="entry-btn entry-btn-quick" type="button">⚡ دخول سريع</button>
       </div>
     </div>
     <div id="waitPart" style="display:none">
@@ -86,8 +86,10 @@
   <span class="bb-sep"></span>
   <button class="bb bb-text" id="fileBtn" title="التبديل بين السبورة والملف" style="display:none">📄 الملف</button>
   <button class="bb bb-text" id="saveBtn" title="حفظ" style="display:none">💾 حفظ</button>
-  <button class="bb" id="spkBtn" title="سماعة: كتم/تشغيل صوت المدرس"><svg viewBox="0 0 24 24" class="spk-svg"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="spk-w" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path class="spk-w" d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+  <button class="bb" id="spkBtn" title="سماعة: كتم/تشغيل صوت المدرس" style="display:inline-flex;align-items:center;justify-content:center;padding:0;width:38px;min-width:38px;height:32px;line-height:0"><svg viewBox="0 0 24 24" class="spk-svg" style="display:block;width:20px;height:20px;margin:0;transform:translateY(1px)"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="spk-w" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path class="spk-w" d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
   <button class="bb bb-text" id="micBtn" title="اطلب المايك للتحدث"></button>
+  <button class="bb bb-text" id="hwBtn" title="إرسال واجب (صورة أو PDF)">📎 واجب</button>
+  <input type="file" id="hwFile" accept="image/*,application/pdf" style="display:none">
   <button class="bb bb-text" id="msgBtn" title="أرسل رسالة للمدرس">✉ رسالة</button>
   <button class="bb" id="fsBtn" title="ملء الشاشة">⛶</button>
 </footer>
@@ -100,9 +102,9 @@
 <div class="save-menu" id="saveMenu" style="display:none"></div>
 <audio id="audioEl" autoplay playsinline></audio>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="config.js"></script>
-<script src="render.js"></script>
-<script src="student.js"></script>
+<script src="config.js?v=12"></script>
+<script src="render.js?v=12"></script>
+<script src="student.js?v=12"></script>
 <script>(function(){var r=new URLSearchParams(location.search).get("room");if(r)document.getElementById("homeLink").href="index.html?room="+encodeURIComponent(r);})();</script>
 </body>
 </html>

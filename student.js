@@ -227,8 +227,10 @@
     }
     function watchMicPermission() {
         ref('micPermissions/' + myId).on('value', async snap => {
+            const prevAllowed = micAllowed;
             micAllowed = !!(snap.val() && snap.val().allowed);
             if (micAllowed) {
+                if (!prevAllowed && selfMuted) { selfMuted = false; ref('micSelf/' + myId).remove(); }   /* إذن جديد من المدرس بعد كتمي لنفسي */
                 wasAllowed = true;
                 if (!micOn && !selfMuted) {                          /* المدرس فعّل مايكي مباشرة */
                     try { await openMic(); } catch (e) { toast('تعذر تشغيل المايك: ' + e.message, 'a'); return; }
@@ -695,6 +697,43 @@
     });
 
     const panel = $('slidesPanel');
+/* إرسال الواجب (صورة أو PDF) للمدرس */
+(function () {
+    const b = document.getElementById('hwBtn'), f = document.getElementById('hwFile'); if (!b || !f) return;
+    let last = 0;
+    b.addEventListener('click', () => { if (typeof approved !== 'undefined' && !approved) return; f.value = ''; f.click(); });
+    const MAXPDF = 2.5 * 1024 * 1024;
+    function readAsData(file) { return new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(file); }); }
+    async function shrink(file) {
+        const url = await readAsData(file);
+        return new Promise((ok, no) => {
+            const im = new Image(); im.onerror = no;
+            im.onload = () => {
+                const k = Math.min(1, 1600 / Math.max(im.width, im.height));
+                const c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+                const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height);
+                ok(c.toDataURL('image/jpeg', 0.82));
+            };
+            im.src = url;
+        });
+    }
+    f.addEventListener('change', async () => {
+        const file = f.files && f.files[0]; if (!file) return;
+        if (Date.now() - last < 8000) { toast('انتظر قليلًا قبل إرسال واجب آخر', 'a'); return; }
+        try {
+            let data, type;
+            if (/^image\//.test(file.type)) { data = await shrink(file); type = 'image/jpeg'; }
+            else if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) {
+                if (file.size > MAXPDF) { toast('ملف PDF كبير (الحد 2.5MB) — صوّره كصورة أو صغّر حجمه', 'a'); return; }
+                data = await readAsData(file); type = 'application/pdf';
+            } else { toast('أرسل صورة أو ملف PDF فقط', 'a'); return; }
+            last = Date.now();
+            await ref('homework').push({ id: myId, name: myName, fname: String(file.name).slice(0, 80), type: type, data: data, ts: Date.now() });
+            toast('✅ تم إرسال الواجب للمدرس');
+        } catch (e) { toast('تعذر إرسال الواجب، حاول مرة أخرى', 'a'); }
+    });
+})();
+
 })();
 
 
