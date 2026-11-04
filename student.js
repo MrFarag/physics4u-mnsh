@@ -567,8 +567,8 @@
         wrap.style.overflowX = (mode === 'width') ? 'hidden' : 'auto';
         wrap.style.background = (mode === 'width') ? (pg.bg || '') : '';   /* عند ملاءمة العرض تمتد خلفية السبورة */
         if (mode === 'one') scale = 1;
-        else if (mode === 'width') { scale = W / pg.w; if (pg.h * scale > H) scale = (W - sb) / pg.w; }
-        else if (mode === 'page') scale = Math.min((wrap.clientWidth - 8) / pg.w, (H - 8) / pg.h);
+        else if (mode === 'width') { scale = (W - 16) / pg.w; if (pg.h * scale > H) scale = (W - 16 - sb) / pg.w; }
+        else if (mode === 'page') scale = Math.min((wrap.clientWidth - 16) / pg.w, (H - 16) / pg.h);
         if (pg.zoom) { mode = 'one'; scale = pg.zoom; wrap.style.overflowX = 'auto'; wrap.classList.remove('fit-width'); wrap.style.background = ''; }
         scale = Math.max(0.1, Math.min(5, scale));
         const next = { one: 'ملاءمة العرض', width: 'الصفحة كاملة', page: '100%', free: '100%', auto: 'ملاءمة العرض' };
@@ -730,7 +730,7 @@
             last = Date.now();
             await ref('homework').push({ id: myId, name: myName, fname: String(file.name).slice(0, 80), type: type, data: data, ts: Date.now() });
             toast('✅ تم إرسال الواجب للمدرس');
-        } catch (e) { toast('تعذر إرسال الواجب، حاول مرة أخرى', 'a'); }
+        } catch (e) { toast('تعذر إرسال الواجب: ' + ((e && (e.code || e.message)) || ''), 'a'); }
     });
 })();
 
@@ -768,5 +768,22 @@
         b.classList.toggle('off', a.muted);
         b.title = a.muted ? 'السماعة مكتومة — اضغط لسماع المدرس' : 'سماعة: كتم/تشغيل صوت المدرس';
         if (!a.muted && a.srcObject && a.paused) a.play().catch(() => {});
+    });
+})();
+
+
+/* الشريط الجانبي: دورات + رسالة */
+(function () {
+    const sb = document.getElementById('sideBar'); if (!sb) return;
+    const grid = document.getElementById('sbCourses'), H = window.HOME;
+    const room = new URLSearchParams(location.search).get('room');
+    if (H && H.courses) grid.innerHTML = H.courses.map(c => '<a class="sb-c" style="background:' + c.color + '" target="_blank" rel="noopener" href="index.html' + (room ? '?room=' + encodeURIComponent(room) : '') + '#courses"><i>' + c.icon + '</i><span>' + String(c.title).split(/\s*—\s*/)[0] + '</span></a>').join('');
+    if (window.innerWidth < 700) sb.classList.add('hide');
+    document.getElementById('sideBtn').addEventListener('click', () => { sb.classList.toggle('hide'); window.dispatchEvent(new Event('resize')); });
+    document.getElementById('sideSend').addEventListener('click', () => {
+        const t = document.getElementById('sideText'), m = document.getElementById('msgText');
+        if (!t.value.trim()) return;
+        m.value = t.value; document.getElementById('msgSend').click();
+        if (!m.value) t.value = '';
     });
 })();

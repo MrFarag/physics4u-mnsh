@@ -57,6 +57,19 @@
 
 <!-- ═══ المنطقة الرئيسية ═══ -->
 <main class="main-area">
+  <aside class="side-bar" id="sideBar">
+    <div class="sb-head">المحتويات</div>
+    <div class="sb-courses" id="sbCourses"></div>
+    <div class="sb-msg">
+      <textarea id="sideText" maxlength="300" placeholder="اكتب رسالة للمدرس…"></textarea>
+      <div class="sb-btns">
+        <button type="button" class="sb-send" id="sideSend">Send</button>
+        <button type="button" class="sb-hw" id="hwBtn" title="إرسال واجب (صورة أو PDF)">📎 واجب</button>
+      </div>
+      <input type="file" id="hwFile" accept="image/*,application/pdf" style="display:none">
+    </div>
+  </aside>
+
   <aside class="slides-panel" id="slidesPanel">
     <div class="sp-head"><span>الشرائح</span><span class="sp-count" id="slidesCount">0</span></div>
     <div class="sp-list" id="slidesList"></div>
@@ -88,9 +101,8 @@
   <button class="bb bb-text" id="saveBtn" title="حفظ" style="display:none">💾 حفظ</button>
   <button class="bb" id="spkBtn" title="سماعة: كتم/تشغيل صوت المدرس" style="display:inline-flex;align-items:center;justify-content:center;padding:0;width:38px;min-width:38px;height:32px;line-height:0"><svg viewBox="0 0 24 24" class="spk-svg" style="display:block;width:20px;height:20px;margin:0;transform:translateY(1px)"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="spk-w" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path class="spk-w" d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
   <button class="bb bb-text" id="micBtn" title="اطلب المايك للتحدث"></button>
-  <button class="bb bb-text" id="hwBtn" title="إرسال واجب (صورة أو PDF)">📎 واجب</button>
-  <input type="file" id="hwFile" accept="image/*,application/pdf" style="display:none">
-  <button class="bb bb-text" id="msgBtn" title="أرسل رسالة للمدرس">✉ رسالة</button>
+  <button class="bb bb-text" id="msgBtn" title="أرسل رسالة للمدرس" style="display:none">✉ رسالة</button>
+  <button class="bb" id="sideBtn" title="المحتويات والرسائل">☰</button>
   <button class="bb" id="fsBtn" title="ملء الشاشة">⛶</button>
 </footer>
 
@@ -103,6 +115,7 @@
 <audio id="audioEl" autoplay playsinline></audio>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="config.js?v=12"></script>
+<script src="home-data.js?v=12"></script>
 <script src="render.js?v=12"></script>
 <script src="student.js?v=12"></script>
 <script>(function(){var r=new URLSearchParams(location.search).get("room");if(r)document.getElementById("homeLink").href="index.html?room="+encodeURIComponent(r);})();</script>
