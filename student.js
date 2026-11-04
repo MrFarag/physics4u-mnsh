@@ -567,8 +567,8 @@
         wrap.style.overflowX = (mode === 'width') ? 'hidden' : 'auto';
         wrap.style.background = (mode === 'width') ? (pg.bg || '') : '';   /* عند ملاءمة العرض تمتد خلفية السبورة */
         if (mode === 'one') scale = 1;
-        else if (mode === 'width') { scale = (W - 16) / pg.w; if (pg.h * scale > H) scale = (W - 16 - sb) / pg.w; }
-        else if (mode === 'page') scale = Math.min((wrap.clientWidth - 16) / pg.w, (H - 16) / pg.h);
+        else if (mode === 'width') { scale = (W - 38) / pg.w; if (pg.h * scale > H) scale = (W - 38 - sb) / pg.w; }
+        else if (mode === 'page') scale = Math.min((wrap.clientWidth - 38) / pg.w, (H - 38) / pg.h);
         if (pg.zoom) { mode = 'one'; scale = pg.zoom; wrap.style.overflowX = 'auto'; wrap.classList.remove('fit-width'); wrap.style.background = ''; }
         scale = Math.max(0.1, Math.min(5, scale));
         const next = { one: 'ملاءمة العرض', width: 'الصفحة كاملة', page: '100%', free: '100%', auto: 'ملاءمة العرض' };
