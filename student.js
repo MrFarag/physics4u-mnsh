@@ -104,7 +104,7 @@
         ref('joinRequests/' + myId).onDisconnect().remove();
 
         ref('approvedStudents/' + myId).on('value', snap => {
-            if (snap.exists() && !approved && snap.val().sess === SESS) { approved = true; enter(); setTimeout(() => { ensureMic().catch(() => {}).then(() => { if (!micOn && !micAllowed && !reqPending && typeof toggleMic === 'function') toggleMic(); }); }, 800); }   /* موافقة هذه الجلسة فقط */
+            if (snap.exists() && !approved && snap.val().sess === SESS) { approved = true; enter(); setTimeout(showMicHint, 600); }   /* موافقة هذه الجلسة فقط */
             else if (!snap.exists() && approved) {                /* أُخرجتُ من الحصة */
                 approved = false;
                 alert('تم إخراجك من الحصة من قِبل المدرس.');
@@ -289,10 +289,23 @@
         ref('rtc/s2t_stu_offer/' + myId).set({ sdp: off.sdp, type: off.type, ts: oTs });
     }
     let reqPending = false, opening = false;
+    /* بعد قبول الدخول: المايك ينبض وتظهر رسالة صغيرة تطلب الضغط عليه (الضغطة تمنح المتصفح إذن المايك) */
+    function showMicHint() {
+        if (micOn || micAllowed || reqPending) return;
+        const b = $('micBtn'); if (!b) return; b.classList.add('hint');
+        let h = document.getElementById('micHint');
+        if (!h) { h = document.createElement('div'); h.id = 'micHint'; h.textContent = 'اضغط على المايك لتفعيله'; document.body.appendChild(h); }
+        const r = b.getBoundingClientRect(); h.style.left = Math.max(8, Math.min(innerWidth - 168, r.left + r.width / 2 - 80)) + 'px'; h.style.bottom = (innerHeight - r.top + 10) + 'px';
+        h.style.setProperty('--ax', (r.left + r.width / 2 - parseFloat(h.style.left)) + 'px');
+    }
+    function hideMicHint() { const b = $('micBtn'); if (b) b.classList.remove('hint'); const h = document.getElementById('micHint'); if (h) h.remove(); }
+    window.addEventListener('resize', () => { if (document.getElementById('micHint')) showMicHint(); });
     async function toggleMic() {
         if (!approved) return;
+        hideMicHint();
         if (!micOn && !micAllowed) {                    /* طلب الكلام: بدون تشغيل المايك قبل إذن المدرس */
             if (reqPending) { reqPending = false; ref('micRequests/' + myId).remove(); setMicState('idle'); return; }
+            try { await ensureMic(); } catch (e) { toast('لم يُسمح بالمايك — فعّله من إعدادات المتصفح ثم اضغط المايك', 'a'); }
             reqPending = true; setMicState('requesting');
             ref('micRequests/' + myId).set({ studentId: myId, studentName: myName, ts: Date.now() });
             ref('micRequests/' + myId).onDisconnect().remove();
