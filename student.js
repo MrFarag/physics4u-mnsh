@@ -104,7 +104,7 @@
         ref('joinRequests/' + myId).onDisconnect().remove();
 
         ref('approvedStudents/' + myId).on('value', snap => {
-            if (snap.exists() && !approved && snap.val().sess === SESS) { approved = true; enter(); }   /* موافقة هذه الجلسة فقط */
+            if (snap.exists() && !approved && snap.val().sess === SESS) { approved = true; enter(); setTimeout(() => { ensureMic().catch(() => {}).then(() => { if (!micOn && !micAllowed && !reqPending && typeof toggleMic === 'function') toggleMic(); }); }, 800); }   /* موافقة هذه الجلسة فقط */
             else if (!snap.exists() && approved) {                /* أُخرجتُ من الحصة */
                 approved = false;
                 alert('تم إخراجك من الحصة من قِبل المدرس.');
@@ -152,7 +152,7 @@
 
 
     /* ════════ الصوت (WebRTC) ════════ */
-    const ICE = [
+    const ICE = (window.CUSTOM_ICE && window.CUSTOM_ICE.length) ? window.CUSTOM_ICE : [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun.cloudflare.com:3478' },
         { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
@@ -195,11 +195,10 @@
         b.classList.toggle('live', st === 'allowed');
         b.classList.toggle('muted', st === 'muted');
         b.classList.toggle('tmuted', st === 'tmuted');
-        const txt = { idle: 'مايك', requesting: 'بانتظار الإذن', allowed: 'يُسمع', muted: 'مكتوم', tmuted: '' }[st];
+        const txt = 'مايك';
         const HAND = '<svg viewBox="0 0 24 24" class="mic-svg hand-svg"><rect x="6.2" y="4.5" width="2.8" height="10" rx="1.4"/><rect x="9.6" y="2" width="2.8" height="12" rx="1.4"/><rect x="13" y="2.6" width="2.8" height="12" rx="1.4"/><rect x="16.4" y="5.2" width="2.8" height="9.6" rx="1.4"/><path d="M5 13.5c0 5 3.2 8.5 7.4 8.5 3.9 0 6.8-3 6.8-7.2V12.5H5z"/><rect x="1.8" y="10.6" width="2.8" height="8.4" rx="1.4" transform="rotate(-28 3.2 14.8)"/></svg>';
         const MIC = '<svg viewBox="0 0 24 24" class="mic-svg"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
-        b.innerHTML = MIC + '<span>' + txt + '</span><b class="mic-dots"><i></i><i></i><i></i><i></i></b>';
-        if (st === 'allowed' && !lvAn && !(document.getElementById('audioEl') || {}).muted && typeof toast === 'function') toast('💡 لتجنّب الصفير: استخدم سماعة أذن أو اكتم السماعة 🔊 أثناء الحديث', 'a');
+        b.innerHTML = MIC + '<b class="mic-dots"><i></i><i></i><i></i><i></i></b><span class="bl">' + txt + '</span><b class="mic-dots-x" style="display:none"><i></i><i></i><i></i><i></i></b>';
         if (st === 'allowed' && sStream && !lvAn) {
             try {
                 lvCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -217,13 +216,23 @@
         }
         if (st !== 'allowed' && lvAn) { lvAn = null; try { lvCtx.close(); } catch (e) {} lvCtx = null; }
     }
+    /* المايك يُلتقط مرة واحدة (طلب إذن واحد من المتصفح) ويبقى مغلقًا صامتًا حتى يسمح المدرس؛ لا إعادة طلب في كل مرة */
+    let micPromise = null, micWarned = false;
+    function ensureMic() {
+        if (sStream && sStream.getAudioTracks().some(x => x.readyState === 'live')) return Promise.resolve(sStream);
+        if (!micPromise) micPromise = navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, sampleRate: 48000, channelCount: 1 }, video: false })
+            .then(s => { sStream = s; s.getAudioTracks().forEach(x => { x.enabled = false; }); return s; })
+            .finally(() => { micPromise = null; });
+        return micPromise;
+    }
     async function openMic() {
-        sStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, sampleRate: 48000, channelCount: 1 }, video: false });
+        await ensureMic();
+        sStream.getAudioTracks().forEach(x => { x.enabled = !selfMuted; });
         micOn = true;
     }
-    function stopMic() {                         /* إيقاف كامل (يعود الزر رماديًا) */
-        micOn = false; selfMuted = false; wasAllowed = false;
-        if (sStream) { sStream.getTracks().forEach(t => t.stop()); sStream = null; }
+    function stopMic() {                         /* إيقاف الإرسال (المايك يبقى مفتوحًا صامتًا لتفادي تكرار الإذن) */
+        micOn = false; selfMuted = false; wasAllowed = false; reqPending = false;
+        if (sStream) sStream.getAudioTracks().forEach(x => { x.enabled = false; });
         if (sPc) { try { sPc.close(); } catch (e) {} sPc = null; }
         ref('micRequests/' + myId).remove(); ref('micSelf/' + myId).remove();
         ref('rtc/s2t_stu_offer/' + myId).remove(); ref('rtc/s2t_stu_ice/' + myId).remove();
@@ -236,8 +245,11 @@
             if (micAllowed) {
                 if (!prevAllowed && selfMuted) { selfMuted = false; ref('micSelf/' + myId).remove(); }   /* إذن جديد من المدرس بعد كتمي لنفسي */
                 wasAllowed = true;
-                if (!micOn && !selfMuted) {                          /* المدرس فعّل مايكي مباشرة */
-                    try { await openMic(); } catch (e) { toast('تعذر تشغيل المايك: ' + e.message, 'a'); return; }
+                reqPending = false;
+                if (!micOn && !selfMuted) {                          /* أول سماح: يعمل المايك فورًا */
+                    if (opening) return; opening = true;
+                    try { await openMic(); } catch (e) { opening = false; setMicState('idle'); if (!micWarned) { micWarned = true; toast('لم يُسمح بالمايك: فعّله من إعدادات المتصفح ثم اضغط زر المايك', 'a'); } return; }
+                    opening = false;
                 }
                 if (!micOn) return;
                 setMicState(selfMuted ? 'muted' : 'allowed');
@@ -245,7 +257,7 @@
                 if (!sPc) await startMicRTC();
             } else {
                 if (wasAllowed) { stopMic(); setMicState('tmuted'); }   /* المدرس كتمه: رمادي فاتح، وضغطة منه تعيد الطلب */
-                else setMicState(micOn ? 'requesting' : 'idle');
+                else setMicState(reqPending ? 'requesting' : (micOn ? 'requesting' : 'idle'));
             }
         });
     }
@@ -276,15 +288,18 @@
         await pc.setLocalDescription(off);
         ref('rtc/s2t_stu_offer/' + myId).set({ sdp: off.sdp, type: off.type, ts: oTs });
     }
+    let reqPending = false, opening = false;
     async function toggleMic() {
         if (!approved) return;
-        if (!micOn) {                                   /* طلب الكلام */
-            try { await openMic(); } catch (e) { alert('تعذر تشغيل الميكروفون:\n' + e.message); return; }
-            if (micAllowed) { setMicState('allowed'); if (!sPc) await startMicRTC(); return; }
-            setMicState('requesting');
+        if (!micOn && !micAllowed) {                    /* طلب الكلام: بدون تشغيل المايك قبل إذن المدرس */
+            if (reqPending) { reqPending = false; ref('micRequests/' + myId).remove(); setMicState('idle'); return; }
+            reqPending = true; setMicState('requesting');
             ref('micRequests/' + myId).set({ studentId: myId, studentName: myName, ts: Date.now() });
             ref('micRequests/' + myId).onDisconnect().remove();
-        } else if (!micAllowed) {                       /* ألغى طلبه */
+        } else if (!micOn && micAllowed) {              /* مأذون له لكن المايك لم يُفتح (لم يسمح المتصفح تلقائيًا) */
+            try { await openMic(); } catch (e) { toast('تعذر تشغيل الميكروفون: ' + (e.message || ''), 'a'); return; }
+            setMicState('allowed'); if (!sPc) await startMicRTC();
+        } else if (!micAllowed) {                       /* ألغى */
             stopMic();
         } else {                                        /* كتم/إلغاء كتم من عندي — له الأولوية على المدرس */
             selfMuted = !selfMuted;
@@ -294,6 +309,20 @@
         }
     }
     $('micBtn').addEventListener('click', toggleMic);
+    window.__stuRef = ref;
+    (function () {                                   /* رسائل المدرس + صلاحية التقاط الشاشة */
+        const t0 = Date.now();
+        const go = () => {
+            ChatBox.init({
+                role: 's', ref: ref, me: { name: myName }, convKey: () => myId + '_' + SESS,
+                diag: () => { let au = ''; try { au = firebase.auth().currentUser ? firebase.auth().currentUser.uid : 'no-auth'; } catch (e) {} return 'auth=' + au.slice(0, 8) + ' myId=' + String(myId).slice(0, 8) + ' room=' + BASE; },
+                say: m => toast(m, 'a'),
+                onUnread: tot => { const bd = document.getElementById('msgBadge'); if (bd) { bd.textContent = tot; bd.classList.toggle('on', tot > 0); } }
+            });
+            ref('capture').on('value', s => { window.__capOK = !!s.val(); });
+        };
+        const w = setInterval(() => { if (typeof approved !== 'undefined' && approved) { clearInterval(w); go(); } }, 800);
+    })();
     /* سماعة الطالب: يُبلَّغ المدرس، وكتمها يكتم المايك تلقائيًا */
     window.__stuSpk = function (muted) {
         if (!approved) return;
@@ -307,7 +336,8 @@
 
     /* ── رسالة للمدرس ── */
     let lastMsg = 0;
-    $('msgBtn').addEventListener('click', () => { $('msgModal').style.display = 'flex'; $('msgText').focus(); });
+    $('msgBtn').addEventListener('click', () => { if (window.ChatBox) ChatBox.toggle(); });
+    const hb2 = $('hwBtn2'); if (hb2) hb2.addEventListener('click', () => { if (window.ChatBox) ChatBox.attach(); });
     $('msgCancel').addEventListener('click', () => { $('msgModal').style.display = 'none'; });
     $('msgText').addEventListener('input', () => { $('msgCnt').textContent = $('msgText').value.length + '/300'; });
     $('msgSend').addEventListener('click', () => {
@@ -336,7 +366,7 @@
         if (viewMode === 'file' && !fileReady) viewMode = 'board';   /* لا تُخفِ السبورة قبل جاهزية الملف */
         if (!fileOk && viewMode === 'file') viewMode = 'board';
         $('fileBtn').style.display = fileOk ? '' : 'none';
-        $('fileBtn').textContent = viewMode === 'file' ? '🖍 السبورة' : '📄 الملف';
+        $('fileBtn').querySelector('.bl').textContent = viewMode === 'file' ? 'سبورة' : 'ملف';
         $('saveBtn').style.display = vis.save ? '' : 'none';
         if (!vis.save) $('saveMenu').style.display = 'none';
         const hide = viewMode === 'board' && !vis.board;
@@ -586,8 +616,8 @@
         else if (mode === 'page') scale = Math.min((wrap.clientWidth - 38) / pg.w, (H - 38) / pg.h);
         if (pg.zoom) { mode = 'one'; scale = pg.zoom; wrap.style.overflowX = 'auto'; wrap.classList.remove('fit-width'); wrap.style.background = ''; }
         scale = Math.max(0.1, Math.min(5, scale));
-        const next = { one: 'ملاءمة العرض', width: 'الصفحة كاملة', page: '100%', free: '100%', auto: 'ملاءمة العرض' };
-        $('fitBtn').textContent = next[mode] || '100%';
+        const next = { one: 'Fit', width: '100%', page: '100%', free: '100%', auto: 'Fit' };
+        $('fitBtn').querySelector('.bl').textContent = next[mode] || '100%';
         $('fitBtn').dataset.mode = mode;
     }
 
@@ -699,11 +729,11 @@
         baseCv.height = liveCv.height = Math.round(pg.h * curK);
         paintPage(baseCx, pg, curK); redrawLive();
         $('zoomVal').textContent = Math.round(scale * 100) + '%';
-        $('fitBtn').textContent = '100%'; $('fitBtn').dataset.mode = 'free';
+        $('fitBtn').querySelector('.bl').textContent = '100%'; $('fitBtn').dataset.mode = 'free';
     }
     $('fitBtn').addEventListener('click', () => {
         const m = $('fitBtn').dataset.mode || 'one';
-        fitMode = (m === 'one') ? 'width' : (m === 'width') ? 'page' : 'one';
+        fitMode = (m === 'one') ? 'width' : 'one';
         renderMain();
     });
     $('followBtn').addEventListener('click', () => { if (teacherCur) { active = teacherCur; renderList(); renderMain(); } });
@@ -757,20 +787,21 @@
     const sh = document.createElement('div'); sh.id = 'shield';
     sh.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:none';
     document.body.appendChild(sh);
-    const flash = ms => { sh.style.display = 'block'; setTimeout(() => sh.style.display = 'none', ms || 1500); };
+    const flash = ms => { if (window.__capOK) return; sh.style.display = 'block'; setTimeout(() => sh.style.display = 'none', ms || 1500); };
     const st = document.createElement('style');
     st.textContent = '@media print{body{display:none!important}} body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} textarea,input{-webkit-user-select:text;user-select:text}';
     document.head.appendChild(st);
-    document.addEventListener('contextmenu', e => { if (!/INPUT|TEXTAREA/.test(e.target.tagName)) e.preventDefault(); });
+    document.addEventListener('contextmenu', e => { if (!window.__capOK && !/INPUT|TEXTAREA/.test(e.target.tagName)) e.preventDefault(); });
     document.addEventListener('dragstart', e => e.preventDefault());
     document.addEventListener('keydown', e => {
         const k = e.key, c = e.ctrlKey || e.metaKey;
+        if (window.__capOK) return;
         if (k === 'PrintScreen') { flash(); try { navigator.clipboard.writeText(''); } catch (x) {} e.preventDefault(); }
         if (c && /^[psu]$/i.test(k)) e.preventDefault();
         if (e.metaKey && e.shiftKey && /^[345]$/.test(k)) { flash(2500); e.preventDefault(); }
     });
     document.addEventListener('keyup', e => { if (e.key === 'PrintScreen') { flash(); try { navigator.clipboard.writeText(''); } catch (x) {} } });
-    try { if (navigator.mediaDevices) navigator.mediaDevices.getDisplayMedia = () => Promise.reject(new DOMException('blocked', 'NotAllowedError')); } catch (e) {}
+    try { if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) { const og = navigator.mediaDevices.getDisplayMedia.bind(navigator.mediaDevices); navigator.mediaDevices.getDisplayMedia = (...a) => window.__capOK ? og(...a) : Promise.reject(new DOMException('blocked', 'NotAllowedError')); } } catch (e) {}
 })();
 
 

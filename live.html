@@ -95,15 +95,16 @@
   <button class="bb" id="zoomOut" title="تصغير">−</button>
   <span class="bb-txt" id="zoomVal">100%</span>
   <button class="bb" id="zoomIn" title="تكبير">+</button>
-  <button class="bb bb-text" id="fitBtn" title="تبديل طريقة العرض: 100% / ملاءمة العرض / الصفحة كاملة">ملاءمة العرض</button>
+  <button class="bb " id="fitBtn" title="تبديل: Fit / 100%"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg><span class="bl">Fit</span></button>
   <span class="bb-sep"></span>
-  <button class="bb bb-text" id="fileBtn" title="التبديل بين السبورة والملف" style="display:none">📄 الملف</button>
-  <button class="bb bb-text" id="saveBtn" title="حفظ" style="display:none">💾 حفظ</button>
-  <button class="bb" id="spkBtn" title="سماعة: كتم/تشغيل صوت المدرس" style="display:inline-flex;align-items:center;justify-content:center;padding:0;width:38px;min-width:38px;height:32px;line-height:0"><svg viewBox="0 0 24 24" class="spk-svg" style="display:block;width:20px;height:20px;margin:0;transform:translateY(1px)"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="spk-w" d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path class="spk-w" d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>
+  <button class="bb " id="fileBtn" title="التبديل بين السبورة والملف" style="display:none"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="bl">ملف</span></button>
+  <button class="bb " id="saveBtn" title="حفظ" style="display:none"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span class="bl">حفظ</span></button>
+  <button class="bb " id="spkBtn" title="سماعة: كتم/تشغيل صوت المدرس"><svg viewBox="0 0 24 24"><polygon class="spk-b" points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="spk-w" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="spk-w" d="M19 5a10 10 0 0 1 0 14"/></svg><span class="bl">سماعة</span></button>
   <button class="bb bb-text" id="micBtn" title="اطلب المايك للتحدث"></button>
-  <button class="bb bb-text" id="msgBtn" title="أرسل رسالة للمدرس" style="display:none">✉ رسالة</button>
-  <button class="bb" id="sideBtn" title="المحتويات والرسائل">☰</button>
-  <button class="bb" id="fsBtn" title="ملء الشاشة">⛶</button>
+  <button class="bb bb-msg" id="msgBtn" title="رسالة للمدرس"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="22 7 12 13 2 7"/></svg><span class="bl">رسالة</span><i class="cb-badge" id="msgBadge"></i></button>
+  <button class="bb bb-hw" id="hwBtn2" title="إرسال واجب (صورة أو PDF)"><svg viewBox="0 0 24 24"><path d="M21.4 11.6 12.2 20.8a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><span class="bl">واجب</span></button>
+  <button class="bb " id="sideBtn" title="المحتويات والرسائل"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg><span class="bl">محتويات</span></button>
+  <button class="bb " id="fsBtn" title="ملء الشاشة"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg><span class="bl">ملء</span></button>
 </footer>
 
 <div id="toastBox"></div>
@@ -117,7 +118,8 @@
 <script src="config.js?v=12"></script>
 <script src="home-data.js?v=12"></script>
 <script src="render.js?v=12"></script>
-<script src="student.js?v=12"></script>
+<script src="chatbox.js?v=15"></script>
+<script src="student.js?v=15"></script>
 <script>(function(){var r=new URLSearchParams(location.search).get("room");if(r)document.getElementById("homeLink").href="index.html?room="+encodeURIComponent(r);})();</script>
 </body>
 </html>
