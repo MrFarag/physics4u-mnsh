@@ -34,9 +34,10 @@
 .cb-chip em{font-style:normal;background:#38bdf8;color:#06202e;border-radius:9px;padding:0 6px;font-size:11px;font-weight:800}
 .cb-body{flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;background:radial-gradient(circle at 20% 0,#0f1c33,#0a111f 60%);user-select:text;-webkit-user-select:text;scrollbar-width:thin;scrollbar-color:#24406a transparent}
 .cb-empty{margin:auto;text-align:center;color:#64748b;font-size:13.5px;line-height:1.9;padding:20px}.cb-empty svg{width:48px;height:48px;fill:none;stroke:#334e7a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-bottom:8px}
-.cb-m{max-width:85%;padding:9px 12px 5px;border-radius:14px;font-size:14.5px;line-height:1.6;word-break:break-word;display:flex;flex-direction:column;gap:6px;position:relative}
-.cb-m.me{align-self:flex-start;background:linear-gradient(135deg,#0e5a8a,#0b4a73);color:#e0f2fe;border-top-right-radius:4px}
-.cb-m.ot{align-self:flex-end;background:#1a2b47;color:#e8eef8;border-top-left-radius:4px}
+.cb-m{max-width:85%;width:fit-content;padding:5px 10px 3px;border-radius:12px;font-size:14px;line-height:1.45;word-break:break-word;display:flex;flex-direction:column;gap:3px;position:relative}
+.cb-ed{background:none;border:none;color:inherit;opacity:.7;cursor:pointer;font:inherit;font-size:11px;padding:0 4px}.cb-ed:hover{opacity:1;text-decoration:underline}.cb-ted{font-size:10px;opacity:.7}
+.cb-m.me{align-self:flex-start;background:#7f1d1d;color:#ffe4e4;border-top-right-radius:4px}
+.cb-m.ot{align-self:flex-end;background:#14532d;color:#dcfce7;border-top-left-radius:4px}
 .cb-m.all{border:1px dashed rgba(251,191,36,.55)}
 .cb-tag{font-size:11px;color:#fbbf24;font-weight:700}
 .cb-tx{white-space:pre-wrap}
@@ -79,6 +80,7 @@
 .cb-badge.on{display:block;animation:cbPulse 1.4s 3}
 `;
     const IC = {
+        fix: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
         chat: '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
         clip: '<svg viewBox="0 0 24 24"><path d="M21.4 11.6 12.2 20.8a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>',
         mic: '<svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>',
@@ -172,6 +174,8 @@
         ui.chips.addEventListener('click', e => { const c = e.target.closest('.cb-chip'); if (c) switchTo(c.dataset.k); });
         ui.body.addEventListener('click', e => {
             const im = e.target.closest('img.cb-img'); if (im) return lightbox(im.src, im.dataset.name);
+            const fx = e.target.closest('[data-fix]'); if (fx) { const m = find(fx.dataset.fix); if (m && m.file && cfg.onCorrect) cfg.onCorrect(m.file, cur); return; }
+            const ed = e.target.closest('[data-ed]'); if (ed) { const m = find(ed.dataset.ed); if (m) { editKey = ed.dataset.ed; ui.ta.value = m.text || ''; ui.ta.focus(); ui.ta.dispatchEvent(new Event('input')); ui.ta.placeholder = 'تعديل الرسالة… (Enter للحفظ)'; } return; }
             const b = e.target.closest('[data-open]'); if (b) { const m = find(b.dataset.open); if (m && m.file && cfg.onOpenFile) cfg.onOpenFile(m.file); }
         });
         ui.light.addEventListener('click', e => { if (e.target.id === 'cbLimg') ui.light.classList.toggle('z'); else if (e.target === ui.light || e.target.id === 'cbLcl' || e.target.classList.contains('lw')) ui.light.classList.remove('show', 'z'); });
@@ -191,6 +195,7 @@
         if (attached[conv]) return; attached[conv] = true;
         const r = cfg.ref(pathOf(conv));
         r.on('child_added', s => { store(conv)[s.key] = s.val() || {}; got[conv] = (got[conv] || 0) + 1; onMsg(conv, s.key); if (shown && conv === cur) head(); }, fail);
+        r.on('child_changed', s => { store(conv)[s.key] = s.val() || {}; if (visible(role === 's' ? cur : conv)) render(); }, fail);
         r.on('child_removed', s => { delete store(conv)[s.key]; recount(conv); if (visible(conv)) render(); });
     }
     function visible(conv) { return shown && !collapsed && (role === 's' || cur === conv); }
@@ -202,6 +207,7 @@
     }
     function onMsg(conv, k) {
         const m = msgs[conv][k];
+        if (role === 't' && m.from === 's' && cfg.onLast) cfg.onLast(m);
         if (visible(role === 's' ? cur : conv)) { appendOne(Object.assign({ k, conv }, m)); markSeen(conv); }
         else {
             if (m.from !== role && (m.ts || 0) > (seen[conv] || 0)) { unread[conv] = (unread[conv] || 0) + 1; if ((m.ts || 0) > t0 - 2000) beep(); }
@@ -226,17 +232,17 @@
         const mine = m.from === role, d = document.createElement('div');
         d.className = 'cb-m ' + (mine ? 'me' : 'ot') + (m.conv === 'all' ? ' all' : ''); d.dataset.k = m.k;
         let h = '';
-        if (m.conv === 'all') h += '<span class="cb-tag">' + 'رسالة عامة من المدرس' + '</span>';
-        if (m.text) h += '<div class="cb-tx">' + esc(m.text) + '</div>';
+
+        if (m.text) h += '<div class="cb-tx">' + esc(m.text) + (m.edited ? ' <span class="cb-ted">(معدّلة)</span>' : '') + '</div>';
         if (m.file) {
             const f = m.file;
             if (/^image\//.test(f.type)) h += '<img class="cb-img" src="' + f.data + '" data-name="' + esc(f.name) + '" alt="">' +
-                '<div class="cb-act"><a class="cb-a" href="' + f.data + '" download="' + esc(f.name) + '">' + IC.dl + ' تحميل</a>' + (role === 't' ? '<button class="cb-a" data-open="' + m.k + '">' + IC.open + ' فتح في الملفات</button>' : '') + '</div>';
+                '<div class="cb-act"><a class="cb-a" href="' + f.data + '" download="' + esc(f.name) + '">' + IC.dl + ' تحميل</a>' + (role === 't' ? '<button class="cb-a" data-open="' + m.k + '">' + IC.open + ' فتح في الملفات</button>' + (m.from === 's' ? '<button class="cb-a" data-fix="' + m.k + '">' + IC.fix + ' تصحيح</button>' : '') : '') + '</div>';
             else h += '<div class="cb-file"><div class="cb-fi">' + esc((f.name.split('.').pop() || 'FILE').slice(0, 4).toUpperCase()) + '</div><div class="cb-fn"><b>' + esc(f.name) + '</b><small>' + fsize(f.size || 0) + '</small></div></div>' +
-                '<div class="cb-act"><a class="cb-a" href="' + f.data + '" download="' + esc(f.name) + '">' + IC.dl + ' تحميل</a>' + (role === 't' && /pdf/.test(f.type) ? '<button class="cb-a" data-open="' + m.k + '">' + IC.open + ' فتح في الملفات</button>' : '') + '</div>';
+                '<div class="cb-act"><a class="cb-a" href="' + f.data + '" download="' + esc(f.name) + '">' + IC.dl + ' تحميل</a>' + (role === 't' && /pdf/.test(f.type) ? '<button class="cb-a" data-open="' + m.k + '">' + IC.open + ' فتح في الملفات</button>' + (m.from === 's' ? '<button class="cb-a" data-fix="' + m.k + '">' + IC.fix + ' تصحيح</button>' : '') : '') + '</div>';
         }
         if (m.voice) h += '<audio class="cb-au" controls preload="metadata" src="' + m.voice.data + '"></audio>';
-        h += '<span class="cb-ts">' + fmt(m.ts || Date.now()) + (mine ? '<b class="cb-st">' + (ack[m.k] === 'ok' ? ' ✓' : ack[m.k] === 'err' ? ' ✗ لم تُرسل' : ack[m.k] === 'wait' ? ' …' : '') + '</b>' : '') + '</span>';
+        h += '<span class="cb-ts">' + fmt(m.ts || Date.now()) + (mine && m.text && !m.file && !m.voice && m.conv !== 'all' ? '<button class="cb-ed" data-ed="' + m.k + '">تعديل</button>' : '') + (mine ? '<b class="cb-st">' + (ack[m.k] === 'ok' ? ' ✓' : ack[m.k] === 'err' ? ' ✗ لم تُرسل' : ack[m.k] === 'wait' ? ' …' : '') + '</b>' : '') + '</span>';
         d.innerHTML = h; return d;
     }
     function emptyEl() {
@@ -263,7 +269,7 @@
         ui.chips.innerHTML = h;
     }
     function head() {
-        if (role === 's') { ui.title.textContent = 'المدرس · Mr. Farag'; ui.sub.textContent = 'رمز ' + String(cur || '').slice(-5) + ' · وصل ' + (got[cur] || 0); return; }
+        if (role === 's') { ui.title.textContent = 'Mr. Farag Physics4u'; ui.sub.textContent = 'رمز ' + String(cur || '').slice(-5) + ' · وصل ' + (got[cur] || 0); return; }
         if (!cur) { ui.title.textContent = 'الرسائل'; ui.sub.textContent = 'اختر طالبًا'; $('#cbClear').style.display = 'none'; return; }
         const p = peers().find(x => convOf(x) === cur); ui.title.textContent = p ? p.name : 'طالب'; ui.sub.textContent = (p && p.on ? 'متصل' : 'غير متصل') + ' · رمز ' + String(cur).slice(-5) + ' · وصل ' + (got[cur] || 0); $('#cbClear').style.display = '';
     }
@@ -279,8 +285,20 @@
         if (pr && pr.then) { const k = pr.key; ack[k] = 'wait'; pr.then(() => { ack[k] = 'ok'; stamp(k); }, e => { ack[k] = 'err'; stamp(k); fail(e); }); }
         return true;
     }
+    CB.sendTo = function (conv, obj) {
+        obj.from = role; obj.nm = (cfg.me && cfg.me.name) || 'المدرس'; obj.ts = Date.now();
+        const pr = cfg.ref(pathOf(conv)).push(obj);
+        return (pr && pr.then) ? pr : Promise.resolve();
+    };
     function stamp(k) { const n = ui.body && ui.body.querySelector('[data-k="' + k + '"] .cb-st'); if (n) n.textContent = ack[k] === 'ok' ? ' ✓' : ack[k] === 'err' ? ' ✗ لم تُرسل' : ' …'; }
-    function sendText() { const v = ui.ta.value.trim(); if (!v) return; if (post({ text: v.slice(0, 1000) })) { ui.ta.value = ''; ui.ta.style.height = '40px'; } }
+    let editKey = null;
+    function sendText() {
+        const v = ui.ta.value.trim(); if (!v) return;
+        if (editKey) {
+            const conv = role === 's' ? cfg.convKey() : cur, k = editKey; editKey = null; ui.ta.placeholder = '';
+            const pr = cfg.ref(pathOf(conv)).child(k).update({ text: v.slice(0, 1000), edited: true });
+            if (pr && pr.catch) pr.catch(fail); ui.ta.value = ''; ui.ta.style.height = '40px'; return;
+        } if (post({ text: v.slice(0, 1000) })) { ui.ta.value = ''; ui.ta.style.height = '40px'; } }
     function readAsData(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); }); }
     async function shrink(f) {
         const url = await readAsData(f);
@@ -338,7 +356,12 @@
         setTimeout(() => ui.ta.focus(), 50);
     };
     CB.toggle = function (conv) { if (!cfg) return; if (shown && !collapsed && (!conv || conv === cur)) { shown = false; win.classList.remove('show'); } else CB.open(conv); };
-    CB.attach = function () { CB.open(); setTimeout(() => $('#cbFile').click(), 80); };
+    CB.attach = function () {      /* رفع الواجب مباشرة بدون فتح نافذة الرسائل */
+        if (role === 's') { cur = cfg.convKey(); attach(cur); }
+        const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*,application/pdf';
+        i.onchange = async () => { if (i.files && i.files[0]) { await sendFile(i.files[0]); say('تم رفع الواجب ✓'); } };
+        i.click();
+    };
     CB.convFor = convOf;
     CB.unread = k => unread[k] || 0;
     CB.isOpen = () => shown;

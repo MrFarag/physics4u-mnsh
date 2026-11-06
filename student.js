@@ -364,6 +364,7 @@
 
 
     /* ════════ ما يُظهره المدرس: vis + الملف + الحفظ ════════ */
+    let tools = {};
     let vis = { board: true, file: false, save: false, slides: false }, fileMeta = null, viewMode = 'board', fileShown = false;
     const fileBg = {}, fileStr = {};
     function buildFile(n) {
@@ -373,15 +374,28 @@
         if (viewMode === 'file' && String(fileMeta.cur) === String(n)) renderMain();
         else if (vis.file && viewMode === 'board' && !fileShown && String(fileMeta.cur) === String(n)) { fileShown = true; viewMode = 'file'; applyVis(); }
     }
+    let penOn = false, penCv = null, penDown = false;
+    function setPen(on) {
+        penOn = on; const b = $('penBtn'); if (b) b.classList.toggle('pen-on', on);
+        if (on && !penCv) {
+            penCv = document.createElement('canvas'); penCv.id = 'penCv'; const host = $('slideBox') || document.body; host.appendChild(penCv);
+            const pos = e => { const r = penCv.getBoundingClientRect(); return { x: (e.clientX - r.left) * penCv.width / r.width, y: (e.clientY - r.top) * penCv.height / r.height }; };
+            penCv.addEventListener('pointerdown', e => { penDown = true; penCv.setPointerCapture(e.pointerId); const c = penCv.getContext('2d'), p = pos(e); c.strokeStyle = '#7dd3fc'; c.lineWidth = 3 * penCv.width / penCv.getBoundingClientRect().width; c.lineCap = c.lineJoin = 'round'; c.beginPath(); c.moveTo(p.x, p.y); });
+            penCv.addEventListener('pointermove', e => { if (!penDown) return; const c = penCv.getContext('2d'), p = pos(e); c.lineTo(p.x, p.y); c.stroke(); });
+            penCv.addEventListener('pointerup', () => { penDown = false; });
+        }
+        if (penCv) { if (!on) { const c = penCv.getContext('2d'); c.clearRect(0, 0, penCv.width, penCv.height); } penCv.style.display = on ? 'block' : 'none'; if (on) { const r = penCv.parentNode.getBoundingClientRect(); penCv.width = Math.round(r.width); penCv.height = Math.round(r.height); } }
+    }
     function applyVis() {
         const fileOk = !!(vis.file && fileMeta && fileMeta.n);
         const fileReady = fileOk && !!pagesData['F' + fileMeta.cur];
         if (viewMode === 'file' && !fileReady) viewMode = 'board';   /* لا تُخفِ السبورة قبل جاهزية الملف */
         if (!fileOk && viewMode === 'file') viewMode = 'board';
-        $('fileBtn').style.display = fileOk ? '' : 'none';
-        $('fileBtn').querySelector('.bl').textContent = viewMode === 'file' ? 'سبورة' : 'ملف';
-        $('saveBtn').style.display = vis.save ? '' : 'none';
-        if (!vis.save) $('saveMenu').style.display = 'none';
+        $('fileBtn').style.display = 'none';
+        viewMode = fileReady ? 'file' : 'board';
+        $('penBtn').style.display = tools.pen ? '' : 'none'; if (!tools.pen) setPen(false);
+        $('saveBtn').style.display = tools.save ? '' : 'none';
+        if (!tools.save) $('saveMenu').style.display = 'none';
         const hide = viewMode === 'board' && !vis.board;
         $('hiddenMsg').style.display = hide ? 'flex' : 'none';
         wrap.style.visibility = hide ? 'hidden' : '';
@@ -389,6 +403,7 @@
         renderMain();
     }
     function listenShare() {
+        ref('studentTools/' + myId).on('value', sn => { tools = sn.val() || {}; try { applyVis(); } catch (e) {} }, () => {});
         ref('vis').on('value', snap => {
             const v = snap.val() || { board: true, file: false, save: false, slides: false };
             if (v.file && !vis.file) fileShown = false;          /* أظهر المدرس الملف → ينتقل إليه عند جاهزيته */
@@ -726,6 +741,7 @@
     }
     $('prevBtn').addEventListener('click', () => step(-1));
     $('nextBtn').addEventListener('click', () => step(1));
+    $('penBtn').addEventListener('click', () => setPen(!penOn));
     $('zoomIn').addEventListener('click', () => { fitMode = 'free'; scale *= 1.15; renderMainFree(); });
     $('zoomOut').addEventListener('click', () => { fitMode = 'free'; scale /= 1.15; renderMainFree(); });
     function renderMainFree() {            /* تكبير يدوي: نحفظ المقياس ثم نرسم */

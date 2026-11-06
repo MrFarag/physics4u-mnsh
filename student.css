@@ -164,7 +164,7 @@ html { color-scheme: dark; }
 #micBtn.live .mic-dots i { animation: none; }
 
 /* الشريط السفلي للطالب: بدون تكبير/تصغير/تقليب */
-#prevBtn, #nextBtn, #zoomOut, #zoomIn, .bot .bb-txt, .bot .bb-sep { display: none !important; }
+#prevBtn, #nextBtn, .bot .bb-sep { display: none !important; }
 #fitBtn { min-width: 0 !important; height: 26px !important; padding: 0 8px !important; font-size: 11px !important; letter-spacing: .3px; }
 .bb-ico { display: inline-flex; align-items: center; justify-content: center; padding: 0 !important; width: 38px; min-width: 38px; }
 .bb-ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -200,3 +200,20 @@ html { color-scheme: dark; }
 @keyframes micHintP { 0% { box-shadow: 0 0 0 0 rgba(245,158,11,.75); } 100% { box-shadow: 0 0 0 12px rgba(245,158,11,0); } }
 #micHint { position: fixed; z-index: 99980; width: 160px; text-align: center; background: #f59e0b; color: #1a1405; font-size: 12px; font-weight: 700; line-height: 1.5; padding: 6px 8px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.45); pointer-events: none; direction: rtl; }
 #micHint:after { content: ""; position: absolute; top: 100%; left: var(--ax, 50%); margin-left: -6px; border: 6px solid transparent; border-top-color: #f59e0b; }
+
+/* أزرار الطالب بنفس شكل رسالة/واجب */
+.bot .bb:not(.bb-msg):not(.bb-hw) { background: linear-gradient(135deg,#1e3a8a,#2563eb); color: #dbeafe; border-color: #60a5fa; }
+#fileBtn, #saveBtn { background: linear-gradient(135deg,#14532d,#15803d) !important; color: #dcfce7 !important; border-color: #22c55e !important; }
+#fsBtn, #sideBtn { background: linear-gradient(135deg,#4c1d95,#7c3aed) !important; color: #ede9fe !important; border-color: #a78bfa !important; }
+.bot .bb.live, .bot .bb.on { background: #f59e0b !important; color: #1a1405 !important; border-color: #fde047 !important; }
+
+/* ===== الأزرار بألوانها الأصلية؛ التكبير مخفي؛ القلم والحفظ يظهران بتفعيل المدرس فقط ===== */
+#fileBtn, #sideBtn, .side-bar, .zoomgrp, #zoomOut, #zoomIn, #zoomVal { display: none !important; }
+.bot .bb { width: 44px !important; min-width: 44px !important; height: 36px !important; padding: 0 !important; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; }
+.bot .bb .bl { font-size: 11px; font-weight: 400; }
+.bot { justify-content: safe center !important; overflow-x: auto !important; }
+#penBtn { color: #7dd3fc; border-color: #38bdf8; }
+#penBtn.pen-on { background: rgba(56,189,248,.18); }
+#penCv { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 20; touch-action: none; cursor: crosshair; }
+
+#penBtn, #saveBtn, #saveMenu { display: none !important; }

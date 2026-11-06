@@ -78,6 +78,12 @@ function drawShape(tCtx, shape) {
     if (!['arrow', 'double-arrow', 'line'].includes(shape.shape) && (rot !== 0 || ts.sx !== 1 || ts.sy !== 1)) {
         tCtx.translate(ccx, ccy); tCtx.scale(ts.sx, ts.sy); tCtx.rotate(rot); tCtx.translate(-ccx, -ccy);
     }
+    if (shape.imgSrc) {
+        window.__imgC = window.__imgC || {};
+        let im = window.__imgC[shape.imgSrc]; if (!im) { im = new Image(); im.onload = () => { if (window.MCR && MCR.redraw) MCR.redraw(); else if (window.render) window.render(); }; im.src = shape.imgSrc; window.__imgC[shape.imgSrc] = im; }
+        if (im.complete && im.naturalWidth) tCtx.drawImage(im, x1, y1, w, h);
+        tCtx.restore(); return;
+    }
     tCtx.strokeStyle = shape.color || col;
     tCtx.lineWidth = shape.sz || sz;
     tCtx.globalAlpha = shape.opacity !== undefined ? shape.opacity : opacity;
@@ -96,6 +102,7 @@ function drawShape(tCtx, shape) {
 
     switch (shape.shape) {
         case 'rc': case 'hl': tCtx.rect(x1, y1, w, h); break;
+        case 'tri': tCtx.moveTo(x1 + w / 2, y1); tCtx.lineTo(x1 + w, y1 + h); tCtx.lineTo(x1, y1 + h); tCtx.closePath(); break;
         case 'sq': { const side = Math.min(w, h); tCtx.rect(s.x < e.x ? s.x : s.x - side, s.y < e.y ? s.y : s.y - side, side, side); break; }
         case 'cr': { const r = Math.max(Math.hypot(e.x - s.x, e.y - s.y), 1); tCtx.arc(s.x, s.y, r, 0, Math.PI * 2); break; }
         case 'el': tCtx.ellipse(cx, cy, Math.max(w / 2, 1), Math.max(h / 2, 1), 0, 0, Math.PI * 2); break;
