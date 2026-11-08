@@ -138,6 +138,9 @@
             p.onDisconnect().remove();
             p.set({ name: myName, online: true, dev: DEV });
         });
+        const beat = () => { try { if (approved) { const q = ref('onlineStudents/' + myId); q.onDisconnect().remove(); q.set({ name: myName, online: true, dev: DEV }); } } catch (e) {} };
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) beat(); });
+        window.addEventListener('online', beat); window.addEventListener('focus', beat);
         ref('onlineStudents').on('value', s => { $('cnt').textContent = Object.keys(s.val() || {}).length; });
         /* المدرس قد ينزل يدي */
 
@@ -294,7 +297,7 @@
         if (micOn || micAllowed || reqPending) return;
         const b = $('micBtn'); if (!b) return; b.classList.add('hint');
         let h = document.getElementById('micHint');
-        if (!h) { h = document.createElement('div'); h.id = 'micHint'; h.textContent = 'اضغط على المايك لتفعيله'; document.body.appendChild(h); }
+        if (!h) { h = document.createElement('div'); h.id = 'micHint'; h.textContent = 'اضغط على المايك لتفعيله'; document.body.appendChild(h); clearTimeout(window.__mhT); window.__mhT = setTimeout(hideMicHint, 15000); }
         const r = b.getBoundingClientRect(); h.style.left = Math.max(8, Math.min(innerWidth - 168, r.left + r.width / 2 - 80)) + 'px'; h.style.bottom = (innerHeight - r.top + 10) + 'px';
         h.style.setProperty('--ax', (r.left + r.width / 2 - parseFloat(h.style.left)) + 'px');
     }
@@ -333,6 +336,9 @@
                 onUnread: tot => { const bd = document.getElementById('msgBadge'); if (bd) { bd.textContent = tot; bd.classList.toggle('on', tot > 0); } }
             });
             ref('capture').on('value', s => { window.__capOK = !!s.val(); });
+            ref('widget').on('value', s => { try { window.MCWidgetStudent && window.MCWidgetStudent(s.val()); } catch (e) {} });
+            ref('videoData').on('value', s => { try { window.MCVideoData && window.MCVideoData(s.val()); } catch (e) {} });
+            ref('video').on('value', s => { try { window.MCVideoState && window.MCVideoState(s.val()); } catch (e) {} });
         };
         const w = setInterval(() => { if (typeof approved !== 'undefined' && approved) { clearInterval(w); go(); } }, 800);
     })();
@@ -837,13 +843,23 @@
 /* سماعة الطالب: كتم/تشغيل صوت المدرس */
 (function () {
     const b = document.getElementById('spkBtn'); if (!b) return;
-    b.addEventListener('click', () => {
+    b.addEventListener('click', e => {
+        e.stopPropagation();
         const a = document.getElementById('audioEl'); if (!a) return;
-        a.muted = !a.muted;
-        b.classList.toggle('off', a.muted);
-        b.title = a.muted ? 'السماعة مكتومة — اضغط لسماع المدرس' : 'سماعة: كتم/تشغيل صوت المدرس';
-        if (!a.muted && a.srcObject && a.paused) a.play().catch(() => {});
-        if (window.__stuSpk) window.__stuSpk(a.muted);
+        let p = document.getElementById('volPop'); if (p) { p.remove(); return; }
+        p = document.createElement('div'); p.id = 'volPop'; p.className = 'vol-pop';
+        const v = a.muted ? 0 : Math.round((a.volume == null ? 1 : a.volume) * 100);
+        p.innerHTML = '<span>🔈</span><input type="range" min="0" max="100" value="' + v + '"><b id="volVal">' + v + '</b>';
+        document.body.appendChild(p);
+        const r = b.getBoundingClientRect(); p.style.left = Math.max(6, Math.min(innerWidth - p.offsetWidth - 6, r.left + r.width / 2 - p.offsetWidth / 2)) + 'px'; p.style.bottom = (innerHeight - r.top + 8) + 'px';
+        const inp = p.querySelector('input');
+        inp.oninput = () => {
+            const x = +inp.value; a.volume = x / 100; a.muted = x === 0; p.querySelector('#volVal').textContent = x;
+            b.classList.toggle('off', a.muted);
+            if (!a.muted && a.srcObject && a.paused) a.play().catch(() => {});
+            if (window.__stuSpk) window.__stuSpk(a.muted);
+        };
+        setTimeout(() => document.addEventListener('click', function f(ev) { if (!p.contains(ev.target)) { p.remove(); document.removeEventListener('click', f); } }), 0);
     });
 })();
 

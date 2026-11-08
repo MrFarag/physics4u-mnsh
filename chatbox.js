@@ -194,9 +194,9 @@
     function attach(conv) {
         if (attached[conv]) return; attached[conv] = true;
         const r = cfg.ref(pathOf(conv));
-        r.on('child_added', s => { store(conv)[s.key] = s.val() || {}; got[conv] = (got[conv] || 0) + 1; onMsg(conv, s.key); if (shown && conv === cur) head(); }, fail);
-        r.on('child_changed', s => { store(conv)[s.key] = s.val() || {}; if (visible(role === 's' ? cur : conv)) render(); }, fail);
-        r.on('child_removed', s => { delete store(conv)[s.key]; recount(conv); if (visible(conv)) render(); });
+        r.on('child_added', s => { store(conv)[s.key] = s.val() || {}; got[conv] = (got[conv] || 0) + 1; onMsg(conv, s.key); updFlags(); if (shown && conv === cur) head(); }, fail);
+        r.on('child_changed', s => { store(conv)[s.key] = s.val() || {}; updFlags(); if (visible(role === 's' ? cur : conv)) render(); }, fail);
+        r.on('child_removed', s => { delete store(conv)[s.key]; updFlags(); recount(conv); if (visible(conv)) render(); });
     }
     function visible(conv) { return shown && !collapsed && (role === 's' || cur === conv); }
     function recount(conv) {
@@ -350,9 +350,14 @@
         else { cur = null; ui.chips.style.display = 'none'; head(); render(); }
     };
     CB.refresh = function () { if (!cfg || role !== 't') return; peers().forEach(p => attach(convOf(p))); if (shown) { drawChips(); head(); } };
-    CB.open = function (conv) {
+    CB.open = function (conv, anchor) {
         if (!cfg) return; shown = true; win.classList.add('show'); collapsed = false; win.classList.remove('col');
         if (role === 't') { if (conv) cur = conv; else if (!cur && peers().length) cur = convOf(peers()[0]); peers().forEach(p => attach(convOf(p))); switchTo(cur); } else switchTo(cur);
+        if (anchor && anchor.getBoundingClientRect) {     /* تتدلى النافذة أسفل إطار الطالب */
+            const r = anchor.getBoundingClientRect(), w = win.offsetWidth, h = win.offsetHeight, vw = innerWidth, vh = innerHeight;
+            let t = r.bottom + 4; if (t + h > vh - 6) t = Math.max(6, vh - h - 6);
+            win.style.left = Math.max(6, Math.min(r.left, vw - w - 6)) + 'px'; win.style.top = t + 'px';
+        }
         setTimeout(() => ui.ta.focus(), 50);
     };
     CB.toggle = function (conv) { if (!cfg) return; if (shown && !collapsed && (!conv || conv === cur)) { shown = false; win.classList.remove('show'); } else CB.open(conv); };
@@ -364,5 +369,10 @@
     };
     CB.convFor = convOf;
     CB.unread = k => unread[k] || 0;
+    CB.flags = function (conv) { const o = { v: 0, f: 0 }, m = msgs[conv] || {}; for (const k in m) { const x = m[k]; if (x && x.from === 's') { if (x.voice) o.v++; if (x.file) o.f++; } } return o; };
+    function updFlags() { document.querySelectorAll('.stu-flags[data-conv]').forEach(e => { const f = CB.flags(e.dataset.conv); e.querySelector('.fl-v').classList.toggle('on', !!f.v); e.querySelector('.fl-f').classList.toggle('on', !!f.f); }); }
+    CB.updFlags = updFlags;
+    CB.lastVoice = function (conv) { const m = msgs[conv] || {}; let best = null; for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.voice && (!best || (x.ts || 0) >= (best.ts || 0))) best = x; } return best ? best.voice.data : null; };
+    CB.files = function (conv) { const m = msgs[conv] || {}, out = []; for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.file) out.push({ k, ts: x.ts || 0, name: x.file.name, type: x.file.type, data: x.file.data }); } return out.sort((a, b) => a.ts - b.ts); };
     CB.isOpen = () => shown;
 })();
