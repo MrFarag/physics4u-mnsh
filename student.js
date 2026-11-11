@@ -66,7 +66,7 @@
         $('studentSecret').type = 'text'; $('studentSecret').placeholder = 'كود الاشتراك'; $('studentSecret').autocomplete = 'off';
         $('secretErr').textContent = '';
         if (firebase.auth) firebase.auth().signInAnonymously().then(c => { myId = c.user.uid; authReady = true; })
-            .catch(e => { $('secretErr').style.display = 'block'; $('secretErr').textContent = '❌ تعذر الاتصال بالخادم، حدّث الصفحة'; });
+            .catch(e => { $('secretErr').style.display = 'block'; $('secretErr').textContent = '❌ تعذر الاتصال بالخادم، حدّث الصفحة (' + (e && (e.code || e.message) || '?') + ')'; });
     }
     async function checkAccess() {          /* الغرفة الحقيقية: يلزم اشتراك في البث (كود يخصّني) */
         const ok = (await db.ref('access/' + myId + '/live').once('value')).exists();
@@ -325,7 +325,7 @@
         }
     }
     $('micBtn').addEventListener('click', toggleMic);
-    window.__stuRef = ref;
+    window.__stuRef = ref; window.__stuMe = () => ({ id: myId, name: myName, phone: myPhone });
     (function () {                                   /* رسائل المدرس + صلاحية التقاط الشاشة */
         const t0 = Date.now();
         const go = () => {
@@ -337,6 +337,7 @@
             });
             ref('capture').on('value', s => { window.__capOK = !!s.val(); });
             ref('widget').on('value', s => { try { window.MCWidgetStudent && window.MCWidgetStudent(s.val()); } catch (e) {} });
+            ref('exam').on('value', s => { try { window.MCExamStudent && window.MCExamStudent(s.val()); } catch (e) {} });
             ref('videoData').on('value', s => { try { window.MCVideoData && window.MCVideoData(s.val()); } catch (e) {} });
             ref('video').on('value', s => { try { window.MCVideoState && window.MCVideoState(s.val()); } catch (e) {} });
         };

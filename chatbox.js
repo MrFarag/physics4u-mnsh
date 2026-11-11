@@ -11,7 +11,7 @@
     let actx = null, rec = null, recTick = null, recStart = 0, lastSend = 0;
 
     const CSS = `
-#cbx{position:fixed;z-index:99990;display:none;flex-direction:column;background:#0b1424;border:1px solid #5c1a1a;border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 0 1px rgba(56,189,248,.08);color:#e2e8f0;font-family:inherit;direction:rtl;overflow:hidden;min-width:320px;min-height:350px;width:400px;height:500px;user-select:none;-webkit-user-select:none;pointer-events:auto;}
+#cbx{position:fixed;z-index:99990;display:none;flex-direction:column;background:#0b1424;border:1px solid #5c1a1a;border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.6),0 0 0 1px rgba(56,189,248,.08);color:#e2e8f0;font-family:inherit;direction:rtl;overflow:hidden;min-width:200px;min-height:230px;width:200px;height:333px;user-select:none;-webkit-user-select:none;pointer-events:auto;}
 #cbx.show{display:flex}
 #cbx.col{height:auto!important;min-height:0}
 #cbx.col .cb-body,#cbx.col .cb-chips,#cbx.col .cb-grip{display:none}
@@ -127,12 +127,12 @@
 
     function initGeom() {
         const vw = innerWidth, vh = innerHeight, small = vw < 640;
-        let g = null; try { g = JSON.parse(localStorage.getItem('cbx2_' + role) || 'null'); } catch (e) {}
-        const w = small ? Math.min(vw - 12, 340) : Math.min((g && g.w) || 400, vw - 20), h = small ? Math.round(vh * .5) : Math.min((g && g.h) || 500, vh - 20);
+        let g = null; try { g = JSON.parse(localStorage.getItem('cbx3_' + role) || 'null'); } catch (e) {}
+        const w = small ? Math.min(vw - 12, 340) : Math.min((g && g.w) || (role === 's' ? 400 : 200), vw - 20), h = small ? Math.round(vh * .5) : Math.min((g && g.h) || (role === 's' ? 500 : 333), vh - 20);
         const l = small ? Math.round((vw - w) / 2) : Math.max(0, Math.min((g && g.l != null ? g.l : 220), vw - w)), t = small ? vh - h - 64 : Math.max(0, Math.min((g && g.t != null ? g.t : vh - h - 70), vh - 60));
         Object.assign(win.style, { width: w + 'px', height: h + 'px', left: l + 'px', top: t + 'px' });
     }
-    function saveGeom() { try { localStorage.setItem('cbx2_' + role, JSON.stringify({ l: win.offsetLeft, t: win.offsetTop, w: win.offsetWidth, h: win.offsetHeight })); } catch (e) {} }
+    function saveGeom() { try { localStorage.setItem('cbx3_' + role, JSON.stringify({ l: win.offsetLeft, t: win.offsetTop, w: win.offsetWidth, h: win.offsetHeight })); } catch (e) {} }
     
     function bindDrag() {
         const head = $('#cbHead');
@@ -310,13 +310,13 @@
             }; im.onerror = () => res(url); im.src = url;
         });
     }
-    async function sendFile(f) {
+    async function sendFile(f, hw) {
         try {
             let data, type = f.type || 'application/octet-stream', name = f.name || 'file', size = f.size;
             if (/^image\//.test(type) && type !== 'image/gif') { data = await shrink(f); type = 'image/jpeg'; size = Math.round(data.length * .75); name = name.replace(/\.[^.]+$/, '') + '.jpg'; }
             else { if (f.size > MAXFILE) { say('الملف كبير — الحد الأقصى 2.5 ميجا'); return; } data = await readAsData(f); }
             if (data.length > 3400000) { say('الملف كبير — الحد الأقصى 2.5 ميجا'); return; }
-            post({ file: { name: name.slice(0, 80), type, size, data } });
+            post(hw ? { file: { name: name.slice(0, 80), type, size, data }, hw: 1 } : { file: { name: name.slice(0, 80), type, size, data } });
         } catch (e) { say('تعذر قراءة الملف'); }
     }
     async function startRec() {
@@ -364,15 +364,15 @@
     CB.attach = function () {      /* رفع الواجب مباشرة بدون فتح نافذة الرسائل */
         if (role === 's') { cur = cfg.convKey(); attach(cur); }
         const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*,application/pdf';
-        i.onchange = async () => { if (i.files && i.files[0]) { await sendFile(i.files[0]); say('تم رفع الواجب ✓'); } };
+        i.onchange = async () => { if (i.files && i.files[0]) { await sendFile(i.files[0], true); say('تم رفع الواجب ✓'); } };
         i.click();
     };
     CB.convFor = convOf;
     CB.unread = k => unread[k] || 0;
-    CB.flags = function (conv) { const o = { v: 0, f: 0 }, m = msgs[conv] || {}; for (const k in m) { const x = m[k]; if (x && x.from === 's') { if (x.voice) o.v++; if (x.file) o.f++; } } return o; };
-    function updFlags() { document.querySelectorAll('.stu-flags[data-conv]').forEach(e => { const f = CB.flags(e.dataset.conv); e.querySelector('.fl-v').classList.toggle('on', !!f.v); e.querySelector('.fl-f').classList.toggle('on', !!f.f); }); }
+    CB.flags = function (conv) { const o = { v: 0, f: 0 }, m = msgs[conv] || {}; for (const k in m) { const x = m[k]; if (x && x.from === 's') { if (x.voice) o.v++; if (x.file && x.hw) o.f++; } } return o; };
+    function updFlags() { document.querySelectorAll('.stu-flags[data-conv]').forEach(e => { const f = CB.flags(e.dataset.conv); e.querySelector('.fl-v').classList.toggle('on', !!f.v); e.querySelector('.fl-f').classList.toggle('on', !!f.f); const xb = e.querySelector('.fl-x'); if (xb) xb.classList.toggle('on', !!(window.MCExam && MCExam.subsOf && MCExam.subsOf(xb.dataset.id).length)); }); }
     CB.updFlags = updFlags;
     CB.lastVoice = function (conv) { const m = msgs[conv] || {}; let best = null; for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.voice && (!best || (x.ts || 0) >= (best.ts || 0))) best = x; } return best ? best.voice.data : null; };
-    CB.files = function (conv) { const m = msgs[conv] || {}, out = []; for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.file) out.push({ k, ts: x.ts || 0, name: x.file.name, type: x.file.type, data: x.file.data }); } return out.sort((a, b) => a.ts - b.ts); };
+    CB.files = function (conv) { const m = msgs[conv] || {}, out = []; for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.file && x.hw) out.push({ k, ts: x.ts || 0, name: x.file.name, type: x.file.type, data: x.file.data }); } return out.sort((a, b) => a.ts - b.ts); };
     CB.isOpen = () => shown;
 })();
