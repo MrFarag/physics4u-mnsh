@@ -11,24 +11,41 @@
 
     /* ── Firebase + الغرفة التجريبية (?room=test) ── */
     const CFG = window.MC_CONFIG || {};
-    firebase.initializeApp(CFG.firebase || {
-        apiKey: 'AIzaSyB7E4NsGQbCehVSQ3Kj97yExRZwpHzTOl8',
-        databaseURL: 'https://myclaive-default-rtdb.firebaseio.com'
-    });
-    const db = firebase.database();
+    /* وضع محلي: إن فشل مفتاح Firebase API أو لم يُحمَّل، يبقى التطبيق يعمل بواجهة محدودة (غرفة تجريبية) */
+    let LOCAL_MODE = false;
+    let db = null;
+    try {
+        firebase.initializeApp(CFG.firebase || {
+            apiKey: 'AIzaSyB7E4NsGQbCehVSQ3Kj97yExRZwpHzTOl8',
+            databaseURL: 'https://myclaive-default-rtdb.firebaseio.com'
+        });
+        db = firebase.database();
+    } catch (e) {
+        console.warn('Firebase.initialize فشل — وضع محلي:', e && e.code || e);
+        LOCAL_MODE = true;
+    }
+    const isApiKeyErr = c => /api-key-not-valid|api-key|invalid-api-key|INTERNAL_NOT_FOUND|admin-restricted-operation/.test(String(c));
     const LIVE_ROOM = CFG.liveRoom || 'live';
     const ROOM = (new URLSearchParams(location.search).get('room') || LIVE_ROOM).replace(/[.#$\[\]\/]/g, '_');
     const IS_TEST = ROOM === 'test';          /* التجريبية: بلا حساب ولا أكواد */
-    const BASE = 'rooms/' + ROOM + '/';
-    const ref = p => db.ref(BASE + p);
+    /* في الوضع المحلي: نُجبر الغرفة لتجريبي حتى لا ينتظر الطالب اتصالاً مستحيلًا */
+    const EFF_ROOM = LOCAL_MODE ? 'test' : ROOM;
+    const BASE = 'rooms/' + EFF_ROOM + '/';
+    const ref = p => db ? db.ref(BASE + p) : { once: () => Promise.resolve({ exists: () => false, val: () => null }), on: () => {}, set: () => Promise.resolve(), update: () => Promise.resolve(), remove: () => Promise.resolve() };
     const $ = id => document.getElementById(id);
     const toArr = o => Array.isArray(o) ? o.filter(Boolean) : Object.values(o || {});
 
-    if (ROOM !== LIVE_ROOM) $('brandName').textContent = 'تجريبي: ' + ROOM;
+    if (EFF_ROOM !== LIVE_ROOM) $('brandName').textContent = 'تجريبي: ' + EFF_ROOM;
+    if (LOCAL_MODE) {
+        const bar = document.createElement('div');
+        bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99997;background:#7c2d12;color:#fff;text-align:center;font:12px Cairo,sans-serif;padding:5px;direction:rtl';
+        bar.innerHTML = '⚠️ وضع محلي — مفتاح Firebase غير صالح. يعمل التطبيق بواجهة تجريبية محدودة. أبلغ المدرس. (auth/api-key-not-valid)';
+        document.body.appendChild(bar);
+    }
 
     /* ── حالة الطالب ── */
     let myId = 's' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);   /* في الغرفة الحقيقية يصبح معرّف حسابي (uid) */
-    let authReady = IS_TEST || !firebase.auth;
+    let authReady = IS_TEST || LOCAL_MODE || !firebase.auth;
     let myName = '', myPhone = '';
     let approved = false, entered = false;
     let order = [];            /* ترتيب الشرائح من المدرس */
@@ -60,15 +77,39 @@
     $('studentPhone').value = store.get('mc_phone');
 
     const TEMP_QUICK = true;
-    if (!IS_TEST) {
+    if (!IS_TEST && !LOCAL_MODE) {
         /* مؤقت للتجارب: الدخول السريع ظاهر في الغرفة الحقيقية — لإزالته اجعل TEMP_QUICK=false */
         if (!TEMP_QUICK) $('quickBtn').style.display = 'none';
         $('studentSecret').type = 'text'; $('studentSecret').placeholder = 'كود الاشتراك'; $('studentSecret').autocomplete = 'off';
         $('secretErr').textContent = '';
         if (firebase.auth) firebase.auth().signInAnonymously().then(c => { myId = c.user.uid; authReady = true; })
-            .catch(e => { $('secretErr').style.display = 'block'; $('secretErr').textContent = '❌ تعذر الاتصال بالخادم، حدّث الصفحة (' + (e && (e.code || e.message) || '?') + ')'; });
+            .catch(e => {
+                const c = e && e.code || String(e);
+                if (isApiKeyErr(c)) {
+                    /* مفتاح Firebase غير صالح — نسمح للطالب بالدخول كوضع تجريبي محلي بدل البقاء عالقًا */
+                    LOCAL_MODE = true; authReady = true;
+                    $('secretErr').style.display = 'block';
+                    $('secretErr').style.color = '#fde68a';
+                    $('secretErr').textContent = '⚠️ مفتاح Firebase غير صالح — الدخول بوضع محلي محدود. اكتب الكود 135 للمتابعة.';
+                    $('studentSecret').placeholder = 'الكود التجريبي: 135';
+                } else {
+                    $('secretErr').style.display = 'block';
+                    $('secretErr').textContent = '❌ تعذر الاتصال بالخادم، حدّث الصفحة';
+                }
+            });
+        /* مهلة احتياطية: Firebase أحيانًا لا يُرجع خطأً صريحًا عند فساد مفتاح API بل يُبقي الطلب معلّقًا.
+           إن لم يصل ردّ خلال 7 ثوانٍ، ننتقل للوضع المحلي */
+        setTimeout(function () {
+            if (authReady || LOCAL_MODE) return;
+            LOCAL_MODE = true; authReady = true;
+            $('secretErr').style.display = 'block';
+            $('secretErr').style.color = '#fde68a';
+            $('secretErr').textContent = '⚠️ مفتاح Firebase غير صالح — الدخول بوضع محلي محدود. اكتب الكود 135 للمتابعة.';
+            $('studentSecret').placeholder = 'الكود التجريبي: 135';
+        }, 7000);
     }
     async function checkAccess() {          /* الغرفة الحقيقية: يلزم اشتراك في البث (كود يخصّني) */
+        if (LOCAL_MODE) return true;        /* وضع محلي: لا قواعد بيانات — اقبل الدخول */
         const ok = (await db.ref('access/' + myId + '/live').once('value')).exists();
         if (ok) return true;
         const code = $('studentSecret').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -86,7 +127,7 @@
         const sec = $('studentSecret').value.trim();
         if (!name) { $('studentName').focus(); toast('الرجاء إدخال الاسم', 'a'); return; }
         if (name.split(/\s+/).length < 2) { $('studentName').focus(); toast('اكتب اسمك الثنائي على الأقل: الأول والأخير', 'a'); return; }
-        if (IS_TEST) {
+        if (IS_TEST || LOCAL_MODE) {
             if (sec !== SECRET) { $('secretErr').style.display = 'block'; return; }
         } else {
             if (!authReady) { toast('جارٍ الاتصال… حاول بعد لحظة', 'a'); return; }

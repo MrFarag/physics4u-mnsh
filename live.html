@@ -103,7 +103,12 @@
   <button class="bb " id="fileBtn" title="التبديل بين السبورة والملف" style="display:none"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="bl">ملف</span></button>
   <button class="bb " id="saveBtn" title="حفظ" style="display:none"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg><span class="bl">حفظ</span></button>
   <button class="bb " id="spkBtn" title="سماعة: كتم/تشغيل صوت المدرس"><svg viewBox="0 0 24 24"><polygon class="spk-b" points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path class="spk-w" d="M15.5 8.5a5 5 0 0 1 0 7"/><path class="spk-w" d="M19 5a10 10 0 0 1 0 14"/></svg><span class="bl">سماعة</span></button>
-  <button class="bb bb-text" id="micBtn" title="اطلب المايك للتحدث"></button>
+  <button class="bb " id="camBtn" title="إظهار/إخفاء كاميرتي">
+  <svg viewBox="0 0 24 24"><rect x="2" y="6" width="15" height="12" rx="2"/><path d="M17 10l5-3v10l-5-3z"/></svg>
+  <span class="bl">كاميرا</span>
+</button>
+
+<button class="bb bb-text" id="micBtn" title="اطلب المايك للتحدث"></button>
   <button class="bb bb-msg" id="msgBtn" title="رسالة للمدرس"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3"/><polyline points="22 7 12 13 2 7"/></svg><span class="bl">رسالة</span><i class="cb-badge" id="msgBadge"></i></button>
   <button class="bb bb-hw" id="hwBtn2" title="إرسال واجب (صورة أو PDF)"><svg viewBox="0 0 24 24"><path d="M21.4 11.6 12.2 20.8a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><span class="bl">واجب</span></button>
   <button class="bb " id="sideBtn" title="المحتويات والرسائل"><svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg><span class="bl">محتويات</span></button>
@@ -111,22 +116,34 @@
 </footer>
 
 <div id="toastBox"></div>
-
+<div id="camOverlay" style="display:none">
+  <div class="cam-box">
+    <button class="cam-close" id="camClose" title="إغلاق">✕</button>
+    <video id="camPreview" autoplay playsinline muted></video>
+    <div class="cam-foot">
+      <span id="camState">الكاميرا مغلقة</span>
+      <button class="entry-btn" id="camToggle">تشغيل</button>
+    </div>
+  </div>
+</div>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <div class="msg-modal" id="msgModal" style="display:none"><div class="msg-box"><div class="msg-t">رسالة إلى المدرس</div><textarea id="msgText" maxlength="300" placeholder="اكتب رسالتك هنا (حتى 300 حرف)…"></textarea><div class="msg-row"><span id="msgCnt">0/300</span><button class="entry-btn" id="msgSend" type="button">إرسال</button><button class="entry-btn msg-cancel" id="msgCancel" type="button">إغلاق</button></div></div></div>
 <div class="save-menu" id="saveMenu" style="display:none"></div>
 <audio id="audioEl" autoplay playsinline></audio>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="config.js?v=12"></script>
+<script src="config.js?v=13"></script>
 <script src="home-data.js?v=12"></script>
 <script src="render.js?v=12"></script>
 <script src="chatbox.js?v=23"></script>
 <script src="projectile.js?v=5"></script>
 <script src="widgets-s.js?v=2"></script>
 <script src="video-s.js?v=1"></script>
-<script src="examview.js?v=15"></script>
-<script src="student.js?v=23"></script>
+<script src="examview.js?v=17"></script>
+<script src="student.js?v=25"></script>
+<script src="student-cam.js?v=1"></script>
+
+
 <script>(function(){var r=new URLSearchParams(location.search).get("room");if(r)document.getElementById("homeLink").href="index.html?room="+encodeURIComponent(r);})();</script>
 </body>
 </html>
