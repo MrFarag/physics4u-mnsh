@@ -1,7 +1,7 @@
 /* student-cam.js — كاميرا + صوت الطالب إلى المعلم (WebRTC) مع لقطات احتياطية
    زر #camBtn: ضغطة = تشغيل (فيديو + صوت)، ضغطة ثانية = إيقاف.
-   المسارات (مسموحة في القواعد): camOn/<id> ، s2t_stu_offer/<id> ، s2t_stu_ice/<id> (يكتبها الطالب)
-                                  t2s_stu_answer/<id> ، t2s_stu_ice/<id> (يكتبها المعلم)
+   المسارات (مسموحة في القواعد): camOn/<id> ، s2t_cam_offer/<id> ، s2t_cam_ice/<id> (يكتبها الطالب)
+                                  t2s_cam_answer/<id> ، t2s_cam_ice/<id> (يكتبها المعلم)
    اللقطات camShot/<id> احتياطي إلى أن يتصل البث الحي (تتوقف حين يتصل). */
 /* [1] ننتظر جاهزية Firebase وزر الكاميرا (حتى 40 ثانية) بدل الاستسلام بعد 3 ثوانٍ */
 (function waitReady(n) {
@@ -38,16 +38,16 @@ function init() {
 
       /* البث الحي */
       try {
-        await RTC.child('s2t_stu_ice/' + id).remove();
-        pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }] });
+        await RTC.child('s2t_cam_ice/' + id).remove();
+        pc = new RTCPeerConnection({ iceServers: (window.CUSTOM_ICE && window.CUSTOM_ICE.length) ? window.CUSTOM_ICE : [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }, { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }, { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }, { urls: 'turns:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }] });
         stream.getTracks().forEach(function (t) { pc.addTrack(t, stream); });
-        pc.onicecandidate = function (e) { if (e.candidate) RTC.child('s2t_stu_ice/' + id).push(e.candidate.toJSON()).catch(err); };
+        pc.onicecandidate = function (e) { if (e.candidate) RTC.child('s2t_cam_ice/' + id).push(e.candidate.toJSON()).catch(err); };
         pc.onconnectionstatechange = function () { live = pc && pc.connectionState === 'connected'; if (live) RTC.child('camShot/' + id).remove().catch(function () { }); };
         var offer = await pc.createOffer(); await pc.setLocalDescription(offer);
         var mark = offer.sdp.length;
-        await RTC.child('s2t_stu_offer/' + id).set({ type: offer.type, sdp: offer.sdp, m: mark });
+        await RTC.child('s2t_cam_offer/' + id).set({ type: offer.type, sdp: offer.sdp, m: mark });
         await RTC.child('camOn/' + id).set({ on: true, ts: Date.now() });
-        var aR = RTC.child('t2s_stu_answer/' + id), iR = RTC.child('t2s_stu_ice/' + id), got = false, myPc = pc;
+        var aR = RTC.child('t2s_cam_answer/' + id), iR = RTC.child('t2s_cam_ice/' + id), got = false, myPc = pc;
         var acb = async function (sn) {
           var a = sn.val(); if (!a || !a.sdp || a.m !== mark || got || myPc !== pc) return;
           got = true;
@@ -65,7 +65,7 @@ function init() {
       try { pc && pc.close(); } catch (e) { } pc = null;
       if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
       var id = sid(); btn.classList.remove('on');
-      if (id) { RTC.child('camOn/' + id).set({ on: false, ts: Date.now() }).catch(function () { }); RTC.child('s2t_stu_offer/' + id).remove().catch(function () { }); RTC.child('camShot/' + id).remove().catch(function () { }); }
+      if (id) { RTC.child('camOn/' + id).set({ on: false, ts: Date.now() }).catch(function () { }); RTC.child('s2t_cam_offer/' + id).remove().catch(function () { }); RTC.child('camShot/' + id).remove().catch(function () { }); }
     }
 
     btn.addEventListener('click', function () { (stream ? Promise.resolve(stop()) : start()).catch(function (e) { err(e); try { stop(); } catch (x) { } }); });
