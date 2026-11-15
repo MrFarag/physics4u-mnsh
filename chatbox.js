@@ -78,6 +78,10 @@
 .cb-err{background:#7f1d1d;color:#fee2e2;font-size:12px;line-height:1.6;padding:8px 12px;flex-shrink:0;display:none}.cb-err.on{display:block}
 .cb-badge{position:absolute;top:-5px;inset-inline-end:-5px;min-width:18px;height:18px;border-radius:9px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center;padding:0 5px;pointer-events:none;display:none}
 .cb-badge.on{display:block;animation:cbPulse 1.4s 3}
+.stu-row .eb-msg.hasf{color:#fbbf24;filter:drop-shadow(0 0 3px rgba(251,191,36,.8))}
+.cb-m.ex{align-self:stretch;max-width:100%;background:#1e3a8a;color:#dbeafe;border:1px solid #3b82f6}
+.cb-m.hwm{border:1px solid rgba(251,191,36,.55)}
+.cb-hwt{font-size:11px;color:#fbbf24;font-weight:700}
 `;
     const IC = {
         fix: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
@@ -189,6 +193,7 @@
     function listFor(conv) {
         let a = Object.keys(store(conv)).map(k => Object.assign({ k, conv }, msgs[conv][k]));
         if (role === 's') a = a.concat(Object.keys(store('all')).map(k => Object.assign({ k, conv: 'all' }, msgs.all[k])));
+        if (role === 's') a = a.filter(x => !x.hw);      /* [M2] ملفات الواجب/الاختبار تصل للمدرس فقط ولا تظهر في رسائل الطالب */
         return a.sort((x, y) => (x.ts || 0) - (y.ts || 0));
     }
     function attach(conv) {
@@ -208,6 +213,7 @@
     function onMsg(conv, k) {
         const m = msgs[conv][k];
         if (role === 't' && m.from === 's' && cfg.onLast) cfg.onLast(m);
+        if (role === 's' && m.hw) { fire(); return; }     /* [M2] */
         if (visible(role === 's' ? cur : conv)) { appendOne(Object.assign({ k, conv }, m)); markSeen(conv); }
         else {
             if (m.from !== role && (m.ts || 0) > (seen[conv] || 0)) { unread[conv] = (unread[conv] || 0) + 1; if ((m.ts || 0) > t0 - 2000) beep(); }
@@ -230,8 +236,8 @@
 
     function node(m) {
         const mine = m.from === role, d = document.createElement('div');
-        d.className = 'cb-m ' + (mine ? 'me' : 'ot') + (m.conv === 'all' ? ' all' : ''); d.dataset.k = m.k;
-        let h = '';
+        d.className = 'cb-m ' + (mine ? 'me' : 'ot') + (m.conv === 'all' ? ' all' : '') + (m.hw ? ' hwm' : ''); d.dataset.k = m.k;
+        let h = m.hw ? '<div class="cb-hwt">📎 واجب / ملف للتصحيح</div>' : '';
 
         if (m.text) h += '<div class="cb-tx">' + esc(m.text) + (m.edited ? ' <span class="cb-ted">(معدّلة)</span>' : '') + '</div>';
         if (m.file) {
@@ -252,7 +258,9 @@
     }
     function render() {
         const arr = cur ? listFor(cur) : []; ui.body.innerHTML = '';
-        if (!arr.length) ui.body.appendChild(emptyEl()); else arr.forEach(m => ui.body.appendChild(node(m)));
+        const exs = examSubs(cur);
+        if (!arr.length && !exs.length) ui.body.appendChild(emptyEl()); else arr.forEach(m => ui.body.appendChild(node(m)));
+        exs.length && ui.body.appendChild(examNode(exs));
         ui.body.scrollTop = ui.body.scrollHeight;
     }
     function appendOne(m) {
@@ -344,6 +352,21 @@
     }
     function clearConv() { if (role !== 't' || !cur || cur === 'all') return; cfg.ref(pathOf(cur)).remove(); msgs[cur] = {}; unread[cur] = 0; render(); fire(); }
 
+    /* [M3] إجابات الاختبار تظهر للمدرس داخل نافذة الرسائل كبطاقة مع زر «فتح وتصحيح» */
+    const sidOf = conv => String(conv || '').split('_')[0];
+    function examSubs(conv) { try { return role === 't' && window.MCExam && MCExam.subsOf ? (MCExam.subsOf(sidOf(conv)) || []) : []; } catch (e) { return []; } }
+    function examNode(exs) {
+        const d = document.createElement('div'); d.className = 'cb-m ex';
+        d.innerHTML = '<div class="cb-hwt" style="color:#bfdbfe">📝 إجابات اختبار (' + exs.length + ')</div><div class="cb-act"><button class="cb-a" data-exam="1">' + IC.fix + ' فتح وتصحيح</button></div>';
+        d.querySelector('[data-exam]').onclick = () => { const p = peers().find(x => convOf(x) === cur); if (window.MCExam && MCExam.tray) MCExam.tray(sidOf(cur), cur, win, p ? p.name : ''); };
+        return d;
+    }
+    let exN = {};
+    setInterval(() => {      /* إعادة الرسم عند وصول/تغيّر إجابات اختبار الطالب المفتوحة محادثته + إضاءة الظرف */
+        if (role !== 't') return;
+        if (shown && cur && !collapsed) { const n = examSubs(cur).length; if (n !== exN[cur]) { exN[cur] = n; render(); } }
+        updFlags();
+    }, 2000);
     CB.init = function (c) {
         if (cfg) return; cfg = c; role = c.role; build();
         if (role === 's') { cur = cfg.convKey(); attach(cur); attach('all'); head(); render(); $('#cbClear').style.display = 'none'; }
@@ -370,7 +393,11 @@
     CB.convFor = convOf;
     CB.unread = k => unread[k] || 0;
     CB.flags = function (conv) { const o = { v: 0, f: 0 }, m = msgs[conv] || {}; for (const k in m) { const x = m[k]; if (x && x.from === 's') { if (x.voice) o.v++; if (x.file && x.hw) o.f++; } } return o; };
-    function updFlags() { document.querySelectorAll('.stu-flags[data-conv]').forEach(e => { const f = CB.flags(e.dataset.conv); e.querySelector('.fl-v').classList.toggle('on', !!f.v); e.querySelector('.fl-f').classList.toggle('on', !!f.f); const xb = e.querySelector('.fl-x'); if (xb) xb.classList.toggle('on', !!(window.MCExam && MCExam.subsOf && MCExam.subsOf(xb.dataset.id).length)); }); }
+    function updFlags() {
+        document.querySelectorAll('.stu-flags[data-conv]').forEach(e => { const f = CB.flags(e.dataset.conv), v = e.querySelector('.fl-v'); if (v) v.classList.toggle('on', !!f.v); });
+        /* [M4] الظرف يُضاء إن وُجد واجب/ملف أو إجابات اختبار من الطالب */
+        document.querySelectorAll('.eb-msg[data-conv]').forEach(b => { const f = CB.flags(b.dataset.conv); b.classList.toggle('hasf', !!(f.f || examSubs(b.dataset.conv).length)); });
+    }
     CB.updFlags = updFlags;
     CB.lastVoice = function (conv) { const m = msgs[conv] || {}; let best = null; for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.voice && (!best || (x.ts || 0) >= (best.ts || 0))) best = x; } return best ? best.voice.data : null; };
     CB.files = function (conv) { const m = msgs[conv] || {}, out = []; for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.file && x.hw) out.push({ k, ts: x.ts || 0, name: x.file.name, type: x.file.type, data: x.file.data }); } return out.sort((a, b) => a.ts - b.ts); };
