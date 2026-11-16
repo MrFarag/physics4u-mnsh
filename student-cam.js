@@ -3,12 +3,19 @@
 (function () {
   var st = document.createElement('style'); st.id = 'stuCamCss';
   st.textContent =
-    '#camBtn:not(.on),#micBtn:not(.on):not(.live),#spkBtn.off{opacity:.42;filter:grayscale(.65)}' +
+    '#camBtn:not(.on),#micBtn:not(.on):not(.live):not(.hint),#spkBtn.off,#msgBtn:not(.on):not(:has(.cb-badge.on)){opacity:.42;filter:grayscale(.65)}' +
+    '#camBtn:not(.on):hover,#micBtn:hover,#spkBtn.off:hover,#msgBtn:hover{opacity:.85}' +
     '#camBtn.on{color:#4ade80}#camBtn.on svg{stroke:#4ade80}' +
-    '#stuCamNote{position:fixed;left:10px;bottom:64px;width:190px;height:113px;z-index:99990;border-radius:10px;overflow:hidden;background:#000;border:2px solid #ef4444;box-shadow:0 6px 20px rgba(0,0,0,.6);direction:rtl;font-family:Cairo,system-ui,sans-serif}' +
+    '#stuCamNote{position:fixed;left:10px;bottom:64px;width:190px;height:113px;min-width:120px;min-height:80px;z-index:99990;border-radius:10px;overflow:hidden;background:#000;border:2px solid #ef4444;box-shadow:0 6px 20px rgba(0,0,0,.6);direction:rtl;font-family:Cairo,system-ui,sans-serif}' +
     '#stuCamNote video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}' +
     '#stuCamNote.back video{transform:none}' +
     '#stuCamNote .sn-t{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:5px;padding:3px 7px;background:linear-gradient(180deg,rgba(0,0,0,.75),transparent);color:#fff;font-size:10px;font-weight:700}' +
+    '#stuCamNote .sn-t{cursor:move;touch-action:none;z-index:3}#stuCamNote .sn-t span{flex:1}' +
+    '#stuCamNote .sn-mx{background:rgba(15,23,42,.8);color:#fff;border:0;border-radius:4px;width:20px;height:16px;font-size:11px;line-height:1;cursor:pointer;padding:0}' +
+    '#stuCamNote .sn-rz{position:absolute;bottom:0;width:20px;height:20px;z-index:5;touch-action:none}' +
+    '#stuCamNote .sn-rz-se{right:0;cursor:se-resize;background:linear-gradient(135deg,transparent 55%,#fff 55%,#fff 65%,transparent 65%,transparent 75%,#fff 75%,#fff 85%,transparent 85%)}' +
+    '#stuCamNote .sn-rz-sw{left:0;cursor:sw-resize;background:linear-gradient(225deg,transparent 55%,#fff 55%,#fff 65%,transparent 65%,transparent 75%,#fff 75%,#fff 85%,transparent 85%)}' +
+    '#stuCamNote .sn-b{z-index:4;bottom:14px}' +
     '#stuCamNote .sn-d{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:snp 1.2s infinite}@keyframes snp{50%{opacity:.25}}' +
     '#stuCamNote .sn-b{position:absolute;bottom:4px;left:4px;right:4px;display:flex;gap:4px}' +
     '#stuCamNote .sn-b button{flex:1;border:0;border-radius:6px;padding:3px 0;font:700 10px Cairo,system-ui,sans-serif;cursor:pointer;color:#fff;background:rgba(15,23,42,.78)}' +
@@ -31,6 +38,7 @@ function init() {
     var stream = null, pc = null, shotT = 0, offs = [], warned = false, live = false, facing = 'user', note = null;
     var video = document.createElement('video'); video.muted = true; video.playsInline = true; video.autoplay = true;
     var cv = document.createElement('canvas');
+    var spk = document.getElementById('spkBtn'); if (spk && spk.parentNode && btn.previousElementSibling !== spk) spk.parentNode.insertBefore(btn, spk.nextSibling);   /* زر الكاميرا بجوار السماعة */
     function sid() { return window.__stuMe ? window.__stuMe().id : ''; }
     function err(e) { console.error('[cam]', e); if (!warned) { warned = true; alert('تعذّر إرسال الكاميرا للمعلم: ' + (e && e.code || e && e.message || e)); } }
 
@@ -39,11 +47,37 @@ function init() {
     function showNote() {
       hideNote();
       note = document.createElement('div'); note.id = 'stuCamNote';
-      note.innerHTML = '<video autoplay playsinline muted></video><div class="sn-t"><i class="sn-d"></i>كاميرتك مفعّلة — المعلم يراك' + (stream && stream.getAudioTracks().length ? ' 🎤' : '') + '</div><div class="sn-b"><button class="sn-f" type="button">🔄 خلفية/أمامية</button><button class="sn-x" type="button">إيقاف</button></div>';
+      note.innerHTML = '<video autoplay playsinline muted></video><div class="sn-t"><i class="sn-d"></i><span>كاميرتك مفعّلة — المعلم يراك' + (stream && stream.getAudioTracks().length ? ' 🎤' : '') + '</span><button class="sn-mx" type="button" title="تكبير / استعادة">▢</button></div><i class="sn-rz sn-rz-se" data-rz="se"></i><i class="sn-rz sn-rz-sw" data-rz="sw"></i><div class="sn-b"><button class="sn-f" type="button">🔄 خلفية/أمامية</button><button class="sn-x" type="button">إيقاف</button></div>';
       note.querySelector('video').srcObject = stream;
       note.querySelector('.sn-x').onclick = function () { stop(); };
       note.querySelector('.sn-f').onclick = flip;
-      document.body.appendChild(note);
+      document.body.appendChild(note); floatify(note);
+    }
+    /* [5] سحب + تغيير حجم + تكبير للنافذة: الحافة تتبع المؤشر مباشرة، ويُثبَّت المؤشر على المقبض فلا يصل لأي لوحة رسم */
+    function floatify(n) {
+      var MINW = 120, MINH = 80, saved = null;
+      function toLT() { var r = n.getBoundingClientRect(); n.style.left = r.left + 'px'; n.style.top = r.top + 'px'; n.style.bottom = 'auto'; n.style.right = 'auto'; }
+      var hd = n.querySelector('.sn-t'), dr = null;
+      hd.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; toLT(); var r = n.getBoundingClientRect(); dr = { x: e.clientX, y: e.clientY, l: r.left, t: r.top }; try { hd.setPointerCapture(e.pointerId); } catch (x) { } e.preventDefault(); e.stopPropagation(); });
+      hd.addEventListener('pointermove', function (e) { if (!dr) return; var l = dr.l + e.clientX - dr.x, t = dr.t + e.clientY - dr.y; n.style.left = Math.max(0, Math.min(innerWidth - 60, l)) + 'px'; n.style.top = Math.max(0, Math.min(innerHeight - 40, t)) + 'px'; saved = null; });
+      ['pointerup', 'pointercancel'].forEach(function (ev) { hd.addEventListener(ev, function () { dr = null; }); });
+      n.querySelectorAll('[data-rz]').forEach(function (h) {
+        var rs = null, dir = h.dataset.rz;
+        h.addEventListener('pointerdown', function (e) { toLT(); var r = n.getBoundingClientRect(); rs = { x: e.clientX, y: e.clientY, l: r.left, w: r.width, h: r.height }; try { h.setPointerCapture(e.pointerId); } catch (x) { } e.preventDefault(); e.stopPropagation(); });
+        h.addEventListener('pointermove', function (e) {
+          if (!rs) return; var dx = e.clientX - rs.x, dy = e.clientY - rs.y, nh = Math.max(MINH, rs.h + dy), nw, nl = rs.l;
+          if (dir === 'se') nw = Math.max(MINW, rs.w + dx); else { nw = Math.max(MINW, rs.w - dx); nl = rs.l + (rs.w - nw); }
+          n.style.width = nw + 'px'; n.style.height = nh + 'px'; n.style.left = nl + 'px'; saved = null;
+        });
+        ['pointerup', 'pointercancel'].forEach(function (ev) { h.addEventListener(ev, function () { rs = null; }); });
+      });
+      var mx = n.querySelector('.sn-mx');
+      mx.onclick = function () {
+        if (saved) { n.style.left = saved.l; n.style.top = saved.t; n.style.width = saved.w; n.style.height = saved.h; saved = null; mx.textContent = '▢'; return; }
+        toLT(); saved = { l: n.style.left, t: n.style.top, w: n.style.width, h: n.style.height };
+        var W = Math.min(innerWidth - 16, 640), H = Math.min(innerHeight - 70, Math.round(W * 0.75));
+        n.style.left = Math.round((innerWidth - W) / 2) + 'px'; n.style.top = '8px'; n.style.width = W + 'px'; n.style.height = H + 'px'; mx.textContent = '❐';
+      };
     }
     function hideNote() { if (note) { note.remove(); note = null; } var o = document.getElementById('stuCamNote'); if (o) o.remove(); }
     /* تبديل الكاميرا الأمامية/الخلفية دون قطع البث: نستبدل مسار الفيديو في الاتصال */
