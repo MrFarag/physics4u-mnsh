@@ -15,7 +15,16 @@
     '#stuCamNote .sn-rz{position:absolute;bottom:0;width:20px;height:20px;z-index:5;touch-action:none}' +
     '#stuCamNote .sn-rz-se{right:0;cursor:se-resize;background:linear-gradient(135deg,transparent 55%,#fff 55%,#fff 65%,transparent 65%,transparent 75%,#fff 75%,#fff 85%,transparent 85%)}' +
     '#stuCamNote .sn-rz-sw{left:0;cursor:sw-resize;background:linear-gradient(225deg,transparent 55%,#fff 55%,#fff 65%,transparent 65%,transparent 75%,#fff 75%,#fff 85%,transparent 85%)}' +
-    '#stuCamNote .sn-b{z-index:4;bottom:14px}' +
+    '#stuCamNote .sn-rz-e,#stuCamNote .sn-rz-w{top:26px;bottom:22px;width:12px;height:auto;background:none}#stuCamNote .sn-rz-e{right:0;cursor:ew-resize}#stuCamNote .sn-rz-w{left:0;cursor:ew-resize}#stuCamNote .sn-rz-s{left:22px;right:22px;bottom:0;width:auto;height:10px;background:none;cursor:ns-resize}#stuCamNote .sn-rz:hover{background:rgba(255,255,255,.18)}' +
+    '#stuCamNote.cap .sn-rz{display:none}' +
+    '#stuCamNote .sn-b{z-index:4;bottom:14px}#stuCamNote .sn-b button{flex:1 1 0;min-width:0;height:30px;font-size:12px;padding:0 2px;white-space:nowrap}' +
+    '#stuCamNote .sn-cap{display:none}' +
+    '#stuCamNote.cap{left:0 !important;top:0 !important;right:0 !important;bottom:0 !important;width:100vw !important;height:100vh !important;border-radius:0;border-width:0;z-index:2147483000}' +
+    '#stuCamNote.cap video{object-fit:contain;background:#000}#stuCamNote.cap .sn-b,#stuCamNote.cap .sn-rz,#stuCamNote.cap .sn-mx{display:none}' +
+    '#stuCamNote.cap .sn-cap{display:flex;position:absolute;left:0;right:0;bottom:0;height:170px;align-items:center;justify-content:center;gap:34px;background:linear-gradient(0deg,rgba(0,0,0,.65),transparent);z-index:9}' +
+    '#stuCamNote .sn-shot{width:120px;height:120px;border-radius:50%;border:5px solid #fff;background:#ef4444;cursor:pointer;padding:0;box-shadow:0 0 0 3px rgba(0,0,0,.4)}#stuCamNote .sn-shot:active{transform:scale(.93)}' +
+    '#stuCamNote .sn-cf{border:0;border-radius:50%;width:76px;height:76px;background:rgba(15,23,42,.85);color:#fff;font-size:30px;cursor:pointer}#stuCamNote .sn-cx{border:0;border-radius:38px;height:76px;min-width:76px;padding:0 24px;background:rgba(15,23,42,.85);color:#fff;font:700 17px Cairo,system-ui,sans-serif;cursor:pointer}' +
+    '#stuCamNote .sn-ok{position:absolute;top:-70px;color:#fff;background:#16a34a;border-radius:18px;padding:6px 16px;font:700 14px Cairo,system-ui,sans-serif;display:none}' +
     '#stuCamNote .sn-d{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:snp 1.2s infinite}@keyframes snp{50%{opacity:.25}}' +
     '#stuCamNote .sn-b{position:absolute;bottom:4px;left:4px;right:4px;display:flex;gap:4px}' +
     '#stuCamNote .sn-b button{flex:1;border:0;border-radius:6px;padding:3px 0;font:700 10px Cairo,system-ui,sans-serif;cursor:pointer;color:#fff;background:rgba(15,23,42,.78)}' +
@@ -47,11 +56,30 @@ function init() {
     function showNote() {
       hideNote();
       note = document.createElement('div'); note.id = 'stuCamNote';
-      note.innerHTML = '<video autoplay playsinline muted></video><div class="sn-t"><i class="sn-d"></i><span>كاميرتك مفعّلة — المعلم يراك' + (stream && stream.getAudioTracks().length ? ' 🎤' : '') + '</span><button class="sn-mx" type="button" title="تكبير / استعادة">▢</button></div><i class="sn-rz sn-rz-se" data-rz="se"></i><i class="sn-rz sn-rz-sw" data-rz="sw"></i><div class="sn-b"><button class="sn-f" type="button">🔄 خلفية/أمامية</button><button class="sn-x" type="button">إيقاف</button></div>';
+      note.innerHTML = '<video autoplay playsinline muted></video><div class="sn-t"><i class="sn-d"></i><span></span><button class="sn-mx" type="button" title="تكبير / استعادة">▢</button></div><i class="sn-rz sn-rz-se" data-rz="se"></i><i class="sn-rz sn-rz-sw" data-rz="sw"></i><i class="sn-rz sn-rz-e" data-rz="e"></i><i class="sn-rz sn-rz-w" data-rz="w"></i><i class="sn-rz sn-rz-s" data-rz="s"></i><div class="sn-b"><button class="sn-p" type="button" title="التقاط صورة وإرسالها للمدرس">📸 صورة</button><button class="sn-f" type="button" title="تبديل الكاميرا الأمامية/الخلفية">🔄 تدوير</button><button class="sn-x" type="button">إيقاف</button></div><div class="sn-cap"><button class="sn-shot" type="button" title="التقط وأرسل"></button><button class="sn-cf" type="button" title="تبديل الكاميرا">🔄</button><button class="sn-cx" type="button">إلغاء</button><b class="sn-ok"></b></div>';
       note.querySelector('video').srcObject = stream;
       note.querySelector('.sn-x').onclick = function () { stop(); };
       note.querySelector('.sn-f').onclick = flip;
+      note.querySelector('.sn-p').onclick = function () { note.classList.add('cap'); };
+      note.querySelector('.sn-cx').onclick = function () { note.classList.remove('cap'); };
+      note.querySelector('.sn-shot').onclick = takePhoto;
+      note.querySelector('.sn-cf').onclick = flip;
       document.body.appendChild(note); floatify(note);
+    }
+    /* [6] التقاط صورة: المعاينة تملأ الشاشة (وضع cap) ثم نرسل الإطار الحالي للمدرس كملف في نافذة الرسائل */
+    function takePhoto() {
+      var v = note && note.querySelector('video'); if (!v || !v.videoWidth) return;
+      var c = document.createElement('canvas'), k = Math.min(1, 1280 / Math.max(v.videoWidth, v.videoHeight));
+      c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k); c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      var ok = note.querySelector('.sn-ok');
+      c.toBlob(function (b) {
+        if (!b) return;
+        var f = new File([b], 'صورة_' + Date.now().toString(36) + '.jpg', { type: 'image/jpeg' });
+        try { note.style.filter = 'brightness(2)'; setTimeout(function () { if (note) note.style.filter = ''; }, 120); } catch (e) { }
+        var p = (window.ChatBox && ChatBox.sendFile) ? ChatBox.sendFile(f, 2) : Promise.reject(new Error('حدّث chatbox.js في صفحة الطالب (v=26)'));
+        Promise.resolve(p).then(function (r) { if (!r) throw new Error('انتظر لحظة وأعد المحاولة'); ok.textContent = 'تم إرسال الصورة للمدرس ✓'; }, function (er) { ok.textContent = 'تعذّر الإرسال: ' + (er && er.message || ''); ok.style.background = '#dc2626'; })
+          .then(function () { ok.style.display = 'block'; setTimeout(function () { ok.style.display = 'none'; ok.style.background = ''; if (note) note.classList.remove('cap'); }, 1300); });
+      }, 'image/jpeg', 0.9);
     }
     /* [5] سحب + تغيير حجم + تكبير للنافذة: الحافة تتبع المؤشر مباشرة، ويُثبَّت المؤشر على المقبض فلا يصل لأي لوحة رسم */
     function floatify(n) {
@@ -65,8 +93,10 @@ function init() {
         var rs = null, dir = h.dataset.rz;
         h.addEventListener('pointerdown', function (e) { toLT(); var r = n.getBoundingClientRect(); rs = { x: e.clientX, y: e.clientY, l: r.left, w: r.width, h: r.height }; try { h.setPointerCapture(e.pointerId); } catch (x) { } e.preventDefault(); e.stopPropagation(); });
         h.addEventListener('pointermove', function (e) {
-          if (!rs) return; var dx = e.clientX - rs.x, dy = e.clientY - rs.y, nh = Math.max(MINH, rs.h + dy), nw, nl = rs.l;
-          if (dir === 'se') nw = Math.max(MINW, rs.w + dx); else { nw = Math.max(MINW, rs.w - dx); nl = rs.l + (rs.w - nw); }
+          if (!rs) return; var dx = e.clientX - rs.x, dy = e.clientY - rs.y, nh = rs.h, nw = rs.w, nl = rs.l;
+          if (dir.indexOf('s') >= 0) nh = Math.max(MINH, rs.h + dy);
+          if (dir.indexOf('e') >= 0) nw = Math.max(MINW, rs.w + dx);
+          if (dir.indexOf('w') >= 0) { nw = Math.max(MINW, rs.w - dx); nl = rs.l + (rs.w - nw); }
           n.style.width = nw + 'px'; n.style.height = nh + 'px'; n.style.left = nl + 'px'; saved = null;
         });
         ['pointerup', 'pointercancel'].forEach(function (ev) { h.addEventListener(ev, function () { rs = null; }); });
