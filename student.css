@@ -1,4 +1,4 @@
-/* ═════════ MyClass — الطالب (مشاهدة فقط) ═════════ */
+/* ═════════ MyClass — الطالب (مشاهدة فقط) ══student.css═══ */
 :root { --bg:#0a101d; --panel:#111827; --panel2:#1a2332; --border:rgba(255,255,255,.1); --text:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8; --gold:#e6c75a; --ok:#22c55e; --danger:#ef4444; }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; user-select: none; -webkit-user-select: none; }
