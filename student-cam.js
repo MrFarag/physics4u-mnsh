@@ -1,4 +1,4 @@
-window.__stuCamBuild = 'panel-v18';   /* علامة النسخة: اكتب __stuCamBuild في Console للتأكد من النسخة العاملة */
+window.__stuCamBuild = 'panel-v19';   /* علامة النسخة: اكتب __stuCamBuild في Console للتأكد من النسخة العاملة */
 
 /* [3] أنماط: أزرار الكاميرا/السماعة/المايك باهتة عند عدم التفعيل + نافذة إشعار الخصوصية (≈5×3 سم) */
 (function () {
@@ -13,9 +13,9 @@ window.__stuCamBuild = 'panel-v18';   /* علامة النسخة: اكتب __stu
     '#stuCamNote .sn-t{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:5px;padding:3px 7px;background:linear-gradient(180deg,rgba(0,0,0,.75),transparent);color:#fff;font-size:10px;font-weight:700}' +
     '#stuCamNote .sn-t{cursor:move;touch-action:none;z-index:3}#stuCamNote .sn-t span{flex:1}' +
     '#stuCamNote .sn-mx{background:rgba(15,23,42,.8);color:#fff;border:0;border-radius:4px;width:20px;height:16px;font-size:11px;line-height:1;cursor:pointer;padding:0}' +
-    '#stuCamNote .sn-rz{position:absolute;bottom:0;width:20px;height:20px;z-index:5;touch-action:none}' +
-    '#stuCamNote .sn-rz-se{right:0;cursor:se-resize;background:linear-gradient(135deg,transparent 55%,#fff 55%,#fff 65%,transparent 65%,transparent 75%,#fff 75%,#fff 85%,transparent 85%)}' +
-    '#stuCamNote .sn-rz-sw{left:0;cursor:sw-resize;background:linear-gradient(225deg,transparent 55%,#fff 55%,#fff 65%,transparent 65%,transparent 75%,#fff 75%,#fff 85%,transparent 85%)}' +
+    '#stuCamNote .sn-rz{position:absolute;bottom:0;width:12px;height:12px;z-index:5;touch-action:none}' +
+    '#stuCamNote .sn-rz-se{right:0;cursor:se-resize;background:linear-gradient(135deg,transparent 55%,#cdbf9a 55%,#cdbf9a 68%,transparent 68%,transparent 78%,#cdbf9a 78%,#cdbf9a 90%,transparent 90%)}' +
+    '#stuCamNote .sn-rz-sw{left:0;cursor:sw-resize;background:linear-gradient(225deg,transparent 55%,#cdbf9a 55%,#cdbf9a 68%,transparent 68%,transparent 78%,#cdbf9a 78%,#cdbf9a 90%,transparent 90%)}' +
     '#stuCamNote .sn-rz-e,#stuCamNote .sn-rz-w{top:26px;bottom:22px;width:12px;height:auto;background:none}#stuCamNote .sn-rz-e{right:0;cursor:ew-resize}#stuCamNote .sn-rz-w{left:0;cursor:ew-resize}#stuCamNote .sn-rz-s{left:22px;right:22px;bottom:0;width:auto;height:10px;background:none;cursor:ns-resize}#stuCamNote .sn-rz:hover{background:rgba(255,255,255,.18)}' +
     '#stuCamNote.cap .sn-rz{display:none}' +
     '#stuCamNote .sn-b{z-index:4;bottom:5px}#stuCamNote .sn-b button{flex:1 1 0;min-width:0;height:34px;font-size:12px;padding:0 2px;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:4px}#stuCamNote .sn-em{font-size:22px;line-height:1;display:inline-block;transform:translateY(2px)}' +
@@ -35,14 +35,20 @@ window.__stuCamBuild = 'panel-v18';   /* علامة النسخة: اكتب __stu
     '#stuCamNote{direction:ltr;display:flex;flex-direction:column;width:232px;height:178px;min-width:150px;min-height:130px}' +
     '#stuCamNote .sn-v{position:relative;flex:1 1 auto;min-height:0;width:100%;overflow:hidden;background:#000}' +
     '#stuCamNote .sn-v video{position:absolute;left:0;top:0;width:100%;height:100%}' +
-    /* [S4] لوحة سفلية مجسّمة رمادية متدرجة، أزرارها في المنتصف وكلها بنفس الحجم والشكل؛ يختلف رسم الأيقونة فقط */
-    '#stuCamNote .sn-sb{flex:0 0 40px;position:relative;z-index:4;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:9px;padding:0 0 3px;background:linear-gradient(180deg,#6b7280 0%,#4b5563 45%,#2b323d 100%);border-top:1px solid #9ca3af;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 3px rgba(0,0,0,.35)}' +
-    '#stuCamNote .sn-sb button{box-sizing:border-box;flex:0 0 auto;width:26px;height:26px;border-radius:50%;padding:0;margin:0;border:1px solid #1f2937;cursor:pointer;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#5b6472 0%,#374151 50%,#161b24 100%);box-shadow:0 2px 3px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 2px rgba(0,0,0,.5)}' +
-    '#stuCamNote .sn-sb button svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}' +
-    '#stuCamNote .sn-sb button:hover{filter:brightness(1.15)}#stuCamNote .sn-sb button:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.55)}' +
-    '#stuCamNote .sn-sb .sn-sh svg{stroke:#ff8a8a}#stuCamNote .sn-sb .sn-g svg{stroke:#c4a8ff}#stuCamNote .sn-sb .sn-x svg rect{fill:#ff8a8a}' +
+    /* [S4] لوحة سفلية رمادية مجسّمة؛ أزرارها أقراص بنفس الحجم والشكل بخلفيات داكنة (أحمر/أخضر/برتقالي) ونص يدوي أبيض ورسم أبيض */
+    '#stuCamNote{container-type:inline-size;direction:ltr;display:flex;flex-direction:column;width:260px;height:170px;min-width:150px;min-height:120px}' +
+    '#stuCamNote .sn-v{position:relative;flex:1 1 auto;min-height:0;width:100%;overflow:hidden;background:#000}' +
+    '#stuCamNote .sn-v video{position:absolute;left:0;top:0;width:100%;height:100%}' +
+    '#stuCamNote .sn-sb{flex:0 0 34px;position:relative;z-index:4;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px;padding:0 0 2px;background:linear-gradient(180deg,#6b7280 0%,#4b5563 45%,#2b323d 100%);border-top:1px solid #9ca3af;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 3px rgba(0,0,0,.35)}' +
+    '#stuCamNote .sn-sb button{box-sizing:border-box;flex:0 0 56px;width:56px;height:24px;border-radius:12px;padding:0 4px;margin:0;border:1px solid rgba(0,0,0,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;color:#fff;font-family:"Aref Ruqaa","Katibeh","Reem Kufi",Cairo,cursive;font-size:12px;font-weight:700;line-height:1;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.5);box-shadow:0 2px 3px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.28)}' +
+    '#stuCamNote .sn-sb button svg{flex:0 0 auto;width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}' +
+    '#stuCamNote .sn-sb button:hover{filter:brightness(1.15)}#stuCamNote .sn-sb button:active{transform:translateY(1px)}' +
+    '#stuCamNote .sn-sb .sn-sh,#stuCamNote .sn-sb .sn-x{background:linear-gradient(135deg,#9a1b1b 0%,#7f1d1d 50%,#450a0a 100%)}' +
+    '#stuCamNote .sn-sb .sn-g{background:linear-gradient(135deg,#16a34a 0%,#15803d 50%,#14532d 100%)}' +
+    '#stuCamNote .sn-sb .sn-f,#stuCamNote .sn-sb .sn-cx{background:linear-gradient(135deg,#c2410c 0%,#9a3412 50%,#7c2d12 100%)}' +
     '#stuCamNote:not(.cap) .sn-sb .sn-cx{display:none}' +
-    '#stuCamNote.cap .sn-sb{flex-basis:60px;gap:16px}#stuCamNote.cap .sn-sb button{width:36px;height:36px}#stuCamNote.cap .sn-sb button svg{width:19px;height:19px}#stuCamNote.cap .sn-sb .sn-x{display:none}' +
+    '@container (max-width:250px){#stuCamNote .sn-sb button{flex-basis:28px;width:28px;padding:0}#stuCamNote .sn-sb .sn-lb{display:none}}' +
+    '#stuCamNote.cap .sn-sb{flex-basis:50px;gap:12px}#stuCamNote.cap .sn-sb button{flex-basis:78px;width:78px;height:34px;border-radius:17px;font-size:15px}#stuCamNote.cap .sn-sb button svg{width:18px;height:18px}#stuCamNote.cap .sn-sb .sn-x{display:none}' +
     '#stuCamNote .sn-ok{position:absolute;top:30px;left:50%;transform:translateX(-50%);max-width:92%;white-space:normal;text-align:center;z-index:12;font-size:12px;padding:5px 12px}';
   document.head.appendChild(st);
 })();
@@ -76,6 +82,10 @@ function init() {
         '<input class="sn-fi" type="file" accept="image/*" multiple style="display:none">' +
         '<i class="sn-rz sn-rz-se" data-rz="se"></i><i class="sn-rz sn-rz-sw" data-rz="sw"></i><i class="sn-rz sn-rz-e" data-rz="e"></i><i class="sn-rz sn-rz-w" data-rz="w"></i><i class="sn-rz sn-rz-s" data-rz="s"></i>';
       note.querySelector('video').srcObject = stream;
+      /* [S5] علامة × يدوية بيضاء + نصوص يدوية بيضاء على الأزرار */
+      var HX = '<svg viewBox="0 0 24 24"><path d="M6.4 6.1c3.7 3.3 7.3 7.7 11.2 11.8"/><path d="M17.5 5.7c-3.8 4.1-7.7 8-11.1 12.6"/></svg>';
+      note.querySelector('.sn-x').innerHTML = HX; note.querySelector('.sn-cx').innerHTML = HX;
+      [['.sn-sh', 'صورة'], ['.sn-f', 'تدوير'], ['.sn-g', 'ألبوم'], ['.sn-x', 'إيقاف'], ['.sn-cx', 'رجوع']].forEach(function (q) { var b = note.querySelector(q[0]); if (b) { var t = document.createElement('span'); t.className = 'sn-lb'; t.textContent = q[1]; b.appendChild(t); } });
       note.querySelector('.sn-x').onclick = function () { stop(); };
       note.querySelector('.sn-f').onclick = flip;
       note.querySelector('.sn-sh').onclick = function () {
