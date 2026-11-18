@@ -32,7 +32,7 @@
 .cb-chip:hover{background:#1a2d4d;}
 .cb-chip.on{background:#c2410c;border-color:#ea580c;color:#fff7ed}.cb-chip i{width:8px;height:8px;border-radius:50%;background:#475569}.cb-chip i.on{background:#22c55e}
 .cb-chip em{font-style:normal;background:#38bdf8;color:#06202e;border-radius:9px;padding:0 6px;font-size:11px;font-weight:800}
-.cb-body{flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;background:radial-gradient(circle at 20% 0,#0f1c33,#0a111f 60%);user-select:text;-webkit-user-select:text;scrollbar-width:thin;scrollbar-color:#24406a transparent}
+.cb-body{flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;background:radial-gradient(circle at 20% 0,#0f1c33,#0a111f 60%);user-select:text;-webkit-user-select:text}
 .cb-empty{margin:auto;text-align:center;color:#64748b;font-size:13.5px;line-height:1.9;padding:20px}.cb-empty svg{width:48px;height:48px;fill:none;stroke:#334e7a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-bottom:8px}
 .cb-m{max-width:85%;width:fit-content;padding:5px 10px 3px;border-radius:12px;font-size:14px;line-height:1.45;word-break:break-word;display:flex;flex-direction:column;gap:3px;position:relative}
 .cb-ed{background:none;border:none;color:inherit;opacity:.7;cursor:pointer;font:inherit;font-size:11px;padding:0 4px}.cb-ed:hover{opacity:1;text-decoration:underline}.cb-ted{font-size:10px;opacity:.7}
@@ -94,6 +94,25 @@
         '#cbSide svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}#cbSide .sd-a>*{display:inline-flex;align-items:center;justify-content:center;gap:4px}.cb-hb.sd{font-size:10px;padding:0 4px}.cb-ti{min-width:0}' +
         '.cb-gripL{right:auto!important;left:0;cursor:nesw-resize!important}' +
         '.cb-ed{position:absolute;z-index:9;touch-action:none;display:block}.cb-ed:hover{background:rgba(255,255,255,.14)}.cb-ed-e{right:0;top:30px;bottom:30px;width:10px;cursor:ew-resize}.cb-ed-w{left:0;top:30px;bottom:30px;width:10px;cursor:ew-resize}.cb-ed-s{left:30px;right:30px;bottom:0;height:9px;cursor:ns-resize}#cbx.col .cb-ed,#cbx.col .cb-gripL{display:none}' +
+        '.cb-split{flex:1;min-height:0;display:flex;flex-direction:row}.cb-mn{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}#cbx.col .cb-split{display:none}' +
+        '.cb-fp{width:214px;flex:0 0 214px;display:flex;flex-direction:column;background:#0a1220;border-left:1px solid #5c1a1a;min-height:0}#cbx.nofp .cb-fp{display:none}' +
+        '.fp-tabs{display:flex;gap:2px;padding:4px 6px 0;flex-shrink:0;background:#0a1220}.fp-tabs button{flex:1;border:1px solid transparent;border-bottom:0;border-radius:6px 6px 0 0;background:transparent;color:#7f90aa;font:600 11px inherit;font-family:inherit;padding:3px 2px;cursor:pointer;line-height:1.3}.fp-tabs button.on{background:#0e182b;color:#e2e8f0;border-color:rgba(148,163,184,.28)}.fp-tabs b{background:rgba(148,163,184,.18);color:#cbd5e1;border-radius:7px;padding:0 5px;font-size:10px;font-weight:600;margin-right:2px}' +
+        '.fp-list{flex:1;min-height:0;overflow:auto;padding:6px;display:flex;flex-direction:column;gap:3px;background:#0e182b;border-top:1px solid rgba(148,163,184,.22)}.fp-e{margin:auto;color:#64748b;font-size:12px;text-align:center;padding:14px}' +
+        '.fp-i{display:flex;gap:8px;align-items:center;padding:5px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#111b30;cursor:pointer}.fp-i:hover{border-color:#ea580c}.fp-i.on{background:#3b0d0d;border-color:#ef4444}' +
+        '.fp-th{flex:0 0 40px;height:40px;border-radius:6px;overflow:hidden;background:#1e293b;color:#7dd3fc;font:800 10px system-ui;display:flex;align-items:center;justify-content:center;font-size:16px}.fp-th img{width:100%;height:100%;object-fit:cover}' +
+        '.fp-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.fp-n b{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#e2e8f0}.fp-n small{font-size:10px;color:#94a3b8;line-height:1.3}' +
+        '.fp-act{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:6px;border-top:1px solid #24324d;background:#0a1220;flex-shrink:0}.fp-act button{display:inline-flex;align-items:center;justify-content:center;gap:4px;border:1px solid rgba(255,255,255,.16);background:#1e293b;color:#e2e8f0;border-radius:7px;padding:6px 2px;font:700 11px inherit;font-family:inherit;cursor:pointer}.fp-act button:hover:not(:disabled){background:#7f1d1d;border-color:#ef4444}.fp-act button:disabled{opacity:.35;cursor:default}.fp-act .w2{grid-column:1/3}' +
+        '.fp-act svg,.cb-vw svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}' +
+        '.cb-vw{position:absolute;inset:0;z-index:7;display:none;flex-direction:column;background:#060b15}.cb-vw.show{display:flex}.vw-h{display:flex;align-items:center;gap:10px;padding:6px 10px;background:#13213a;border-bottom:2px solid #7f1d1d;flex-shrink:0}.vw-h button{border:1px solid rgba(255,255,255,.2);background:#1e293b;color:#e2e8f0;border-radius:7px;padding:4px 10px;font:700 11px inherit;font-family:inherit;cursor:pointer}.vw-h b{flex:1;min-width:0;font-size:12px;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+        '.vw-c{flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center}.vw-c img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}.vw-c.z{display:block}.vw-c.z img{max-width:none;max-height:none;cursor:zoom-out}.vw-c iframe{width:100%;height:100%;border:0;background:#fff}.vw-i{text-align:center;color:#cbd5e1;font-size:13px;display:flex;flex-direction:column;gap:10px;align-items:center}.vw-big{font-size:46px;font-weight:800;color:#7dd3fc}' +
+        '#cbx.exm .cb-fp{width:262px;flex-basis:262px}.cb-fp.exm .fp-act{display:none}.cb-fp.exm .fp-i{cursor:pointer}' +
+        '.fp-tabs .fp-x{flex:0 0 22px;background:transparent;color:#8a9bb5;padding:0;font-size:11px;border-color:transparent}.fp-tabs .fp-x:hover{background:rgba(239,68,68,.25);color:#fff}' +
+        '.fp-i.fp-ex{display:block;padding:2px 2px 4px;border:0;border-bottom:1px solid rgba(148,163,184,.1);background:transparent;border-radius:0}.fp-i.fp-ex:hover,.fp-i.fp-ex.on{background:rgba(148,163,184,.07)}.fx-g{display:grid;grid-template-columns:54px 42px 62px 68px;justify-content:start;gap:4px;direction:ltr}.fx-c{min-width:0;text-align:center}.fx-c i{display:block;font:normal 600 11px "Caveat","Aref Ruqaa","Segoe Print",cursive;color:#64748b;line-height:1;margin-bottom:1px}.fx-c b{display:flex;align-items:center;justify-content:center;gap:3px;height:19px;padding:0 4px;border-radius:5px;background:transparent;border:1px solid rgba(148,163,184,.28);color:#cbd5e1;font:600 11px "Caveat","Aref Ruqaa",system-ui,sans-serif;white-space:nowrap;overflow:hidden}.fx-s{font:500 8px Cairo,system-ui;opacity:.7}' +
+        '.fx-c b.g-r{color:#f87171;border-color:rgba(248,113,113,.4)}.fx-c b.g-o{color:#fb923c;border-color:rgba(251,146,60,.4)}.fx-c b.g-g{color:#4ade80;border-color:rgba(74,222,128,.4)}' +
+        '.fp-list,.cb-body{scrollbar-width:auto}.fp-list::-webkit-scrollbar,.cb-body::-webkit-scrollbar{width:7px}.fp-list::-webkit-scrollbar-track,.cb-body::-webkit-scrollbar-track{background:#0a1220}.fp-list::-webkit-scrollbar-thumb,.cb-body::-webkit-scrollbar-thumb{background:#5a7bb0;border-radius:4px}' +
+        '.fp-list::-webkit-scrollbar-button:single-button,.cb-body::-webkit-scrollbar-button:single-button{display:block;height:10px;width:7px;background-color:#16233b;background-repeat:no-repeat;background-position:center;background-size:7px 7px}' +
+        '.fp-list::-webkit-scrollbar-button:vertical:decrement,.cb-body::-webkit-scrollbar-button:vertical:decrement{background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3E%3Cpath d=%27M4 1.5 7.5 6.5h-7z%27 fill=%27%23cbd5e1%27/%3E%3C/svg%3E")}' +
+        '.fp-list::-webkit-scrollbar-button:vertical:increment,.cb-body::-webkit-scrollbar-button:vertical:increment{background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3E%3Cpath d=%27M4 6.5 .5 1.5h7z%27 fill=%27%23cbd5e1%27/%3E%3C/svg%3E")}' +
         '#cbToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:2147483000;background:#7f1d1d;color:#fff;padding:8px 16px;border-radius:18px;font:700 13px system-ui,Cairo,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.5);max-width:80vw;direction:rtl}';
     const IC = {
         fix: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
@@ -123,9 +142,10 @@
         win = document.createElement('div'); win.id = 'cbx';
         win.innerHTML =
             '<div class="cb-head" id="cbHead"><div class="cb-av">' + IC.chat + '</div><div class="cb-ti"><b id="cbTitle"></b><small id="cbSub"></small></div>' +
-            '<div class="cb-btns">' + (role === 't' ? '<button class="cb-hb sd z" id="cbSdHw" data-sd="hw" title="الواجبات المرسلة من الطالب">واجب <b>0</b></button><button class="cb-hb sd z" id="cbSdEx" data-sd="ex" title="إجابات الاختبار">اختبار <b>0</b></button><button class="cb-hb sd z" id="cbSdFl" data-sd="fl" title="الصور والملفات المرسلة من الطالب">ملفات <b>0</b></button>' : '') + '<button class="cb-hb" id="cbClear" style="display:none" title="مسح المحادثة">مسح</button>' +
+            '<div class="cb-btns">' + (role === 't' ? '<button class="cb-hb sd z" id="cbFpT" title="إظهار/إخفاء شريط ملفات الطالب">📎 <b>0</b></button>' : '') + '<button class="cb-hb" id="cbClear" style="display:none" title="مسح المحادثة">مسح</button>' +
             '<button class="cb-hb" id="cbCol" title="تصغير/تكبير">' + IC.down + '</button>' +
             '<button class="cb-hb danger" id="cbClose" title="إغلاق">' + IC.close + '</button></div></div>' +
+            '<div class="cb-split">' + (role === 't' ? '<div class="cb-fp" id="cbFp"><div class="fp-tabs"><button data-sd="hw">واجب <b>0</b></button><button data-sd="ex">اختبار <b>0</b></button><button data-sd="fl">ملفات <b>0</b></button><button class="fp-x" id="fpX" title="إغلاق هذا الجزء (يعود من زر 📎 في الأعلى)">✕</button></div><div class="fp-list" id="fpList"></div><div class="fp-act"><button data-a="view">' + IC.open + ' عرض</button><button data-a="fix">' + IC.fix + ' تصحيح</button><button data-a="board">⇱ للسبورة</button><button data-a="dl">' + IC.dl + ' تحميل</button><button data-a="saveall" class="w2">💾 حفظ الكل</button></div></div>' : '') + '<div class="cb-mn">' +
             '<div class="cb-err" id="cbErr"></div><div class="cb-chips" id="cbChips" style="display:none"></div>' +
             '<div class="cb-body" id="cbBody"></div>' +
             '<div class="cb-comp" id="cbComp">' +
@@ -135,23 +155,23 @@
             '<button class="cb-ib" id="cbMic" title="رسالة صوتية">' + IC.mic + '</button>' +
             '<button class="cb-ib send" id="cbSend" title="إرسال">' + IC.send + '</button>' +
             '<input type="file" id="cbFile" style="display:none" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip">' +
-            '</div><div class="cb-grip" id="cbGrip" title="تغيير الحجم"></div><div class="cb-grip cb-gripL" id="cbGripL" title="تغيير الحجم"></div><i class="cb-ed cb-ed-e" data-d="e"></i><i class="cb-ed cb-ed-w" data-d="w"></i><i class="cb-ed cb-ed-s" data-d="s"></i>';
+            '</div>' + (role === 't' ? '<div class="cb-vw" id="cbVw"><div class="vw-h"><button id="vwBack">→ رجوع للمحادثة</button><b id="vwT"></b></div><div class="vw-c" id="vwC"></div></div>' : '') + '</div></div><div class="cb-grip" id="cbGrip" title="تغيير الحجم"></div><div class="cb-grip cb-gripL" id="cbGripL" title="تغيير الحجم"></div><i class="cb-ed cb-ed-e" data-d="e"></i><i class="cb-ed cb-ed-w" data-d="w"></i><i class="cb-ed cb-ed-s" data-d="s"></i>';
         document.body.appendChild(win);
         const lb = document.createElement('div'); lb.id = 'cbLight';
         lb.innerHTML = '<div class="lw"><img id="cbLimg" alt=""></div><div class="lb"><a class="cb-a" id="cbLdl">' + IC.dl + ' تحميل</a><button class="cb-a" id="cbLcl">إغلاق</button></div>';
         document.body.appendChild(lb);
         ui = { err: $('#cbErr'), body: $('#cbBody'), chips: $('#cbChips'), ta: $('#cbTa'), title: $('#cbTitle'), sub: $('#cbSub'), comp: $('#cbComp'), light: lb };
-        initGeom(); bindDrag(); bindUI();
+        initGeom(); bindDrag(); bindUI(); bindFiles();
     }
 
     function initGeom() {
         const vw = innerWidth, vh = innerHeight, small = vw < 640;
-        let g = null; try { g = JSON.parse(localStorage.getItem('cbx3_' + role) || 'null'); } catch (e) {}
-        const w = small ? Math.min(vw - 12, 340) : Math.min((g && g.w) || (role === 's' ? 400 : 270), vw - 20), h = small ? Math.round(vh * .5) : Math.min((g && g.h) || (role === 's' ? 500 : 333), vh - 20);
+        let g = null; try { g = JSON.parse(localStorage.getItem('cbx4_' + role) || 'null'); } catch (e) {}
+        const w = small ? Math.min(vw - 12, 340) : Math.min((g && g.w) || (role === 's' ? 400 : 600), vw - 20), h = small ? Math.round(vh * .5) : Math.min((g && g.h) || (role === 's' ? 500 : 420), vh - 20);
         const l = small ? Math.round((vw - w) / 2) : Math.max(0, Math.min((g && g.l != null ? g.l : 220), vw - w)), t = small ? vh - h - 64 : Math.max(0, Math.min((g && g.t != null ? g.t : vh - h - 70), vh - 60));
         Object.assign(win.style, { width: w + 'px', height: h + 'px', left: l + 'px', top: t + 'px' });
     }
-    function saveGeom() { try { localStorage.setItem('cbx3_' + role, JSON.stringify({ l: win.offsetLeft, t: win.offsetTop, w: win.offsetWidth, h: win.offsetHeight })); } catch (e) {} }
+    function saveGeom() { try { localStorage.setItem('cbx4_' + role, JSON.stringify({ l: win.offsetLeft, t: win.offsetTop, w: win.offsetWidth, h: win.offsetHeight })); } catch (e) {} }
     
     function bindDrag() {
         const head = $('#cbHead');
@@ -173,8 +193,8 @@
                 el.setPointerCapture(e.pointerId);
                 const mv = ev => {
                     const dx = ev.clientX - sx, dy = ev.clientY - sy; let nw = sw, nl = sl, nh = sh;
-                    if (dir.indexOf('e') >= 0) nw = Math.max(260, Math.min(innerWidth - sl, sw + dx));
-                    if (dir.indexOf('w') >= 0) { nw = Math.max(260, Math.min(sl + sw, sw - dx)); nl = sl + sw - nw; }
+                    if (dir.indexOf('e') >= 0) nw = Math.max(role === 't' ? 380 : 260, Math.min(innerWidth - sl, sw + dx));
+                    if (dir.indexOf('w') >= 0) { nw = Math.max(role === 't' ? 380 : 260, Math.min(sl + sw, sw - dx)); nl = sl + sw - nw; }
                     if (dir.indexOf('s') >= 0) nh = Math.max(180, Math.min(innerHeight - win.offsetTop, sh + dy));
                     win.style.width = nw + 'px'; win.style.left = nl + 'px'; win.style.height = nh + 'px';
                 };
@@ -408,65 +428,109 @@
         d.querySelectorAll('[data-i]').forEach(bt => { bt.onclick = () => { const s = exs[+bt.dataset.i]; if (window.MCExam && MCExam.grade) MCExam.grade(s, nm); else if (MCExam && MCExam.tray) MCExam.tray(sidOf(cur), cur, win, nm); }; });
         return d;
     }
-    /* [M6.2] الشريط الجانبي: واجب / اختبار / ملفات الطالب المحدد — يلتصق بنافذة الرسائل ويتبعها */
-    let sideKind = null, sideSig = '', sideEl = null, sideRaf = 0;
-    const SD_T = { hw: 'الواجبات', ex: 'إجابات الاختبار', fl: 'الصور والملفات' };
+    /* [M6.2] لوحة الملفات داخل نافذة الرسائل (المعلم): شريط أيمن فيه ملفات الطالب ومواصفاتها (واجب / اختبار / ملفات)،
+       وتحته الأزرار، والعرض يتم داخل شاشة الرسائل نفسها وتبقى الملفات حتى نهاية الجلسة */
+    let fpKind = 'ex', fpSel = null, fpSig = '';   /* [M9] تبويب «اختبار» هو الافتراضي */
+    const blobs = {};
     function sideItems(kind) {
         if (role !== 't' || !cur) return [];
-        if (kind === 'ex') return examSubs(cur).map((s, i) => ({ ex: s, i, ts: s.ts || 0 }));
+        if (kind === 'ex') return examSubs(cur).map((s, i) => ({ ex: s, i, key: 'ex' + i, ts: s.ts || 0 }));
         const m = msgs[cur] || {}, out = [];
-        for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.file) { const isHw = !!x.hw && x.hw !== 2; if ((kind === 'hw') === isHw) out.push(Object.assign({ k }, x)); } }
+        for (const k in m) { const x = m[k]; if (x && x.from === 's' && x.file) { const isHw = !!x.hw && x.hw !== 2; if ((kind === 'hw') === isHw) out.push(Object.assign({ k, key: k }, x)); } }
         return out.sort((a, b) => (a.ts || 0) - (b.ts || 0));
     }
-    function ensureSide() {
-        if (sideEl) return sideEl;
-        sideEl = document.createElement('div'); sideEl.id = 'cbSide';
-        sideEl.innerHTML = '<div class="sd-h"><span id="sdTi"></span><button id="sdX" title="إغلاق">×</button></div><div class="sd-b" id="sdBody"></div>';
-        document.body.appendChild(sideEl);
-        sideEl.querySelector('#sdX').onclick = () => toggleSide(null);
-        sideEl.querySelector('#sdBody').addEventListener('click', e => {
-            const im = e.target.closest('img[data-lb]'); if (im) return lightbox(im.src, im.dataset.name);
-            const o = e.target.closest('[data-o]'); if (o) { const m = find(o.dataset.o); if (m && m.file) openFile(m.file); return; }
-            const f = e.target.closest('[data-f]'); if (f) { const m = find(f.dataset.f); if (m && m.file) fixFile(m.file); return; }
-            const x = e.target.closest('[data-x]'); if (x) { const it = sideItems('ex')[+x.dataset.x]; const p = peers().find(z => convOf(z) === cur); if (it && window.MCExam && MCExam.grade) MCExam.grade(it.ex, p ? p.name : 'طالب'); }
-        });
-        return sideEl;
+    const typeLbl = f => /^image\//.test(f.type) ? 'صورة' : /pdf/.test(f.type) ? 'PDF' : (f.name.split('.').pop() || 'ملف').toUpperCase().slice(0, 5);
+    const whenS = ts => new Date(ts || 0).toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric' });
+    function selItem() { if (!fpSel) return null; return sideItems(fpKind).find(x => x.key === fpSel) || null; }
+    function blobOf(it) { if (!blobs[it.key]) { try { blobs[it.key] = URL.createObjectURL(toFile(it.file)); } catch (e) { return null; } } return blobs[it.key]; }
+    function hideViewer() { const v = $('#cbVw'); if (v) { v.classList.remove('show'); v.querySelector('#vwC').innerHTML = ''; } }
+    function showViewer(it) {
+        const v = $('#cbVw'), c = v.querySelector('#vwC'); if (!v || !it) return;
+        v.classList.add('show'); c.innerHTML = '';
+        if (it.ex) { v.querySelector('#vwT').textContent = 'إجابة اختبار · ' + whenS(it.ts); c.innerHTML = '<div class="vw-i"><div class="vw-big">📝</div><div>إجابة اختبار مرسلة من الطالب</div><button class="cb-a" data-a="fix">' + IC.fix + ' فتح وتصحيح</button></div>'; return; }
+        const f = it.file; v.querySelector('#vwT').textContent = f.name + ' · ' + typeLbl(f) + ' · ' + fsize(f.size || 0);
+        if (/^image\//.test(f.type)) { const im = document.createElement('img'); im.src = f.data; im.alt = ''; im.title = 'اضغط للتكبير/التصغير'; im.onclick = () => c.classList.toggle('z'); c.classList.remove('z'); c.appendChild(im); }
+        else if (/pdf/.test(f.type)) { const u = blobOf(it); if (u) { const fr = document.createElement('iframe'); fr.src = u; c.appendChild(fr); } else c.innerHTML = '<div class="vw-i">تعذّر عرض الملف</div>'; }
+        else c.innerHTML = '<div class="vw-i"><div class="vw-big">' + esc(typeLbl(f)) + '</div><div>لا يمكن عرض هذا النوع هنا — يمكنك تحميله</div><button class="cb-a" data-a="dl">' + IC.dl + ' تحميل</button></div>';
     }
-    function drawSide() {
-        const el = ensureSide(), items = sideItems(sideKind), bd = el.querySelector('#sdBody');
-        el.querySelector('#sdTi').textContent = (SD_T[sideKind] || '') + ' (' + items.length + ')';
-        bd.innerHTML = '';
-        if (!items.length) { bd.innerHTML = '<div class="sd-e">لا يوجد شيء بعد من هذا الطالب</div>'; return; }
+    /* [M8] صف واحد لكل اختبار: اختبار (n) الدرجة x/y الزمن t د من T د + اليوم الموافق التاريخ؛ المؤشر عليه = اسم الاختبار؛ نقرتان = فتح وتصحيح */
+    const exInfo = {}; let exVer = 0;
+    const nfmt = n => (Math.round(n * 10) / 10).toString();
+    function exLoad(it) {
+        const k = it.ex.eid + '|' + it.ex.id, c = exInfo[k];
+        if (!c || (!c.ld && Date.now() - c.at > 5000)) {
+            const keep = c; exInfo[k] = Object.assign({ at: Date.now(), ld: 1 }, keep || {}); exInfo[k].at = Date.now();
+            if (window.MCExam && MCExam.rowInfo) MCExam.rowInfo(it.ex).then(r => { exInfo[k] = r; exVer++; fpSig = ''; updSide(); }, () => { exInfo[k].ld = 0; });
+        }
+        return exInfo[k] && exInfo[k].name ? exInfo[k] : null;
+    }
+    /* [M9] تصميم الصف: أربع خلايا ملوّنة وعناوينها فوقها — Date | Time | Deg | Test(n)؛ الدرجة: أحمر < النصف، برتقالي داكن = النصف، أخضر داكن > النصف */
+    function exCells(c, it) {
+        const d = new Date(it.ts || 0), L = 'ar-EG-u-nu-latn';
+        const day = d.toLocaleDateString(L, { weekday: 'long' }), dt = d.getDate() + '/' + (d.getMonth() + 1);
+        const ok = c && c.tot != null && c.mx, r = ok ? c.tot / c.mx : null;
+        const gc = !ok ? '' : (r < 0.5 - 1e-9 ? 'g-r' : (Math.abs(r - 0.5) < 1e-9 ? 'g-o' : 'g-g'));
+        const tm = ':' + (c && c.el != null ? c.el : '—') + '/:' + (c && c.dur ? c.dur : '—');
+        const cell = (lab, cls, html, ttl) => '<div class="fx-c"><i>' + lab + '</i><b class="' + cls + '"' + (ttl ? ' title="' + esc(ttl) + '"' : '') + '>' + html + '</b></div>';
+        /* الترتيب (يسار→يمين): Test | Deg | Time | Date */
+        return '<div class="fx-g">' + cell('Test(' + (it.i + 1) + ')', '', esc((c && c.short) || '—')) + cell('Deg', gc, ok ? esc(nfmt(c.tot) + '/' + nfmt(c.mx)) : '—') +
+            cell('Time', '', esc(tm), c && c.ap ? 'الزمن تقديري (من وقت نشر الاختبار)' : '') + cell('Date', '', '<span class="fx-s">' + esc(day.replace('ال', '')) + '</span>' + esc(dt)) + '</div>';
+    }
+    function exLine(c, it) {
+        const d = new Date(it.ts || 0), L = 'ar-EG-u-nu-latn';
+        const day = d.toLocaleDateString(L, { weekday: 'long' }), dt = d.toLocaleDateString(L, { day: 'numeric', month: 'numeric', year: 'numeric' });
+        return 'اختبار (' + (it.i + 1) + ')  الدرجة ' + (c && c.tot != null ? nfmt(c.tot) + '/' + c.mx : '—') + '  الزمن ' + (c && c.el != null ? c.el : '—') + ' د من ' + (c && c.dur ? c.dur : '—') + ' د  ' + day + ' الموافق ' + dt;
+    }
+    function drawFiles() {
+        const fp = $('#cbFp'); if (!fp) return;
+        fp.classList.toggle('exm', fpKind === 'ex'); win.classList.toggle('exm', fpKind === 'ex');
+        const n = { hw: sideItems('hw'), ex: sideItems('ex'), fl: sideItems('fl') };
+        fp.querySelectorAll('[data-sd]').forEach(b => { const k = b.dataset.sd; b.querySelector('b').textContent = n[k].length; b.classList.toggle('on', k === fpKind); });
+        const tot = n.hw.length + n.ex.length + n.fl.length, tb = $('#cbFpT'); if (tb) { tb.querySelector('b').textContent = tot; tb.classList.toggle('z', !tot); }
+        const list = fp.querySelector('#fpList'); list.innerHTML = '';
+        const items = n[fpKind];
+        if (!items.length) list.innerHTML = '<div class="fp-e">لا يوجد شيء بعد من هذا الطالب</div>';
         items.forEach(it => {
-            const d = document.createElement('div'); d.className = 'sd-i';
-            const when = new Date(it.ts || 0).toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'numeric' });
-            if (it.ex) { d.innerHTML = '<div class="sd-t"><span class="sd-x">📝</span><span class="sd-n">إجابة اختبار<small>' + esc(when) + '</small></span></div><div class="sd-a"><button data-x="' + it.i + '">' + IC.fix + ' فتح وتصحيح</button></div>'; bd.appendChild(d); return; }
-            const f = it.file, img = /^image\//.test(f.type), pdf = /pdf/.test(f.type);
-            d.innerHTML = (img ? '<img data-lb="1" data-name="' + esc(f.name) + '" src="' + f.data + '" alt="">' : '') +
-                '<div class="sd-t">' + (img ? '' : '<span class="sd-x">' + esc((f.name.split('.').pop() || 'FILE').slice(0, 4).toUpperCase()) + '</span>') + '<span class="sd-n">' + esc(f.name) + '<small>' + esc(when) + ' · ' + fsize(f.size || 0) + '</small></span></div>' +
-                '<div class="sd-a">' + ((img || pdf) ? '<button data-o="' + it.k + '">' + IC.open + ' فتح</button>' : '') + (img ? '<button data-f="' + it.k + '">' + IC.fix + ' تصحيح</button>' : '') + '<a href="' + f.data + '" download="' + esc(f.name) + '">' + IC.dl + ' تحميل</a></div>';
-            bd.appendChild(d);
+            const d = document.createElement('div'); d.className = 'fp-i' + (it.key === fpSel ? ' on' : ''); d.dataset.key = it.key;
+            if (it.ex) { const c = exLoad(it); d.classList.add('fp-ex'); d.innerHTML = exCells(c, it); d.title = (c && c.name) || 'اختبار'; }
+            else { const f = it.file, im = /^image\//.test(f.type); d.innerHTML = '<span class="fp-th">' + (im ? '<img src="' + f.data + '" alt="">' : esc(typeLbl(f))) + '</span><span class="fp-n"><b>' + esc(f.name) + '</b><small>' + esc(typeLbl(f)) + ' · ' + fsize(f.size || 0) + ' · ' + esc(whenS(it.ts)) + '</small></span>'; }
+            list.appendChild(d);
         });
+        list.scrollTop = 0;   /* [M9] السكرول يبدأ من الصفر أعلى القائمة */
+        fpActs(n);
     }
-    function placeSide() {
-        sideRaf = 0; if (!sideKind || !sideEl || !shown) { if (sideEl) sideEl.classList.remove('show'); return; }
-        const r = win.getBoundingClientRect(), w = 250; let l = r.right + 6; if (l + w > innerWidth - 4) l = r.left - w - 6; if (l < 4) l = Math.max(4, innerWidth - w - 4);
-        sideEl.style.left = l + 'px'; sideEl.style.top = r.top + 'px'; sideEl.style.height = Math.max(240, r.height) + 'px'; sideEl.classList.add('show');
-        sideRaf = requestAnimationFrame(placeSide);
+    function fpActs(n) {
+        const fp = $('#cbFp'); if (!fp) return; n = n || { hw: sideItems('hw'), ex: sideItems('ex'), fl: sideItems('fl') };
+        const has = !!selItem(), isEx = has && selItem().ex, isImg = has && !isEx && /^image\//.test(selItem().file.type);
+        fp.querySelectorAll('.fp-act [data-a]').forEach(b => { const a = b.dataset.a; let off = false; if (a === 'saveall') off = !(n.hw.length + n.fl.length); else if (!has) off = true; else if (isEx && (a === 'dl' || a === 'board' || a === 'view') && a !== 'view') off = true; else if (a === 'fix' && !isEx && !isImg) off = true; b.disabled = off; });
     }
-    function toggleSide(kind) {
-        sideKind = (kind && sideKind !== kind) ? kind : null;
-        document.querySelectorAll('.cb-hb.sd').forEach(b => b.classList.toggle('on', b.dataset.sd === sideKind));
-        if (!sideKind) { if (sideEl) sideEl.classList.remove('show'); cancelAnimationFrame(sideRaf); sideRaf = 0; return; }
-        sideSig = ''; drawSide(); cancelAnimationFrame(sideRaf); placeSide();
-    }
+    function curSig() { return cur + '|' + fpKind + '|' + exVer + '|' + ['hw', 'ex', 'fl'].map(k => sideItems(k).map(x => x.key).join(',')).join('/'); }
     function updSide() {
         if (role !== 't' || !win) return;
-        const n = { hw: sideItems('hw').length, ex: sideItems('ex').length, fl: sideItems('fl').length };
-        [['cbSdHw', 'hw'], ['cbSdEx', 'ex'], ['cbSdFl', 'fl']].forEach(p => { const b = document.getElementById(p[0]); if (!b) return; b.querySelector('b').textContent = n[p[1]]; b.classList.toggle('z', !n[p[1]]); });
-        if (sideKind) { const sig = cur + '|' + sideKind + '|' + n[sideKind] + '|' + sideItems(sideKind).map(x => x.k || x.i).join(','); if (sig !== sideSig) { sideSig = sig; drawSide(); } }
+        const sig = curSig();
+        if (sig !== fpSig) { fpSig = sig; drawFiles(); }
     }
-    document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('.cb-hb.sd'); if (b) toggleSide(b.dataset.sd); });
+    function dl(it) { if (!it || !it.file) return; const a = document.createElement('a'); a.href = it.file.data; a.download = it.file.name || 'file'; document.body.appendChild(a); a.click(); a.remove(); }
+    function bindFiles() {
+        const fp = $('#cbFp'); if (!fp) return;
+        const act = a => {
+            const it = selItem(); if (a === 'saveall') { const all = sideItems('hw').concat(sideItems('fl')); all.forEach((x, i) => setTimeout(() => dl(x), i * 350)); say('جارٍ حفظ ' + all.length + ' ملف'); return; }
+            if (!it) return;
+            if (a === 'view') showViewer(it);
+            else if (a === 'fix') { if (it.ex) { const p = peers().find(z => convOf(z) === cur); if (window.MCExam && MCExam.grade) MCExam.grade(it.ex, p ? p.name : 'طالب'); } else fixFile(it.file); }
+            else if (a === 'board') openFile(it.file);
+            else if (a === 'dl') dl(it);
+        };
+        fp.addEventListener('click', e => {
+            const t = e.target.closest('[data-sd]'); if (t) { fpKind = t.dataset.sd; fpSel = null; hideViewer(); fpSig = ''; updSide(); return; }
+            const i = e.target.closest('.fp-i'); if (i) { fpSel = i.dataset.key; fp.querySelectorAll('.fp-i').forEach(x => x.classList.toggle('on', x === i)); fpActs(); const si = selItem(); if (si && !si.ex) showViewer(si); return; }
+            const b = e.target.closest('[data-a]'); if (b && !b.disabled) act(b.dataset.a);
+        });
+        fp.addEventListener('dblclick', e => { const i = e.target.closest('.fp-i'); if (!i) return; const it = sideItems(fpKind).find(x => x.key === i.dataset.key); if (it && it.ex) { const p = peers().find(z => convOf(z) === cur); if (window.MCExam && MCExam.grade) MCExam.grade(it.ex, p ? p.name : 'طالب'); } });
+        $('#cbVw').addEventListener('click', e => { if (e.target.closest('#vwBack')) { hideViewer(); return; } const b = e.target.closest('[data-a]'); if (b) act(b.dataset.a); });
+        $('#cbFpT').addEventListener('click', () => { win.classList.toggle('nofp'); });
+        $('#fpX').addEventListener('click', () => { win.classList.add('nofp'); });   /* [M10] إغلاق الجزء الأيمن */
+    }
     let exN = {};
     setInterval(() => {      /* إعادة الرسم عند وصول/تغيّر إجابات اختبار الطالب المفتوحة محادثته + إضاءة الظرف */
         if (role !== 't') return;
@@ -488,9 +552,9 @@
             let t = r.bottom + 4; if (t + h > vh - 6) t = Math.max(6, vh - h - 6);
             win.style.left = Math.max(6, Math.min(r.left, vw - w - 6)) + 'px'; win.style.top = t + 'px';
         }
-        setTimeout(() => ui.ta.focus(), 50); if (sideKind) { sideSig = ''; updSide(); cancelAnimationFrame(sideRaf); placeSide(); }
+        setTimeout(() => ui.ta.focus(), 50); fpSig = ''; updSide();
     };
-    CB.toggle = function (conv) { if (!cfg) return; if (shown && !collapsed && (!conv || conv === cur)) { shown = false; win.classList.remove('show'); if (sideEl) sideEl.classList.remove('show'); } else CB.open(conv); };
+    CB.toggle = function (conv) { if (!cfg) return; if (shown && !collapsed && (!conv || conv === cur)) { shown = false; win.classList.remove('show'); } else CB.open(conv); };
     CB.attach = function () {      /* رفع الواجب مباشرة بدون فتح نافذة الرسائل */
         if (role === 's') { cur = cfg.convKey(); attach(cur); }
         const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*,application/pdf';
