@@ -137,15 +137,43 @@
         try { let t = document.getElementById('cbToast'); if (!t) { t = document.createElement('div'); t.id = 'cbToast'; document.body.appendChild(t); } t.textContent = m; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => { t.style.display = 'none'; }, 3200); } catch (e) {}
     };
 
+
+    /* [SL1] الشريط الأيسر (بحث بالاسم + بالكود + قائمة الطلاب) وحيّز التصحيح داخل النافذة */
+    const CSS3 =
+        '.cb-sl{width:176px;flex:0 0 176px;display:flex;flex-direction:column;background:#0a1220;border-right:1px solid #5c1a1a;min-height:0}#cbx:not(.sl) .cb-sl{display:none}' +
+        '.sl-s{display:flex;gap:4px;padding:6px;flex-shrink:0}.sl-s input{min-width:0;height:24px;border:1px solid rgba(148,163,184,.28);border-radius:6px;background:#0e182b;color:#e2e8f0;font-weight:600;font-size:11px;font-family:inherit;padding:0 6px;outline:0;user-select:text;-webkit-user-select:text}.sl-s input:focus{border-color:#d4af37}#slN{flex:1}#slC{flex:0 0 46px;width:46px;text-align:center}' +
+        '.sl-l{flex:1;min-height:0;overflow:auto;padding:0 5px 5px;display:flex;flex-direction:column;gap:2px}.sl-r{display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:6px;border:1px solid transparent;cursor:pointer;font-weight:600;font-size:11px;font-family:inherit;color:#cbd5e1}.sl-r:hover{background:#111b30}.sl-r.on{background:#16233b;border-color:rgba(212,175,55,.5);color:#fff}.sl-r.off{opacity:.55}' +
+        '.sl-r i{flex:0 0 7px;height:7px;border-radius:50%;background:#475569}.sl-r i.on{background:#22c55e}.sl-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}.sl-r small{font-size:9px;color:#94a3b8}.sl-r em{background:#dc2626;color:#fff;border-radius:8px;font-weight:700;font-size:9px;font-family:inherit;padding:0 5px;font-style:normal}.sl-r input{margin:0;width:13px;height:13px;accent-color:#16a34a;cursor:pointer}' +
+        '.sl-f{display:flex;flex-direction:column;gap:4px;padding:5px 6px;flex-shrink:0}.sl-f div{display:flex;gap:4px}.sl-f>input{flex:none}.sl-f div input{flex:1}.sl-f input{min-width:0;height:24px;border:1px solid rgba(148,163,184,.28);border-radius:6px;background:rgba(0,0,0,.28);color:#e2e8f0;font-size:11px;font-family:inherit;padding:0 6px;outline:0;user-select:text;-webkit-user-select:text}.sl-f div input{width:50%}.sl-r small{background:rgba(0,0,0,.3);border:1px solid rgba(148,163,184,.25);border-radius:5px;padding:1px 5px;direction:ltr;color:#cbd5e1}.sl-p{border:0;background:transparent;cursor:pointer;font-size:11px;padding:0 2px;opacity:.75}.sl-p:hover{opacity:1}.sl-add.dirty{background:#16a34a;color:#fff;border-style:solid}.sl-q{flex-shrink:0;padding:0 5px}.sl-q .q-h{font-size:10px;color:#fbbf24;padding:2px 4px}.sl-q .q-r{display:flex;align-items:center;gap:4px;padding:4px 6px;margin-bottom:3px;border:1px solid rgba(251,191,36,.45);border-radius:6px;background:rgba(251,191,36,.08);color:#fde68a;font-size:11px;font-weight:700}.sl-q .q-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-q .q-r button{border:1px solid rgba(255,255,255,.25);background:#15803d;color:#fff;border-radius:5px;font-size:10px;font-family:inherit;cursor:pointer;padding:1px 6px}.sl-q .q-r button.x{background:transparent;color:#fca5a5}.sl-e{margin:auto;color:#64748b;font-size:11px;text-align:center;padding:10px}.sl-add{margin:0 6px 6px;height:24px;border:1px dashed rgba(148,163,184,.4);border-radius:6px;background:transparent;color:#94a3b8;font-weight:700;font-size:11px;font-family:inherit;cursor:pointer}.sl-add:hover{color:#fff;border-color:#d4af37}' +
+        '.cb-sl,.cb-fp{background:linear-gradient(180deg,#0f3a2a,#082219)!important}.cb-fp .fp-tabs,.cb-fp .fp-list{background:transparent!important}.sl-s input{background:rgba(0,0,0,.28)!important}.sl-r:hover{background:rgba(255,255,255,.07)!important}.sl-r.on{background:rgba(255,255,255,.12)!important}' +
+        '#cbGh{display:none;position:absolute;left:0;right:0;top:0;bottom:0;z-index:25;background:#0b1424}#cbx.gr #cbGh{display:block}';
+
+    /* [SB1] شريط تمرير موحّد لكل النوافذ: أنحف، لون مختلف (تركوازي هادئ)، سهمان في أول وآخر الشريط */
+    const SBS = ['#cbx *'];
+    const ARW = d => 'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 8 8%27%3E%3Cpath d=%27' + d + '%27 fill=%27%2399d5dc%27/%3E%3C/svg%3E")';
+    const SB_CSS = SBS.map(q =>
+        q + '::-webkit-scrollbar{width:9px;height:9px}' + q + '::-webkit-scrollbar-track{background:#08101d}' +
+        q + '::-webkit-scrollbar-thumb{background:#2f7f8a;border-radius:3px}' + q + '::-webkit-scrollbar-thumb:hover{background:#43a3b0}' +
+        q + '::-webkit-scrollbar-button:single-button{display:block;height:11px;width:11px;background-color:#0e1c2c;background-repeat:no-repeat;background-position:center;background-size:6px 6px}' +
+        q + '::-webkit-scrollbar-button:vertical:start:increment,' + q + '::-webkit-scrollbar-button:vertical:end:decrement,' + q + '::-webkit-scrollbar-button:horizontal:start:increment,' + q + '::-webkit-scrollbar-button:horizontal:end:decrement{display:none}' +
+        q + '::-webkit-scrollbar-button:vertical:decrement{background-image:' + ARW('M4 1.5 7.5 6.5h-7z') + '}' +
+        q + '::-webkit-scrollbar-button:vertical:increment{background-image:' + ARW('M4 6.5 .5 1.5h7z') + '}' +
+        q + '::-webkit-scrollbar-button:horizontal:decrement{background-image:' + ARW('M1.5 4 6.5 .5v7z') + '}' +
+        q + '::-webkit-scrollbar-button:horizontal:increment{background-image:' + ARW('M6.5 4 1.5 .5v7z') + '}').join('') +
+        '@supports not selector(::-webkit-scrollbar){#cbx *{scrollbar-width:thin;scrollbar-color:#2f7f8a #08101d}}';
+    window.__mcSB = SB_CSS;
+    const CSS4 =
+        '.cb-ed-n{left:30px;right:30px;top:0;height:6px;cursor:ns-resize}.cb-ed-nw,.cb-ed-ne{top:0;width:14px;height:14px;z-index:10}.cb-ed-nw{left:0;cursor:nwse-resize}.cb-ed-ne{right:0;cursor:nesw-resize}#cbx.col .cb-ed-n,#cbx.col .cb-ed-nw,#cbx.col .cb-ed-ne{display:none}' +
+        '';
     function build() {
-        const st = document.createElement('style'); st.textContent = CSS + CSS2; document.head.appendChild(st);
+        const st = document.createElement('style'); st.textContent = CSS + CSS2 + CSS3 + CSS4 + SB_CSS; document.head.appendChild(st);
         win = document.createElement('div'); win.id = 'cbx';
         win.innerHTML =
             '<div class="cb-head" id="cbHead"><div class="cb-av">' + IC.chat + '</div><div class="cb-ti"><b id="cbTitle"></b><small id="cbSub"></small></div>' +
             '<div class="cb-btns">' + (role === 't' ? '<button class="cb-hb sd z" id="cbFpT" title="إظهار/إخفاء شريط ملفات الطالب">📎 <b>0</b></button>' : '') + '<button class="cb-hb" id="cbClear" style="display:none" title="مسح المحادثة">مسح</button>' +
             '<button class="cb-hb" id="cbCol" title="تصغير/تكبير">' + IC.down + '</button>' +
             '<button class="cb-hb danger" id="cbClose" title="إغلاق">' + IC.close + '</button></div></div>' +
-            '<div class="cb-split">' + (role === 't' ? '<div class="cb-fp" id="cbFp"><div class="fp-tabs"><button data-sd="hw">واجب <b>0</b></button><button data-sd="ex">اختبار <b>0</b></button><button data-sd="fl">ملفات <b>0</b></button><button class="fp-x" id="fpX" title="إغلاق هذا الجزء (يعود من زر 📎 في الأعلى)">✕</button></div><div class="fp-list" id="fpList"></div><div class="fp-act"><button data-a="view">' + IC.open + ' عرض</button><button data-a="fix">' + IC.fix + ' تصحيح</button><button data-a="board">⇱ للسبورة</button><button data-a="dl">' + IC.dl + ' تحميل</button><button data-a="saveall" class="w2">💾 حفظ الكل</button></div></div>' : '') + '<div class="cb-mn">' +
+            '<div class="cb-split">' + (role === 't' ? '<div class="cb-fp" id="cbFp"><div class="fp-tabs"><button data-sd="ex">اختبارات <b>0</b></button><button data-sd="hw">واجبات <b>0</b></button><button data-sd="fl">أسئلة <b>0</b></button><button class="fp-x" id="fpX" title="إغلاق هذا الجزء (يعود من زر 📎 في الأعلى)">✕</button></div><div class="fp-list" id="fpList"></div><div class="fp-act"><button data-a="view">' + IC.open + ' عرض</button><button data-a="fix">' + IC.fix + ' تصحيح</button><button data-a="board">⇱ للسبورة</button><button data-a="dl">' + IC.dl + ' تحميل</button><button data-a="saveall" class="w2">💾 حفظ الكل</button></div></div>' : '') + '<div class="cb-mn">' +
             '<div class="cb-err" id="cbErr"></div><div class="cb-chips" id="cbChips" style="display:none"></div>' +
             '<div class="cb-body" id="cbBody"></div>' +
             '<div class="cb-comp" id="cbComp">' +
@@ -155,7 +183,7 @@
             '<button class="cb-ib" id="cbMic" title="رسالة صوتية">' + IC.mic + '</button>' +
             '<button class="cb-ib send" id="cbSend" title="إرسال">' + IC.send + '</button>' +
             '<input type="file" id="cbFile" style="display:none" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip">' +
-            '</div>' + (role === 't' ? '<div class="cb-vw" id="cbVw"><div class="vw-h"><button id="vwBack">→ رجوع للمحادثة</button><b id="vwT"></b></div><div class="vw-c" id="vwC"></div></div>' : '') + '</div></div><div class="cb-grip" id="cbGrip" title="تغيير الحجم"></div><div class="cb-grip cb-gripL" id="cbGripL" title="تغيير الحجم"></div><i class="cb-ed cb-ed-e" data-d="e"></i><i class="cb-ed cb-ed-w" data-d="w"></i><i class="cb-ed cb-ed-s" data-d="s"></i>';
+            '</div>' + (role === 't' ? '<div class="cb-vw" id="cbVw"><div class="vw-h"><button id="vwBack">→ رجوع للمحادثة</button><b id="vwT"></b></div><div class="vw-c" id="vwC"></div></div><div id="cbGh"></div>' : '') + '</div>' + (role === 't' ? '<div class="cb-sl" id="cbSl"><div class="sl-s"><input id="slN" placeholder="بحث باسم الطالب" autocomplete="off"><input id="slC" placeholder="كود" autocomplete="off"></div><div class="sl-q" id="slQ"></div><div class="sl-l" id="slL"></div><div class="sl-f"><input id="sfN" placeholder="اسم الطالب" autocomplete="off"><div><input id="sfC" placeholder="الكود" autocomplete="off"><input id="sfP" placeholder="رقم الواتس" autocomplete="off" inputmode="tel"></div></div><button class="sl-add" id="slAdd" title="يحفظ الاسم والكود والرقم وتفعيل الدخول">💾 حفظ</button></div>' : '') + '</div><div class="cb-grip" id="cbGrip" title="تغيير الحجم"></div><div class="cb-grip cb-gripL" id="cbGripL" title="تغيير الحجم"></div><i class="cb-ed cb-ed-e" data-d="e"></i><i class="cb-ed cb-ed-w" data-d="w"></i><i class="cb-ed cb-ed-s" data-d="s"></i><i class="cb-ed cb-ed-n" data-d="n"></i><i class="cb-ed cb-ed-nw" data-d="nw"></i><i class="cb-ed cb-ed-ne" data-d="ne"></i>';
         document.body.appendChild(win);
         const lb = document.createElement('div'); lb.id = 'cbLight';
         lb.innerHTML = '<div class="lw"><img id="cbLimg" alt=""></div><div class="lb"><a class="cb-a" id="cbLdl">' + IC.dl + ' تحميل</a><button class="cb-a" id="cbLcl">إغلاق</button></div>';
@@ -188,7 +216,7 @@
         const bindRz = (el, dir) => {
             el.addEventListener('pointerdown', e => {
                 e.preventDefault(); e.stopPropagation();
-                const r = win.getBoundingClientRect(), sx = e.clientX, sy = e.clientY, sl = r.left, sw = r.width, sh = r.height;
+                const r = win.getBoundingClientRect(), sx = e.clientX, sy = e.clientY, sl = r.left, sw = r.width, sh = r.height, stp = r.top; win.style.top = stp + 'px';
                 win.style.left = sl + 'px'; win.style.right = 'auto';
                 el.setPointerCapture(e.pointerId);
                 const mv = ev => {
@@ -196,6 +224,7 @@
                     if (dir.indexOf('e') >= 0) nw = Math.max(role === 't' ? 380 : 260, Math.min(innerWidth - sl, sw + dx));
                     if (dir.indexOf('w') >= 0) { nw = Math.max(role === 't' ? 380 : 260, Math.min(sl + sw, sw - dx)); nl = sl + sw - nw; }
                     if (dir.indexOf('s') >= 0) nh = Math.max(180, Math.min(innerHeight - win.offsetTop, sh + dy));
+                    if (dir.indexOf('n') >= 0) { nh = Math.max(180, Math.min(stp + sh, sh - dy)); win.style.top = (stp + sh - nh) + 'px'; }
                     win.style.width = nw + 'px'; win.style.left = nl + 'px'; win.style.height = nh + 'px';
                 };
                 const up = () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); saveGeom(); };
@@ -327,8 +356,80 @@
         if (!cur) { ui.title.textContent = 'الرسائل'; ui.sub.textContent = 'اختر طالبًا'; $('#cbClear').style.display = 'none'; return; }
         const p = peers().find(x => convOf(x) === cur); ui.title.textContent = p ? p.name : 'طالب'; ui.sub.textContent = (p && p.on ? 'متصل' : 'غير متصل') + ' · رمز ' + String(cur).slice(-5) + ' · وصل ' + (got[cur] || 0); $('#cbClear').style.display = '';
     }
+    /* [SL2] قائمة الطلاب في الشريط الأيسر: من سجل الأكواد (MC.students.roster) أو من المتصلين فقط */
+    function roster() {
+        try { if (window.MC && MC.students && MC.students.roster) return MC.students.roster(); } catch (e) { }
+        return peers().map(p => ({ name: p.name || 'طالب', code: '', auto: false, on: !!p.on, conv: convOf(p) }));
+    }
+    const pend = {};   /* [SL3] تغييرات التفعيل بانتظار زر حفظ */
+    /* [CQ2] طلبات الكود: «إرسال الكود» يسجّل كودًا للطالب ويفتح واتساب على رقمه بالرسالة جاهزة */
+    function drawQ() {
+        const Q = document.getElementById('slQ'); if (!Q) return;
+        const rs = (window.MC && MC.students && MC.students.codeRequests) ? MC.students.codeRequests() : [];
+        const sg = JSON.stringify(rs.map(r => [r.id, r.name, r.phone])); if (sg === Q._sig) return; Q._sig = sg;
+        Q.innerHTML = rs.length ? '<div class="q-h">طلبات الكود (' + rs.length + ')</div>' : '';
+        rs.forEach(r => {
+            const d = document.createElement('div'); d.className = 'q-r';
+            d.innerHTML = '<b title="' + esc(r.name) + ' — ' + esc(r.phone) + '">' + esc(r.name) + '</b><button class="s">🔑 كود</button><button class="x" title="رفض">✕</button>';
+            d.querySelector('.s').onclick = e => { e.stopPropagation(); MC.students.openCodeCard(Object.assign({ reqId: r.id }, r), e.currentTarget); };
+            d.querySelector('.x').onclick = () => MC.students.rejectCode(r.id);
+            Q.appendChild(d);
+        });
+    }
+    window.addEventListener('mc:codereq', () => { try { say('وصل طلب كود جديد من طالب'); } catch (e) { } });
+    function drawSl() {
+        if (role !== 't') return; drawQ(); const L = document.getElementById('slL'); if (!L) return;
+        const qn = ($('#slN').value || '').trim().toLowerCase(), qc = ($('#slC').value || '').trim().toLowerCase();
+        const rs = roster().filter(r => (!qn || String(r.name || '').toLowerCase().includes(qn)) && (!qc || String(r.code || '').toLowerCase().includes(qc)));
+        rs.sort((a, b) => (b.on ? 1 : 0) - (a.on ? 1 : 0) || String(a.name).localeCompare(String(b.name), 'ar'));
+        const sig = JSON.stringify([rs.map(r => [r.name, r.code, r.auto, r.on, r.conv, r.conv ? unread[r.conv] || 0 : 0]), cur]);
+        if (sig === L._sig) return; L._sig = sig;
+        L.innerHTML = '';
+        if (!rs.length) { L.innerHTML = '<div class="sl-e">لا يوجد طلاب</div>'; return; }
+        rs.forEach(r => {
+            const d = document.createElement('div'); d.className = 'sl-r' + (r.conv && r.conv === cur ? ' on' : '') + (r.on ? '' : ' off');
+            const n = r.conv ? unread[r.conv] || 0 : 0;
+            d.innerHTML = '<i class="' + (r.on ? 'on' : '') + '"></i><b title="' + esc(r.name) + '">' + esc(r.name) + '</b>' + (n ? '<em>' + n + '</em>' : '') + (r.code ? '<small>' + esc(r.code) + '</small><button class="sl-p sl-k" title="بطاقة الكود (عرض/تعديل/إرسال)">🔑</button><button class="sl-p" title="نسخ رابط ولي الأمر (يطّلع على درجات ابنه)">🔗</button><input type="checkbox" title="دخول تلقائي بالكود دون إذن"' + (r.auto ? ' checked' : '') + '>' : '');
+            d.addEventListener('click', e => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                if (r.conv) { switchTo(r.conv); drawSl(); } else say('الطالب غير متصل الآن');
+            });
+            const kb = d.querySelector('.sl-k'); if (kb) kb.addEventListener('click', e => { e.stopPropagation(); try { MC.students.openCodeCard({ code: r.code, name: r.name, phone: r.phone }, e.currentTarget); } catch (er) { } });
+            const pb = d.querySelector('.sl-p:not(.sl-k)'); if (pb) pb.addEventListener('click', e => { e.stopPropagation(); try { const u = MC.students.parentLink(r.code); if (!u) { say('تعذّر إنشاء الرابط'); return; } navigator.clipboard.writeText(u).then(() => say('نُسخ رابط ولي الأمر — الصقه له في واتساب'), () => prompt('انسخ الرابط:', u)); } catch (er) { say('تعذّر إنشاء الرابط'); } });
+            const ck = d.querySelector('input'); if (ck) ck.addEventListener('change', () => { pend[r.code] = { code: r.code, name: r.name, phone: r.phone || '', auto: ck.checked }; const sb = $('#slAdd'); if (sb) sb.classList.add('dirty'); });   /* يُحفظ بزر حفظ */
+            L.appendChild(d);
+        });
+    }
+    function wireSl() {
+        if (role !== 't') return;
+        win.classList.add('sl'); win.style.width = Math.min(innerWidth - 20, 800) + 'px';
+        ['slN', 'slC'].forEach(id => $('#' + id).addEventListener('input', () => { const L = $('#slL'); L._sig = ''; drawSl(); }));
+        $('#slAdd').addEventListener('click', () => {
+            const M = window.MC && MC.students; if (!M || !M.saveEntry) return;
+            const nm = $('#sfN').value.trim(), cd = $('#sfC').value.trim(), ph = $('#sfP').value.trim();
+            let n = 0;
+            if (cd) { if (!nm || !ph) { say('اكتب الاسم والكود ورقم الواتس'); return; } M.saveEntry({ code: cd, name: nm, phone: ph, auto: true }); n++; $('#sfN').value = $('#sfC').value = $('#sfP').value = ''; }
+            Object.keys(pend).forEach(k => { const e = pend[k]; M.saveEntry(e); delete pend[k]; n++; });
+            $('#slAdd').classList.remove('dirty'); $('#slL')._sig = ''; setTimeout(drawSl, 300);
+            say(n ? 'تم الحفظ' : 'لا توجد تغييرات');
+        });
+        drawSl(); setInterval(drawSl, 1500);
+    }
+    /* [IN3] تصحيح الاختبار داخل نافذة الرسائل: تتسع النافذة لتحتضن الورقة ثم تعود لحجمها عند الإغلاق */
+    let gSave = null;
+    CB.gradeHost = function () {
+        if (!cfg || role !== 't') return null;
+        if (!shown) CB.open(cur);
+        gSave = gSave || { nofp: win.classList.contains('nofp') };   /* [IN4] لا تغيير لحجم النافذة الحالي */
+        collapsed = false; win.classList.remove('col'); win.classList.add('gr'); win.classList.remove('nofp');
+        const gh = $('#cbGh'); gh.style.bottom = (ui.comp ? ui.comp.offsetHeight : 0) + 'px'; return gh;   /* لا يغطي شريط الرسائل السفلي */
+    };
+    CB.gradeDone = function () {
+        win.classList.remove('gr'); if (!gSave) return;
+        win.classList.toggle('nofp', gSave.nofp); gSave = null;
+    };
     function switchTo(conv) {
-        cur = conv; if (role === 't') { if (conv) attach(conv); drawChips(); } head(); render(); if (conv) markSeen(conv);
+        cur = conv; if (role === 't') { if (conv) attach(conv); drawChips(); } head(); render(); if (conv) markSeen(conv); if (role === 't') { const L = document.getElementById('slL'); if (L) L._sig = ''; drawSl(); }
     }
 
     function post(obj) {
@@ -542,16 +643,29 @@
         if (cfg) return; cfg = c; role = c.role; build();
         if (role === 's') { cur = cfg.convKey(); attach(cur); attach('all'); head(); render(); $('#cbClear').style.display = 'none'; }
         else { cur = null; ui.chips.style.display = 'none'; head(); render(); }
+        wireSl();
     };
     CB.refresh = function () { if (!cfg || role !== 't') return; peers().forEach(p => attach(convOf(p))); if (shown) { drawChips(); head(); } };
+    /* [DK1] تثبيت النافذة في أصل الصفحة: بين شريطي الأدوات الجانبيين (#left-bar و #right-bar) وفوق الشريط السفلي (#bottom) */
+    function dockWin() {
+        const rc = id => { const el = document.getElementById(id); if (!el || getComputedStyle(el).display === 'none') return null; const r = el.getBoundingClientRect(); return r.width > 2 && r.height > 2 ? r : null; };
+        const l = rc('left-bar'), r = rc('right-bar'), b = rc('bottom'), t = rc('top');
+        if (!l || !r || !b) return;
+        const a = l.left < r.left ? l : r, z = l.left < r.left ? r : l;
+        const x1 = a.right, x2 = z.left, y1 = t && t.height < 90 ? t.bottom : 0, y2 = b.top;
+        if (x2 - x1 < 320 || y2 - y1 < 260) return;
+        win.style.left = Math.round(x1) + 'px'; win.style.top = Math.round(y1) + 'px'; win.style.width = Math.round(x2 - x1) + 'px'; win.style.height = Math.round(y2 - y1) + 'px';
+    }
+    CB.dock = dockWin;
     CB.open = function (conv, anchor) {
-        if (!cfg) return; shown = true; win.classList.add('show'); collapsed = false; win.classList.remove('col');
+        if (!cfg) return; const wasShown = shown; shown = true; win.classList.add('show'); collapsed = false; win.classList.remove('col');
         if (role === 't') { if (conv) cur = conv; else if (!cur && peers().length) cur = convOf(peers()[0]); peers().forEach(p => attach(convOf(p))); switchTo(cur); } else switchTo(cur);
         if (anchor && anchor.getBoundingClientRect) {     /* تتدلى النافذة أسفل إطار الطالب */
             const r = anchor.getBoundingClientRect(), w = win.offsetWidth, h = win.offsetHeight, vw = innerWidth, vh = innerHeight;
             let t = r.bottom + 4; if (t + h > vh - 6) t = Math.max(6, vh - h - 6);
             win.style.left = Math.max(6, Math.min(r.left, vw - w - 6)) + 'px'; win.style.top = t + 'px';
         }
+        if (role === 't' && !wasShown) dockWin();   /* عند أول فتح فقط، فلا يُلغى تغيير المعلم للحجم */
         setTimeout(() => ui.ta.focus(), 50); fpSig = ''; updSide();
     };
     CB.toggle = function (conv) { if (!cfg) return; if (shown && !collapsed && (!conv || conv === cur)) { shown = false; win.classList.remove('show'); } else CB.open(conv); };

@@ -32,6 +32,19 @@
     const EFF_ROOM = LOCAL_MODE ? 'test' : ROOM;
     const BASE = 'rooms/' + EFF_ROOM + '/';
     const ref = p => db ? db.ref(BASE + p) : { once: () => Promise.resolve({ exists: () => false, val: () => null }), on: () => {}, set: () => Promise.resolve(), update: () => Promise.resolve(), remove: () => Promise.resolve() };
+    /* [IX2] تحقق مُشفَّر من الكود + رقم الواتس: المعلم ينشر codeIndex/{sha('c|'+كود)} = sha(كود+'|'+آخر9أرقام) (الكود المفعَّل فقط) */
+    function sha(m){var K=[],H=[],p=2,i,j;function f(x){return((x-Math.floor(x))*4294967296)|0;}function r(x,n){return(x>>>n)|(x<<(32-n));}
+    for(;K.length<64;p++){for(j=2;j*j<=p&&p%j;j++);if(j*j>p){if(H.length<8)H.push(f(Math.pow(p,.5)));K.push(f(Math.pow(p,1/3)));}}
+    var b=unescape(encodeURIComponent(m)),l=b.length,w=[],N=(((l+8)>>6)+1)*16;for(i=0;i<N;i++)w[i]=0;
+    for(i=0;i<l;i++)w[i>>2]|=b.charCodeAt(i)<<(24-(i%4)*8);w[l>>2]|=0x80<<(24-(l%4)*8);w[N-1]=l*8;
+    for(i=0;i<N;i+=16){var a=H.slice(0),W=w.slice(i,i+16);for(j=0;j<64;j++){if(j>=16){var s0=r(W[j-15],7)^r(W[j-15],18)^(W[j-15]>>>3),s1=r(W[j-2],17)^r(W[j-2],19)^(W[j-2]>>>10);W[j]=(W[j-16]+s0+W[j-7]+s1)|0;}
+    var e=a[4],t1=(a[7]+(r(e,6)^r(e,11)^r(e,25))+((e&a[5])^(~e&a[6]))+K[j]+W[j])|0,A=a[0],t2=((r(A,2)^r(A,13)^r(A,22))+((A&a[1])^(A&a[2])^(a[1]&a[2])))|0;a=[(t1+t2)|0,a[0],a[1],a[2],(a[3]+t1)|0,a[4],a[5],a[6]];}
+    for(j=0;j<8;j++)H[j]=(H[j]+a[j])|0;}
+    return H.map(function(x){return('00000000'+(x>>>0).toString(16)).slice(-8);}).join('');}
+    const l9 = x => String(x || '').replace(/\D/g, '').slice(-9);
+    async function idxCheck(code, phone) {   /* 'ok' | 'phone' (الكود موجود لرقم آخر) | 'none' */
+        try { const v = (await ref('codeIndex/' + sha('c|' + code)).once('value')).val(); if (!v) return 'none'; return v === sha(code + '|' + l9(phone)) ? 'ok' : 'phone'; } catch (e) { console.warn('[codeIndex]', e); return 'err'; }
+    }
     const $ = id => document.getElementById(id);
     const toArr = o => Array.isArray(o) ? o.filter(Boolean) : Object.values(o || {});
 
@@ -47,6 +60,7 @@
     let myId = 's' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);   /* في الغرفة الحقيقية يصبح معرّف حسابي (uid) */
     let authReady = IS_TEST || LOCAL_MODE || !firebase.auth;
     let myName = '', myPhone = '';
+    let myGrade = '', myCountry = '', myGov = '', myDistr = '';
     let approved = false, entered = false;
     let order = [];            /* ترتيب الشرائح من المدرس */
     const pagesData = {};      /* id → { bg, g, s:strokes, i:images, w, h, ts } */
@@ -72,33 +86,90 @@
         set: (k, v) => { try { localStorage.setItem(k, v); } catch (_) { } }
     };
 
-    /* ════════ الدخول ════════ */
-    { const sn = store.get('mc_name'); $('studentName').value = (/^(Windows PC|Mac|iPhone|iPad|Android|Linux|طالب)$/i.test(sn) || (sn || '').split(/\s+/).length < 2) ? '' : sn; }
-    $('studentPhone').value = store.get('mc_phone');
+    /* ════════ الدخول ════════
+       واجهة جديدة: الاسم + رقم الواتس + الصف (قائمة) + البلد + المحافظة + القطر + الكود.
+       زر واحد فقط ينقلب بين «دخول» و«طلب كود» حسب حالة الطالب.
+       البيانات تُحفظ في: localStorage + Firebase (students/<uid>) — فلا تضيع. */
+
+    /* استرجاع البيانات المحفوظة محليًا وتعبئة الحقول تلقائيًا */
+    function fillFormFromStorage() {
+        $('studentName').value = store.get('mc_name') || '';
+        $('studentPhone').value = store.get('mc_phone') || '';
+        const grade = store.get('mc_grade') || '';
+        if (grade && $('studentGrade')) $('studentGrade').value = grade;
+        $('studentCountry').value = store.get('mc_country') || '';
+        $('studentGov').value = store.get('mc_gov') || '';
+        $('studentDistr').value = store.get('mc_distr') || '';
+    }
+    fillFormFromStorage();
+
+    /* حفظ كل البيانات محليًا + في Firebase عند كل تغيير (حتى لا تضيع) */
+    function saveStudentProfile(silent) {
+        const name = $('studentName').value.trim();
+        const phone = $('studentPhone').value.trim();
+        const grade = $('studentGrade') ? $('studentGrade').value : '';
+        const country = $('studentCountry').value.trim();
+        const gov = $('studentGov').value.trim();
+        const distr = $('studentDistr').value.trim();
+        /* 1) localStorage فوري */
+        store.set('mc_name', name);
+        store.set('mc_phone', phone);
+        store.set('mc_grade', grade);
+        store.set('mc_country', country);
+        store.set('mc_gov', gov);
+        store.set('mc_distr', distr);
+        /* 2) لا نكتب في Firebase هنا — قد تمنع القواعد ذلك.
+           البيانات تُحفظ في joinRequests/<uid> عند الدخول (مسموح به). */
+        if (!silent && name) toast('✅ تم حفظ بياناتك');
+    }
+    /* حفظ تلقائي عند كل تغيير في أي حقل */
+    ['studentName','studentPhone','studentGrade','studentCountry','studentGov','studentDistr'].forEach(id => {
+        const el = $(id); if (el) el.addEventListener('change', () => saveStudentProfile(true));
+    });
 
     const TEMP_QUICK = true;
     if (!IS_TEST && !LOCAL_MODE) {
-        /* مؤقت للتجارب: الدخول السريع ظاهر في الغرفة الحقيقية — لإزالته اجعل TEMP_QUICK=false */
-        if (!TEMP_QUICK) $('quickBtn').style.display = 'none';
-        $('studentSecret').type = 'text'; $('studentSecret').placeholder = 'كود الاشتراك'; $('studentSecret').autocomplete = 'off';
+        $('studentSecret').type = 'text'; $('studentSecret').placeholder = 'كود الاشتراك (إن وُجد)'; $('studentSecret').autocomplete = 'off';
         $('secretErr').textContent = '';
-        if (firebase.auth) firebase.auth().signInAnonymously().then(c => { myId = c.user.uid; authReady = true; })
-            .catch(e => {
-                const c = e && e.code || String(e);
-                if (isApiKeyErr(c)) {
-                    /* مفتاح Firebase غير صالح — نسمح للطالب بالدخول كوضع تجريبي محلي بدل البقاء عالقًا */
-                    LOCAL_MODE = true; authReady = true;
-                    $('secretErr').style.display = 'block';
-                    $('secretErr').style.color = '#fde68a';
-                    $('secretErr').textContent = '⚠️ مفتاح Firebase غير صالح — الدخول بوضع محلي محدود. اكتب الكود 135 للمتابعة.';
-                    $('studentSecret').placeholder = 'الكود التجريبي: 135';
-                } else {
-                    $('secretErr').style.display = 'block';
-                    $('secretErr').textContent = '❌ تعذر الاتصال بالخادم، حدّث الصفحة';
+        if (firebase.auth) firebase.auth().signInAnonymously().then(async c => {
+            myId = c.user.uid; authReady = true;
+            /* بعد المصادقة: نسترجع الكود المحفوظ محليًا (localStorage)
+               لكن نتأكد من صحته في Firebase قبل ملء الحقل */
+            try {
+                const savedCode = store.get('mc_code');
+                if (savedCode && savedCode.length > 2) {
+                    /* نتأكد إن كان الكود لا يزال صالحاً في Firebase */
+                    try {
+                        const c = (await db.ref('codes/' + savedCode).once('value').catch(() => ({ val: () => null }))).val();
+                        const ix = (c && c.item === 'live') ? 'ok' : await idxCheck(savedCode, $('studentPhone').value);
+                        if (ix === 'ok') {
+                            $('studentSecret').value = savedCode;
+                            updateEntryButton();
+                            toast('✅ مرحبًا بعودتك — كودك محفوظ');
+                        } else {
+                            /* الكود لم يعد صالحاً → نحذفه محليًا */
+                            store.set('mc_code', '');
+                        }
+                    } catch (e) {
+                        /* تعذرت القراءة → نترك الحقل فارغاً ليُدخل الطالب الكود يدويًا */
+                        console.warn('تعذرت قراءة الكود المحفوظ من Firebase:', e);
+                    }
                 }
-            });
-        /* مهلة احتياطية: Firebase أحيانًا لا يُرجع خطأً صريحًا عند فساد مفتاح API بل يُبقي الطلب معلّقًا.
-           إن لم يصل ردّ خلال 7 ثوانٍ، ننتقل للوضع المحلي */
+            } catch (e) { /* لا بأس */ }
+        })
+        .catch(e => {
+            const c = e && e.code || String(e);
+            if (isApiKeyErr(c)) {
+                LOCAL_MODE = true; authReady = true;
+                $('secretErr').style.display = 'block';
+                $('secretErr').style.color = '#fde68a';
+                $('secretErr').textContent = '⚠️ مفتاح Firebase غير صالح — الدخول بوضع محلي محدود. اكتب الكود 135 للمتابعة.';
+                $('studentSecret').placeholder = 'الكود التجريبي: 135';
+            } else {
+                $('secretErr').style.display = 'block';
+                $('secretErr').textContent = '❌ تعذر الاتصال بالخادم، حدّث الصفحة';
+            }
+        });
         setTimeout(function () {
             if (authReady || LOCAL_MODE) return;
             LOCAL_MODE = true; authReady = true;
@@ -108,62 +179,209 @@
             $('studentSecret').placeholder = 'الكود التجريبي: 135';
         }, 7000);
     }
-    async function checkAccess() {          /* الغرفة الحقيقية: يلزم اشتراك في البث (كود يخصّني) */
-        if (LOCAL_MODE) return true;        /* وضع محلي: لا قواعد بيانات — اقبل الدخول */
-        const ok = (await db.ref('access/' + myId + '/live').once('value')).exists();
-        if (ok) return true;
-        const code = $('studentSecret').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+    /* تحديث نص الزر حسب حالة الطالب: «دخول» إن وُجد كود، «طلب كود» إن لم يُسجّل */
+    function updateEntryButton() {
+        const btn = $('entryBtn');
+        const code = ($('studentSecret').value || '').trim();
+        if (!code) {
+            btn.textContent = '🔑 طلب كود';
+            btn.dataset.mode = 'request';
+            btn.classList.add('btn-request');
+        } else {
+            btn.textContent = '🚪 دخول';
+            btn.dataset.mode = 'enter';
+            btn.classList.remove('btn-request');
+        }
+    }
+    ['studentName','studentPhone','studentSecret'].forEach(id => {
+        const el = $(id); if (el) el.addEventListener('input', updateEntryButton);
+    });
+
+    async function checkAccess() {
+        if (LOCAL_MODE) return true;
+        const code = $('studentSecret').value.trim();
         if (!code) throw new Error('اكتب كود الاشتراك الذي أرسله لك المدرس');
-        const c = (await db.ref('codes/' + code).once('value')).val();
-        if (!c || c.item !== 'live') throw new Error('الكود غير صحيح');
-        if (c.uid && c.uid !== myId) throw new Error('هذا الكود مستخدم من طالب آخر');
-        if (!c.uid) await db.ref('codes/' + code + '/uid').set(myId);
-        await db.ref('access/' + myId + '/live').set(code);
+        const k = code.replace(/[.#$\[\]\/]/g, '_');
+        /* 1) الفهرس المُشفَّر (كود + رقم الواتس المسجَّلان عند المعلم، والمفعَّلان فقط) */
+        let valid = false, st = await idxCheck(code, $('studentPhone').value);
+        if (st === 'ok') valid = true;
+        /* 2) اشتراكات الجذر codes/ (النظام القديم) */
+        if (!valid && st !== 'phone') {
+            try {
+                const c = (await db.ref('codes/' + code).once('value')).val();
+                if (c && c.item === 'live') valid = true;
+            } catch (e) { /* قد تمنع القواعد */ }
+        }
+        if (!valid) throw new Error(st === 'phone' ? 'هذا الكود مسجَّل لرقم واتس آخر' : st === 'err' ? 'تعذّر التحقق من الكود الآن (إعدادات الخادم) — أبلغ المدرس' : 'الكود غير صحيح أو غير مفعّل — تأكد من الكود ومن رقم الواتس المسجَّل');
+        /* الكود صحيح → نحفظه محليًا للزيارات القادمة */
+        store.set('mc_code', code);
         return true;
     }
+
+    /* إرسال طلب كود جديد:
+       - نحذف أي كود قديم مرتبط برقم الواتس هذا (حتى لا يظهر "هذا الرقم مسجل بكود آخر")
+       - نكتب الطلب في codeRequests/<uid> */
+    async function requestCode() {
+        const name = $('studentName').value.trim();
+        const phone = $('studentPhone').value.trim();
+        const grade = $('studentGrade') ? $('studentGrade').value : '';
+        const country = $('studentCountry').value.trim();
+        const gov = $('studentGov').value.trim();
+        const distr = $('studentDistr').value.trim();
+
+        if (!name) { $('studentName').focus(); toast('الرجاء إدخال الاسم', 'a'); return; }
+        if (name.split(/\s+/).length < 2) { $('studentName').focus(); toast('اكتب اسمك الثنائي على الأقل', 'a'); return; }
+        if (!phone) { $('studentPhone').focus(); toast('الرجاء إدخال رقم الواتس', 'a'); return; }
+        if (phone.replace(/\D/g, '').length < 8) { $('studentPhone').focus(); toast('رقم الواتس غير صحيح', 'a'); return; }
+        if (!grade) { $('studentGrade').focus(); toast('اختر الصف الدراسي', 'a'); return; }
+
+        saveStudentProfile(true);
+
+        if (LOCAL_MODE || IS_TEST) {
+            toast('✅ تم تسجيل طلبك (وضع تجريبي) — الكود التجريبي: 135');
+            $('studentSecret').value = SECRET;
+            updateEntryButton();
+            return;
+        }
+
+        if (!db) { toast('تعذّر الاتصال بقاعدة البيانات', 'a'); return; }
+
+        /* نحصل على UID حقيقي من Firebase Auth */
+        let uid = myId;
+        try {
+            if (firebase.auth && firebase.auth().currentUser) {
+                uid = firebase.auth().currentUser.uid;
+                myId = uid;
+            } else if (firebase.auth) {
+                toast('جارٍ الاتصال بالخادم… انتظر لحظة', 'a');
+                try {
+                    const cred = await firebase.auth().signInAnonymously();
+                    uid = cred.user.uid;
+                    myId = uid;
+                    authReady = true;
+                } catch (e) {
+                    toast('تعذّر الاتصال بالخادم', 'a');
+                    return;
+                }
+            }
+        } catch (e) { }
+
+        const btn = $('entryBtn');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ جارٍ الإرسال…'; }
+
+        /* نحذف أي كود قديم مرتبط برقم الواتس هذا في codesByPhone/<phone> */
+        try {
+            const oldCodeSnap = await db.ref('codesByPhone/' + phone).once('value');
+            if (oldCodeSnap.exists()) {
+                const oldCode = oldCodeSnap.val();
+                if (oldCode && typeof oldCode === 'string') {
+                    /* نحذف الربط القديم */
+                    await db.ref('codesByPhone/' + phone).remove();
+                    /* نحذف الكود القديم نفسه إن لم يعد مرتبطاً بأحد */
+                    await db.ref('codes/' + oldCode).remove();
+                }
+            }
+        } catch (e) { console.warn('[requestCode] تعذّر حذف الكود القديم:', e); }
+
+        /* نكتب الطلب في rooms/live/codeRequests/<uid> */
+        const reqData = {
+            id: uid, name: name, phone: phone, grade: grade,
+            country: country, gov: gov, distr: distr,
+            dev: DEV, sess: SESS, ts: Date.now()
+        };
+
+        try {
+            await ref('codeRequests/' + uid).set(reqData);
+            toast('✅ تم إرسال طلبك للمدرس — سيصلك الكود على واتس قريبًا');
+            if (btn) { btn.disabled = false; btn.textContent = '🔑 طلب كود'; btn.classList.add('btn-request'); }
+        } catch (e) {
+            console.error('[requestCode] فشل:', e);
+            if (btn) { btn.disabled = false; btn.textContent = '🔑 طلب كود'; btn.classList.add('btn-request'); }
+            const ecode = e && e.code || '';
+            const emsg = e && e.message || String(e);
+            if (ecode === 'PERMISSION_DENIED' || /permission/i.test(emsg)) {
+                toast('تعذّر الإرسال — قواعد Firebase تمنع الكتابة', 'a');
+            } else {
+                toast('تعذّر الإرسال: ' + (ecode || emsg).slice(0, 80), 'a');
+            }
+        }
+    }
+
     async function submitEntry(quick) {
         const name = $('studentName').value.trim();
         const phone = $('studentPhone').value.trim();
+        const grade = $('studentGrade') ? $('studentGrade').value : '';
+        const country = $('studentCountry').value.trim();
+        const gov = $('studentGov').value.trim();
+        const distr = $('studentDistr').value.trim();
         const sec = $('studentSecret').value.trim();
+        const mode = $('entryBtn').dataset.mode || 'enter';
+
+        /* إن كان وضع «طلب كود» ولا يوجد كود → ننفّذ requestCode بدل الدخول */
+        if (mode === 'request' && !sec) { return requestCode(); }
+
         if (!name) { $('studentName').focus(); toast('الرجاء إدخال الاسم', 'a'); return; }
-        if (name.split(/\s+/).length < 2) { $('studentName').focus(); toast('اكتب اسمك الثنائي على الأقل: الأول والأخير', 'a'); return; }
+        if (name.split(/\s+/).length < 2) { $('studentName').focus(); toast('اكتب اسمك الثنائي على الأقل', 'a'); return; }
+        if (!phone) { $('studentPhone').focus(); toast('الرجاء إدخال رقم الواتس', 'a'); return; }
+        if (phone.replace(/\D/g, '').length < 8) { $('studentPhone').focus(); toast('رقم الواتس غير صحيح', 'a'); return; }
+        if (!grade) { $('studentGrade').focus(); toast('اختر الصف الدراسي', 'a'); return; }
+
         if (IS_TEST || LOCAL_MODE) {
-            if (sec !== SECRET) { $('secretErr').style.display = 'block'; return; }
+            if (sec !== SECRET) {
+                $('secretErr').style.display = 'block';
+                $('secretErr').textContent = '❌ الكود التجريبي هو 135';
+                return;
+            }
         } else {
-            if (!authReady) { toast('جارٍ الاتصال… حاول بعد لحظة', 'a'); return; }
+            /* لا نمنع الدخول إذا فشل authReady — نحاول التحقق على أي حال */
             try { if (!(quick && TEMP_QUICK)) await checkAccess(); }
-            catch (e) { $('secretErr').style.display = 'block'; $('secretErr').textContent = '❌ ' + (e.message && e.message.indexOf('PERMISSION') < 0 ? e.message : 'تعذر التحقق، حاول لاحقًا'); return; }
+            catch (e) {
+                $('secretErr').style.display = 'block';
+                $('secretErr').textContent = '❌ ' + (e.message || 'تعذر التحقق من الكود');
+                return;
+            }
         }
         $('secretErr').style.display = 'none';
         myName = name; myPhone = phone;
-        store.set('mc_name', name); store.set('mc_phone', phone);
+        myGrade = grade; myCountry = country; myGov = gov; myDistr = distr;
+        saveStudentProfile(true);
+        if (sec) store.set('mc_code', sec);
+
+        /* نتأكد من وجود UID حقيقي */
+        if (firebase.auth && firebase.auth().currentUser) {
+            myId = firebase.auth().currentUser.uid;
+        }
 
         $('formPart').style.display = 'none';
         $('waitPart').style.display = 'block';
 
-        ref('joinRequests/' + myId).set({ id: myId, name: myName, phone: myPhone, dev: DEV, sess: SESS, ts: Date.now() });
+        /* نكتب طلب الدخول في rooms/live/joinRequests/<uid> */
+        ref('joinRequests/' + myId).set({
+            id: myId, name: myName, phone: myPhone,
+            grade: myGrade, country: myCountry, gov: myGov, distr: myDistr,
+            code: sec || '',
+            dev: DEV, sess: SESS, ts: Date.now()
+        });
         ref('joinRequests/' + myId).onDisconnect().remove();
 
+        /* لا نكتب في rooms/live/students/ — قد تمنع القواعد ذلك.
+           البيانات محفوظة في localStorage فقط. */
+
         ref('approvedStudents/' + myId).on('value', snap => {
-            if (snap.exists() && !approved && snap.val().sess === SESS) { approved = true; enter(); setTimeout(showMicHint, 600); }   /* موافقة هذه الجلسة فقط */
-            else if (!snap.exists() && approved) {                /* أُخرجتُ من الحصة */
+            if (snap.exists() && !approved && snap.val().sess === SESS) { approved = true; enter(); setTimeout(showMicHint, 600); }
+            else if (!snap.exists() && approved) {
                 approved = false;
-                alert('تم إخراجك من الحصة من قِبل المدرس.');
-                location.reload();
+                /* [NB1] رسالة داخلية بدل نافذة المتصفح */
+                const kd = document.createElement('div'); kd.textContent = 'تم إخراجك من الحصة من قِبل المدرس'; kd.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(2,6,23,.88);color:#fbbf24;font:700 18px Cairo,Tahoma,sans-serif;direction:rtl';
+                document.body.appendChild(kd); setTimeout(() => location.reload(), 2200);
             }
         });
     }
-    function quickEntry() {
-        const ua = navigator.userAgent;
-        const dev = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows PC' : /Macintosh/.test(ua) ? 'Mac' : 'طالب';
-                if (!$('studentPhone').value.trim()) $('studentPhone').value = '000';
-        if ($('studentName').value.trim().split(/\s+/).length < 2) { $('studentName').focus(); toast('اكتب اسمك الثنائي على الأقل أولًا', 'a'); return; }
-        if (IS_TEST) $('studentSecret').value = SECRET;
-        submitEntry(true);
-    }
+    /* زر واحد فقط: ينقلب بين «دخول» و«طلب كود» حسب الحالة */
     $('entryBtn').addEventListener('click', () => submitEntry(false));
-    $('quickBtn').addEventListener('click', quickEntry);
     $('studentSecret').addEventListener('keydown', e => { if (e.key === 'Enter') submitEntry(false); });
+    updateEntryButton();
 
     function enter() {
         if (entered) return; entered = true;

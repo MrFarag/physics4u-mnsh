@@ -264,3 +264,39 @@ html { color-scheme: dark; }
   background: rgba(0,0,0,.55); color: #fff; cursor: pointer; font-size: 14px;
 }
 .cam-close:hover { background: #ef4444; }
+
+/* ═══ واجهة دخول الطالب الجديدة: زر واحد + صف 3 حقول + قائمة منسدلة ═══ */
+
+/* زر واحد كبير ينقلب بين «دخول» و«طلب كود» */
+.entry-btn-single {
+  width: 100%; height: 48px; border: none; border-radius: 12px;
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+  color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;
+  transition: filter .15s, transform .1s; box-shadow: 0 4px 16px rgba(245,158,11,.4);
+  margin-top: 6px;
+}
+.entry-btn-single:hover { filter: brightness(1.15); }
+.entry-btn-single:active { transform: scale(.98); }
+.entry-btn-single:not(.btn-request) {
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  box-shadow: 0 4px 16px rgba(21,101,192,.4);
+}
+
+/* صف 3 حقول: البلد + المحافظة + القطر */
+.entry-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+.entry-row3 .entry-field { margin-bottom: 0; font-size: 13px; padding: 0 8px; }
+@media (max-width: 480px) { .entry-row3 { grid-template-columns: 1fr; gap: 6px; } }
+
+/* قائمة منسدلة للصف الدراسي */
+select.entry-field {
+  cursor: pointer; appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat; background-position: left 12px center; padding-left: 36px;
+}
+select.entry-field option { background: #1a2332; color: #fff; padding: 8px; }
+
+/* حقل الكود بتنسيق LTR */
+.entry-code { direction: ltr !important; text-align: center !important; letter-spacing: 2px; font-weight: 700; }
+
+/* إخفاء الأزرار القديمة */
+#quickBtn, #reqCodeBtn { display: none !important; }

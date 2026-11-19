@@ -1,63 +1,458 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Master Physics — Mr. Farag Physics</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="home.css?v=12">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سبورة المعلم</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"></noscript>
+
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+    <link rel="stylesheet" href="index.css?v=34">
+    <link rel="stylesheet" href="css/panels.css?v=114">
 </head>
 <body>
-<header class="hd">
-  <div class="brand">⚛️ MASTER PHYSICS <small id="roomTag"></small></div>
-  <nav>
-    <a href="live.html" class="nav-live">🔴 بث مباشر</a><a href="#courses">الدورات</a><a href="#free">دروس مجانية</a><a href="#videos">فيديوهات</a>
-  </nav>
-</header>
 
-<main>
-  <section class="hero2" id="top">
-    <h1 class="mp">Master Physics</h1>
-    <h2 class="tn"><span id="tName"></span></h2>
-    <p class="tag">حصص مباشرة · دورات مسجّلة · دروس مجانية</p>
-    <div class="cta">
-      <a class="btn gold big" id="joinBtn" href="live.html">🔴 ادخل البث المباشر</a>
-      <a class="btn blue big" href="#courses">📚 تصفّح الدروس</a>
+<div id="screenshot-flash"></div>
+
+<div id="top">
+    <div id="top-right">
+        <div class="top-live">
+            <span class="top-brand">MyClass</span>
+            <a href="https://wa.me/201141010981" target="_blank" class="top-wa" title="واتساب"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
+            <span class="top-stat" title="الطلاب المتصلون"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.870"/><path d="M16 3.130a4 4 0 0 1 0 7.750"/></svg><b id="topStudentCount">0</b></span>
+            <span class="top-stat" title="زمن الاستجابة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 20V4"/></svg><b id="topLatency">--</b></span>
+            <span class="top-stat" title="مدة الحصة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><b id="topTimer">00:00</b></span>
+        </div>
+        <input type="text" id="pageTitleInput" class="top-title-input" placeholder="عنوان الدرس..." spellcheck="false">
+        <button class="top-exam-btn" id="topExamBtn" title="فتح منشئ الاختبار" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 8h6M8 12h8"/><path d="M4 19a2 2 0 0 1 2-2h12"/></svg>
+            <span>اختبار</span>
+        </button>
     </div>
-    <div class="live-state"><span class="dot" id="liveDot"></span><b id="liveTxt">جارٍ التحقق…</b></div>
-    <p id="liveSub" class="sub">ادخل الحصة المباشرة عند بدئها.</p>
-    <div class="sched" id="sched"></div>
-  </section>
+</div>
 
-  <section class="pics">
-    <a class="pic" href="#courses">
-      <svg viewBox="0 0 200 130"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d4ed8"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs><rect width="200" height="130" fill="url(#g1)"/><path d="M20 65h160" stroke="#fff" stroke-opacity=".5" stroke-dasharray="4 4"/><ellipse cx="100" cy="65" rx="16" ry="48" fill="#bae6fd" fill-opacity=".7" stroke="#fff"/><path d="M40 35l60 30 60 10" stroke="#fde68a" stroke-width="2" fill="none"/><circle cx="40" cy="35" r="4" fill="#fde68a"/></svg>
-      <b>البصريات والعدسات</b><span>اكتشف الدورة ←</span></a>
-    <a class="pic" href="#free">
-      <svg viewBox="0 0 200 130"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#059669"/><stop offset="1" stop-color="#0891b2"/></linearGradient></defs><rect width="200" height="130" fill="url(#g2)"/><g fill="none" stroke="#fff" stroke-width="2.5"><rect x="45" y="40" width="110" height="50" rx="6"/><path d="M45 65H25M155 65h20"/></g><circle cx="100" cy="65" r="14" fill="#fde68a"/><path d="M92 65h16M100 57v16" stroke="#92400e" stroke-width="2.5"/></svg>
-      <b>دروس مجانية</b><span>ابدأ بدون اشتراك ←</span></a>
-    <a class="pic" href="#videos">
-      <svg viewBox="0 0 200 130"><defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d97706"/><stop offset="1" stop-color="#dc2626"/></linearGradient></defs><rect width="200" height="130" fill="url(#g3)"/><g fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="2.5"><ellipse cx="100" cy="65" rx="62" ry="22"/><ellipse cx="100" cy="65" rx="62" ry="22" transform="rotate(60 100 65)"/><ellipse cx="100" cy="65" rx="62" ry="22" transform="rotate(120 100 65)"/></g><circle cx="100" cy="65" r="9" fill="#fff"/></svg>
-      <b>فيديوهات مختصرة</b><span>شاهد الآن ←</span></a>
-  </section>
+<div id="main">
+    <aside id="slides-panel" class="side-panel sp-min">
+        <div class="sp-head">
+            <span class="sp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>الشرائح</span><label class="sp-chk" title="إظهار/إخفاء شريط الشرائح"><input type="checkbox" id="chkSlides"></label>
+            <span class="sp-count" id="slidesCount">1</span>
+        </div>
+        <div class="sp-list" id="slidesList"></div>
+        <div class="sp-foot">
+            <button class="sp-btn" id="slAdd" title="شريحة جديدة بعد الحالية"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            <button class="sp-btn" id="slDup" title="تكرار الشريحة"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            <button class="sp-btn" id="slUp" title="نقل للأعلى"><svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
+            <button class="sp-btn" id="slDown" title="نقل للأسفل"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <button class="sp-btn sp-danger" id="slDel" title="حذف الشريحة"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        </div>
+    </aside>
 
-  <section id="courses"><h2>الدورات والدروس المدفوعة <button class="btn blue small" id="codeBtn" style="margin-inline-start:auto">🔑 لدي كود اشتراك</button></h2><div class="sample-note" id="sampleNote" style="display:none">⚠ هذه عينات تجريبية — سيظهر هنا المحتوى الحقيقي قريبًا</div><div class="grid" id="courseGrid"></div></section>
-  <section id="free"><h2>دروس مجانية <em>مجانًا</em></h2><div class="grid" id="freeGrid"></div></section>
-  <section id="videos"><h2>فيديوهات مجانية</h2><div class="grid vids" id="vidGrid"></div></section>
-</main>
+    <aside id="students-panel" class="side-panel">
+        <div class="sp-head">
+            <span class="sp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.870"/><path d="M16 3.130a4 4 0 0 1 0 7.750"/></svg>الطلاب</span><label class="sp-chk" title="إظهار/إخفاء شريط الطلبة"><input type="checkbox" id="chkStudents" checked></label>
+            <button class="sp-btn" id="capBtn" title="التقاط الشاشة عند الطلاب: ممنوع"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+            <span class="sp-count" id="studentsCount">0</span>
+        </div>
+        <div class="sp-list" id="studentsList"><div class="sp-empty">لا يوجد طلاب</div></div>
+        <div class="sp-msgbox"><input type="text" id="fileDisplayInput" placeholder="آخر رسالة من الطلاب..." readonly=""></div>
+        <div class="sp-foot">
+            <button class="sp-btn sp-wide" id="stuApproveAll" title="قبول كل الطلبات" disabled><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>قبول الكل</span></button>
+            <button class="sp-btn sp-wide" id="stuCtl" title="التحكم بما يراه الطالب (السبورة / الملف / الحفظ)"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+    </aside>
 
-<footer>© Mr. Farag Physics · المحتوى الحالي عينات تجريبية</footer>
-<a class="fab-live" href="live.html" id="fabLive">🔴 البث المباشر</a>
+    <div id="left-bar">
+        <button class="lbtn p" id="btn-open" title="فتح ملف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path></svg></button>
+        <button class="lbtn lb-send-exam" id="lbSendExam" title="إرسال الاختبار للطلاب" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+        <button class="lbtn lb-send-result" id="lbSendResult" title="إرسال النتيجة لولي الأمر" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></button>
+        <div class="bar-tools">
+          <div class="bt-row"><button class="fh-ball-btn" id="ptrBtnL" title="Pointer (file area) — Ctrl to select"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display:block;pointer-events:none;"><path d="M4 3l7.5 17 2.4-7.1L21 10.5z"></path></svg></button>
+<button class="fh-ball-btn" id="bpenL" title="قلم"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:block;pointer-events:none;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg></button>
+<button class="fh-ball-btn" id="fhColorBallL" title="قلم فسفوري">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+        <path d="M2 2l7.586 7.586"/>
+        <circle cx="11" cy="11" r="2"/>
+    </svg>
+</button>
+</div>
+          <div class="palette-container">
+        <button class="quick-color-btn active" data-color="#ff803d" style="background:#ff803d"></button>
+        <button class="quick-color-btn" data-color="#ef4444" style="background:#ef4444"></button>
+        <button class="quick-color-btn" data-color="#ffffff" style="background:#ffffff"></button>
+        <button class="quick-color-btn" data-color="#38bdf8" id="c4File" style="background:#38bdf8" title="آخر لون من اللوحة"></button>
+<button class="palette-big" id="paletteBtnL" title="لوحة ألوان الملف" style="border:0;outline:0;box-shadow:none;background:transparent;padding:0;margin:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;min-width:28px;flex:0 0 auto;box-sizing:border-box;vertical-align:middle;border-radius:0;"><svg viewBox="0 0 24 24" width="22" height="22" style="display:block;pointer-events:none;"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" fill="#1f2937" stroke="#e2e8f0" stroke-width="1.4" stroke-linejoin="round"></path><circle cx="7.3" cy="11.2" r="1.7" fill="#ef4444"></circle><circle cx="9.6" cy="6.9" r="1.7" fill="#fbbf24"></circle><circle cx="14.2" cy="6.1" r="1.7" fill="#22c55e"></circle><circle cx="17.4" cy="9.9" r="1.7" fill="#3b82f6"></circle></svg></button>
+    </div>
+        </div>
+        <div class="sidebar-save-group" id="ssgFile">
+            <button class="lbtn save-red" id="lb-save-fileL" title="حفظ الملف (partB.json)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></button>
+            <div class="ssg-radios">
+                <label class="sfm"><input type="radio" name="sfmtL" value="png">png</label>
+                <label class="sfm"><input type="radio" name="sfmtL" value="json" checked>json</label>
+            </div>
+        </div>
+        <button class="lbtn p" id="btn-upload-img" title="رفع صورة"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></button>
+        <button class="lbtn p" id="nwf" title="جديد"><svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></button>
+        <button class="lbtn d" id="closeFileBtn" style="display:none" title="اغلاق"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        <button class="lbtn" id="eyeBoard" title="إخفاء/إظهار السبورة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8"></path></svg></button>
+        <button class="lbtn" id="eyeFile" title="إخفاء/إظهار الملف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path></svg></button>
+        <button class="lbtn quick-shape" id="lb-hl" data-shp="hl" title="مستطيل فسفوري"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1" fill="currentColor" fill-opacity="0.35"></rect></svg></button>
+        <div class="lb-sep"></div>
+        <div class="lb-sep"></div>
+        <button class="lbtn" id="copyAreaBtnL" title="نسخ مساحة (ارسم مستطيلًا منقطًا حول المنطقة)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1" stroke-dasharray="3 2"></rect><rect x="8" y="8" width="8" height="8" rx="1"></rect></svg></button>
+        <div class="lb-sep"></div>
+<div class="page-nav-frame pdf-nav-bar no-file" id="zoomNavBar" title="التكبير">
+    <button id="pZoomOut" title="تصغير" disabled="">−</button>
+    <input type="text" id="pZoomInput" min="10" max="500" step="5" value="100" disabled="">
+    <button id="pZoomIn" title="تكبير" disabled="">+</button>
+   </div>
+        <div style="flex:1"></div>
+        <div class="lb-sep" style="margin-top:auto"></div>
+        <div class="lb-sep"></div>
+    </div>
 
-<div class="modal" id="codeModal"><div class="mbox" style="max-width:380px"><button class="mx" id="cmx">✕</button><h3 style="margin-bottom:10px">كود الاشتراك</h3><input id="codeIn" placeholder="مثال: K7M2XQ9P" style="width:100%;height:42px;border-radius:10px;border:1px solid #334155;background:#0a101d;color:#fff;text-align:center;font-size:18px;letter-spacing:3px;direction:ltr;text-transform:uppercase"><div id="codeMsg" style="min-height:22px;margin:8px 0;font-size:13px"></div><button class="btn gold" id="codeGo">تفعيل</button></div></div>
-<div class="modal" id="modal"><div class="mbox"><button class="mx" id="mx">✕</button><div id="mbody"></div></div></div>
+    <div id="workspace">
+        <div id="file-viewer">
+            <div id="file-grid-overlay"></div>
+            <div id="file-body">
+                <div id="pv-bar">
+                    <button class="pv-btn" id="pvUp" title="للأعلى">▲</button>
+                    <div id="pvTrack"><div id="pvThumb"></div><div id="pvTip"></div></div>
+                    <button class="pv-btn" id="pvDown" title="للأسفل">▼</button>
+                </div>
+                <div id="file-scroll">
+                    <div id="pdf-container" style="display:none">
+                        <canvas id="pdf-canvas"></canvas>
+                        <canvas id="file-draw-canvas"></canvas>
+                    </div>
+                    <div id="file-image-wrap" style="display:none">
+                        <img id="file-image-el" alt="">
+                        <canvas id="file-image-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="file-empty-state" id="file-empty">
+                <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div>
+                <div class="title">منطقة الملفات</div>
+                <div style="color:#475569;font-size:11px">PDF - صور - JSON</div>
+            </div>
+        </div>
+        <div id="splitter"></div>
+        <div id="board-wrapper">
+            <div class="a4-page">
+                <div class="a4-body">
+                    <div id="board">
+                        <div id="grid"></div>
+                        <canvas id="cvs" width="794" height="1123" style="cursor: default;"></canvas>
+                        <div id="text-layer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="config.js?v=13"></script>
-<script src="home-data.js?v=12"></script>
-<script src="home.js?v=12"></script>
+    <div id="right-bar">
+        <div class="bar-tools">
+          <div class="bt-row"><button class="tb" id="ptrBtn" title="Pointer — move freely / dotted selection area"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 3l7.5 17 2.4-7.1L21 10.5z"></path></svg></button>
+<button class="tb on" id="bpen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg></button>
+<button class="fh-ball-btn" id="fhColorBall" title="قلم فسفوري"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></button>
+</div>
+          <div class="palette-container">
+    <button class="palette-big" id="paletteBtn" title="لوحة الألوان" style="box-shadow: rgb(253, 186, 116) 0px -3px 0px inset;"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" fill="#1f2937" stroke="#e2e8f0" stroke-width="1.4" stroke-linejoin="round"></path><circle cx="7.3" cy="11.2" r="1.7" fill="#ef4444"></circle><circle cx="9.6" cy="6.9" r="1.7" fill="#fbbf24"></circle><circle cx="14.2" cy="6.1" r="1.7" fill="#22c55e"></circle><circle cx="17.4" cy="9.9" r="1.7" fill="#3b82f6"></circle></svg></button>
+        <button class="quick-color-btn active" data-color="#fdba74" style="background:#fdba74"></button>
+        <button class="quick-color-btn" data-color="#ef4444" style="background:#ef4444"></button>
+        <button class="quick-color-btn" data-color="#ffffff" id="customColorBall" style="background:#ffffff"></button>
+        <button class="quick-color-btn" data-color="#38bdf8" id="c4Board" style="background:#38bdf8" title="آخر لون من اللوحة"></button>
+    </div>
+        </div>
+        <div class="sidebar-save-group" id="ssgBoard">
+            <button class="tbtn save-red" id="lb-save-file" title="حفظ السبورة (partA.json)"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg><span class="tb-label">Save</span></button>
+            <div class="ssg-radios">
+                <label class="sfm"><input type="radio" name="sfmtR" value="png">png</label>
+                <label class="sfm"><input type="radio" name="sfmtR" value="json" checked>json</label>
+            </div>
+        </div>
+        <button class="tbtn" id="lb-text" title="Text"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg><span class="tb-label">Text</span></button>
+        <button class="tbtn" id="lb-select" title="Select"><svg viewBox="0 0 24 24"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path></svg><span class="tb-label">Select</span></button>
+        <button class="tbtn" id="lb-eraser" title="Eraser"><svg viewBox="0 0 24 24"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><path d="M22 21H7"></path><path d="m5 11 9 9"></path></svg><span class="tb-label">Eraser</span></button>
+        <button class="tbtn" id="lb-eraser-fine" title="ممحاة صغيرة"><svg viewBox="0 0 24 24"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path><circle cx="19" cy="5" r="1.6" fill="currentColor"></circle></svg><span class="tb-label">Fine</span></button>
+        <div class="tb-sep"></div>
+        <button class="tbtn" id="lb-undo" title="تراجع (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M3 4v6h6"/><path d="M3.5 14a9 9 0 1 0 2.1-9.4L3 10"/></svg><span class="tb-label">Undo</span></button><button class="tbtn" id="lb-redo" title="إعادة (Ctrl+Y)"><svg viewBox="0 0 24 24"><path d="M21 4v6h-6"/><path d="M20.5 14a9 9 0 1 1-2.1-9.4L21 10"/></svg><span class="tb-label">Redo</span></button>
+        <button class="tbtn" id="copyAreaBtn" title="نسخ مساحة (ارسم مستطيلًا منقطًا حول المنطقة)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1" stroke-dasharray="3 2"></rect><rect x="8" y="8" width="8" height="8" rx="1"></rect></svg><span class="tb-label">Area</span></button>
+        <div class="tb-sep"></div>
+        <button class="tbtn quick-shape" id="lb-hlR" data-shp="hl" title="Highlighter rectangle"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.5" fill="#fde047" fill-opacity="0.55" stroke="#facc15"></rect></svg><span class="tb-label">Marker</span></button>
+        <button class="tbtn quick-shape" id="qs-rc" data-shp="rc" title="مستطيل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="1.5"/></svg></button>
+        <button class="tbtn quick-shape" id="qs-cr" data-shp="cr" title="دائرة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></button>
+        <button class="tbtn quick-shape" id="qs-tri" data-shp="tri" title="مثلث"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 4 21 20 3 20"/></svg></button>
+        <button class="tbtn" id="lb-shapes-menu" title="Shapes"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="11" height="8" rx="1"></rect><circle cx="17.5" cy="8" r="4.5"></circle><rect x="5" y="14" width="8" height="8" rx="1"></rect></svg><span class="tb-label">Shapes</span></button>
+        <button class="tbtn" id="lb-physics-menu" title="Physics"><svg viewBox="0 0 24 24"><path d="M2 8 L5 8 L7 4 L10 12 L13 4 L16 12 L18 8 L22 8"></path><circle cx="12" cy="18" r="4"></circle><line x1="9.2" y1="15.2" x2="14.8" y2="20.8"></line><line x1="14.8" y1="15.2" x2="9.2" y2="20.8"></line></svg><span class="tb-label">Physics</span></button>
+        <div class="tb-sep"></div>
+        <button class="tbtn" id="lb-fill" title="Fill"><svg viewBox="0 0 24 24"><path d="m19 11-8-8-8.6 8.6a2 2 0 0 0 0 2.8l5.2 5.2c.8.8 2 .8 2.8 0L19 11Z"></path><path d="m5 2 5 5"></path><path d="M2 13h15"></path><path d="M22 20a2 2 0 1 1-4 0c0-1.6 2-4 2-4s2 2.4 2 4Z"></path></svg><span class="tb-label">Fill</span><span class="fill-color-dot" id="fillDot" style="background: transparent;"></span></button>
+        <button class="tbtn on" id="lb-grid" title="Grid"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line></svg><span class="tb-label">Grid</span></button>
+        <div class="tb-sep"></div>
+        <button class="tbtn" id="lb-record" title="تسجيل السبورة"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3.5" fill="currentColor"></circle></svg><span class="tb-label">Record</span></button>
+        <button class="tbtn" id="lb-rec-mode" title="وضع التسجيل" style="opacity: 1;"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg><span class="tb-label">Mode</span></button>
+        <button class="tbtn" id="lb-mic" title="Mic"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg><span class="tb-label">Mic</span><div class="mic-level"><div class="mic-level-bar" id="micLevelBar"></div></div></button>
+        <button class="tbtn" id="lb-speaker" title="Speaker"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg><span class="tb-label">Sound</span></button>
+        <div class="tb-sep" style="margin-top:auto"></div>
+    </div>
+</div>
+
+<div id="bottom">
+  <div id="bottom-right">
+        <div class="a4-nav-bar" id="a4NavBar" title="صفحات السبورة">
+        <button id="a4PrevBtn" title="السابقة" onclick="window.goPrevPage()">▶</button>
+        <span class="total" id="a4PageTotal">1</span><span class="slash">/</span>
+        <input type="text" id="a4PageInput" min="1" value="1" title="رقم الصفحة" onchange="window.jumpA4Page()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.jumpA4Page();}" onblur="window.jumpA4Page()">
+        <button id="a4NextBtn" title="التالية" onclick="window.goNextPage()">◀</button>
+        <button id="a4InsertBtn" title="حشر صفحة" onclick="window.goInsertPage()">↳</button>
+        <button id="a4DeleteBtn" title="حذف الصفحة" onclick="window.goDeletePage()">🗑</button>
+    </div>
+    <button class="tb" id="bgClrRight" title="خلفية السبورة"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg><span class="tb-label">BG</span></button>
+    <button class="tb" id="lb-clear" title="Clear"><svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span class="tb-label">Clear</span></button>
+    <button class="tb" id="lb-shapes-menuL" title="أشكال الملف"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="11" height="8" rx="1"></rect><circle cx="17.5" cy="8" r="4.5"></circle><rect x="5" y="14" width="8" height="8" rx="1"></rect></svg></button>
+    <button class="tb" id="lb-textL" title="نص"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg></button>
+    <button class="tb" id="delShape" title="حذف"><svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+    <button class="tb" id="flipH" title="قلب أفقي"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"></path><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path><line x1="12" y1="3" x2="12" y2="21"></line></svg></button>
+    <button class="tb" id="flipV" title="قلب رأسي"><svg viewBox="0 0 24 24"><path d="M21 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg></button>
+    <button class="tb" id="screenshotBtnBar" title="تصوير"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg></button>
+    <button class="tb" id="end" title="انهاء"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></button>
+    <div class="sp"></div>
+    <input type="text" id="fileNameBottom" class="fname-bottom" placeholder="لا يوجد ملف" readonly title="اسم الملف">
+    <div class="page-nav-frame pdf-nav-bar" id="pdfNavBar" title="صفحات PDF">
+        <button id="navPrevBtn" title="السابقة" onclick="window.navPrev()">▶</button>
+        <span class="total" id="pdfPageTotal">0</span><span class="slash">/</span>
+        <input type="text" id="pdfPageInput" min="1" value="1" title="رقم الصفحة" onchange="window.jumpNav()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.jumpNav();}" onblur="window.jumpNav()">
+        <button id="navNextBtn" title="التالية" onclick="window.navNext()">◀</button>
+    </div>
+  </div>
+</div>
+
+<div class="dropdown-menu flyout" id="shapes-flyout">
+    <button class="tb quick-shape" data-shp="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><polyline points="14,5 21,12 14,19"></polyline></svg><span>Arrow</span></button>
+    <button class="tb quick-shape" data-shp="line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"></line></svg><span>Line</span></button>
+    <button class="tb quick-shape" data-shp="cr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg><span>Circle</span></button>
+    <button class="tb quick-shape" data-shp="rc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="1"></rect></svg><span>Rect</span></button>
+    <button class="tb quick-shape" data-shp="sq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="1"></rect></svg><span>Square</span></button>
+    <button class="tb quick-shape" data-shp="tri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 4 21 20 3 20"></polygon></svg><span>Triangle</span></button>
+    <button class="tb quick-shape" data-shp="el"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="10" ry="6"></ellipse></svg><span>Ellipse</span></button>
+</div>
+
+<div class="dropdown-menu flyout" id="physics-flyout">
+    <button class="tb quick-shape" data-shp="resistor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2,12 L6,12 L8,8 L10,16 L12,8 L14,16 L16,8 L18,12 L22,12"></path></svg><span>Resistor</span></button>
+    <button class="tb quick-shape" data-shp="battery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="9" y2="12"></line><line x1="9" y1="6" x2="9" y2="18"></line><line x1="13" y1="9" x2="13" y2="15"></line><line x1="16" y1="6" x2="16" y2="18"></line><line x1="16" y1="12" x2="22" y2="12"></line></svg><span>Battery</span></button>
+    <button class="tb quick-shape" data-shp="lamp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"></circle><line x1="7" y1="7" x2="17" y2="17"></line><line x1="17" y1="7" x2="7" y2="17"></line></svg><span>Lamp</span></button>
+    <button class="tb quick-shape" data-shp="capacitor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="10" y2="12"></line><line x1="10" y1="4" x2="10" y2="20"></line><line x1="14" y1="4" x2="14" y2="20"></line><line x1="14" y1="12" x2="22" y2="12"></line></svg><span>Capacit</span></button>
+    <button class="tb quick-shape" data-shp="inductor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2,12 Q5,4 8,12 Q11,4 14,12 Q17,4 20,12 L22,12"></path></svg><span>Induct</span></button>
+</div>
+
+<div class="dropdown-menu" id="bg-menu">
+    <div class="tb" data-bc="#0a101d">⬛ اسود</div>
+    <div class="tb" data-bc="#ffffff">⬜ ابيض</div>
+    <div class="tb" data-bc="#1a1a2e">🔵 ازرق داكن</div>
+    <div class="tb" data-bc="#0a1a0a">🟢 اخضر داكن</div>
+    <div class="tb" data-bc="#1a0a0a">🔴 احمر داكن</div>
+    <div class="tb" data-bc="#f8f9fa">📄 ورقي</div>
+</div>
+
+<div id="color-picker-popup">
+    <div class="cp-title">إعدادات القلم</div>
+    <div class="cp-grid" id="cp-grid"><div class="cp-swatch" style="background: rgb(255, 255, 255);"></div><div class="cp-swatch" style="background: rgb(0, 0, 0);"></div><div class="cp-swatch" style="background: rgb(239, 68, 68);"></div><div class="cp-swatch" style="background: rgb(249, 115, 22);"></div><div class="cp-swatch" style="background: rgb(245, 158, 11);"></div><div class="cp-swatch" style="background: rgb(34, 197, 94);"></div><div class="cp-swatch" style="background: rgb(59, 130, 246);"></div><div class="cp-swatch" style="background: rgb(167, 139, 250);"></div><div class="cp-swatch" style="background: rgb(236, 72, 153);"></div><div class="cp-swatch" style="background: rgb(6, 182, 212);"></div><div class="cp-swatch" style="background: rgb(132, 204, 22);"></div><div class="cp-swatch" style="background: rgb(99, 102, 241);"></div><div class="cp-swatch" style="background: rgb(251, 113, 133);"></div><div class="cp-swatch" style="background: rgb(251, 191, 36);"></div><div class="cp-swatch" style="background: rgb(52, 211, 153);"></div><div class="cp-swatch" style="background: rgb(96, 165, 250);"></div><div class="cp-swatch" style="background: rgb(192, 132, 252);"></div><div class="cp-swatch" style="background: rgb(244, 114, 182);"></div><div class="cp-swatch" style="background: rgb(20, 184, 166);"></div><div class="cp-swatch" style="background: rgb(100, 116, 139);"></div></div>
+    <div class="cp-custom"><label>لون:</label><input type="color" id="custom-color-input" value="#ffffff"></div>
+    <div class="fh-thickness-row"><label>السمك:</label><input type="range" id="cp-thickness-slider" min="1" max="20" value="4"><span class="fh-thickness-val" id="cp-thickness-val">4</span></div>
+    <div class="cp-line-styles">
+        <button class="tb ls-btn active" data-style="solid">صلب</button>
+        <button class="tb ls-btn" data-style="dashed">متقطع</button>
+        <button class="tb ls-btn" data-style="dotted">منقط</button>
+    </div>
+</div>
+
+<div id="fh-popup">
+    <div class="cp-title">بالتة القلم الفسفوري</div>
+    <div class="fh-palette-section"><div class="fh-palette-label">الألوان الأساسية</div>
+    <div class="cp-grid fh-grid-8" id="fh-color-grid">
+        <div class="cp-swatch" style="background: rgb(251, 191, 36);"></div>
+        <div class="cp-swatch" style="background: rgb(132, 204, 22);"></div>
+        <div class="cp-swatch" style="background: rgb(34, 197, 94);"></div>
+        <div class="cp-swatch" style="background: rgb(34, 211, 238);"></div>
+        <div class="cp-swatch" style="background: rgb(59, 130, 246);"></div>
+        <div class="cp-swatch" style="background: rgb(167, 139, 250);"></div>
+        <div class="cp-swatch" style="background: rgb(236, 72, 153);"></div>
+        <div class="cp-swatch" style="background: rgb(244, 63, 94);"></div>
+    </div></div>
+    <div class="fh-palette-section"><div class="fh-palette-label">ألوان إضافية</div>
+    <div class="cp-grid fh-grid-8" id="fh-color-grid-2">
+        <div class="cp-swatch" style="background: rgb(249, 115, 22);"></div>
+        <div class="cp-swatch" style="background: rgb(245, 158, 11);"></div>
+        <div class="cp-swatch" style="background: rgb(253, 224, 71);"></div>
+        <div class="cp-swatch" style="background: rgb(163, 230, 53);"></div>
+        <div class="cp-swatch" style="background: rgb(45, 212, 191);"></div>
+        <div class="cp-swatch" style="background: rgb(96, 165, 250);"></div>
+        <div class="cp-swatch" style="background: rgb(192, 132, 252);"></div>
+        <div class="cp-swatch" style="background: rgb(244, 114, 182);"></div>
+    </div></div>
+    <div class="fh-palette-section"><div class="fh-palette-label">ألوان فاتحة</div>
+    <div class="cp-grid fh-grid-8" id="fh-color-grid-3">
+        <div class="cp-swatch" style="background: rgb(254, 240, 138);"></div>
+        <div class="cp-swatch" style="background: rgb(190, 242, 100);"></div>
+        <div class="cp-swatch" style="background: rgb(134, 239, 172);"></div>
+        <div class="cp-swatch" style="background: rgb(125, 211, 252);"></div>
+        <div class="cp-swatch" style="background: rgb(165, 180, 252);"></div>
+        <div class="cp-swatch" style="background: rgb(221, 214, 254);"></div>
+        <div class="cp-swatch" style="background: rgb(251, 207, 232);"></div>
+        <div class="cp-swatch" style="background: rgb(254, 202, 202);"></div>
+    </div></div>
+    <div class="cp-custom"><label>لون مخصص:</label><input type="color" id="fh-custom-color" value="#fbbf24"></div>
+    <div class="fh-thickness-row"><label>السمك:</label><input type="range" id="fh-thickness-slider" min="4" max="40" value="18"><span class="fh-thickness-val" id="fh-thickness-val">18</span></div>
+    <div class="fh-thickness-row"><label>الشفافية:</label><input type="range" id="fh-opacity-slider" min="10" max="95" step="5" value="90"><span class="fh-thickness-val" id="fh-opacity-val">90%</span></div>
+    <div class="fh-presets">
+        <button class="tb fh-preset" data-sz="8" data-op="50">رفيع</button>
+        <button class="tb fh-preset active" data-sz="18" data-op="90">متوسط</button>
+        <button class="tb fh-preset" data-sz="32" data-op="85">سميك</button>
+        <button class="tb fh-preset" data-sz="40" data-op="75">عريض</button>
+    </div>
+</div>
+
+<div id="shape-dimensions" class="shape-dimensions idle" style="display:none">
+    <div class="dim-cell off"><label>L</label><input type="number" id="dim-width" min="1" value="" disabled=""></div>
+    <div class="dim-cell off"><label>W</label><input type="number" id="dim-height" min="1" value="" disabled=""></div>
+    <div class="dim-cell off"><label>Theta</label><input type="number" id="dim-theta" step="any" value="" disabled=""></div>
+    <div class="dim-cell off"><label>r</label><input type="number" id="dim-r" step="any" value="" disabled=""></div>
+    <div class="dim-cell off"><label>x</label><input type="number" id="dim-x" step="any" value="" disabled=""></div>
+    <div class="dim-cell off"><label>y</label><input type="number" id="dim-y" step="any" value="" disabled=""></div>
+    <div class="dim-cell off"><label>HR</label><input type="number" id="dim-tilt-h" min="-85" max="85" value="" disabled=""></div>
+    <div class="dim-cell off"><label>VR</label><input type="number" id="dim-tilt-v" min="-85" max="85" value="" disabled=""></div>
+    <div class="dim-cell off"><label>Tr%</label><input type="number" id="dim-alpha" min="0" max="95" step="5" value="" disabled=""></div>
+</div>
+
+<div class="edit-info" id="editInfo" style="display:none"></div>
+
+<input type="file" id="f-unified" class="hd" accept=".pdf,image/*,.json,.sbm">
+<input type="file" id="f-image-only" class="hd" accept="image/*">
+
+<textarea id="text-editor" spellcheck="false" style="display:none" placeholder="اكتب هنا..."></textarea>
+
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script defer src="js/config.js?v=11"></script>
+<script defer src="js/board.js?v=59"></script>
+<script defer src="js/live-core.js?v=12"></script>
+<script defer src="js/live-slides.js?v=11"></script>
+<script defer src="js/live-students.js?v=28"></script>
+<script defer src="js/live-audio.js?v=15"></script>
+<script defer src="js/bars-sync.js?v=24"></script>
+<script defer src="js/style-tuner.js?v=1"></script>
+<script defer src="js/live-share.js?v=11"></script>
+<script defer src="js/chatbox.js?v=43"></script>
+<script defer src="js/btn-labels.js?v=15"></script>
+<script defer src="js/live-msg.js?v=22"></script>
+<script defer src="js/projectile.js?v=5"></script>
+<script defer src="js/widgets.js?v=3"></script>
+<script defer src="lib/katex.min.js"></script>
+<script defer src="lib/katex-inline.js"></script>
+<script defer src="lib/qb-samples.js?v=2"></script>
+<script defer src="js/qbank.js?v=16"></script>
+
+<script defer src="js/exam.js?v=64"></script>
+<script defer src="js/grader.js?v=6"></script>
+<script defer src="js/lessons-data.js?v=11"></script>
+<script defer src="js/live-codes.js?v=11"></script>
+
+<script>(function(){function mk(i,p){var c=document.getElementById(i),a=document.getElementById(p);c.onchange=function(){a.classList.toggle("sp-min",!c.checked);setTimeout(function(){window.dispatchEvent(new Event("resize"))},60)}}mk("chkSlides","slides-panel");mk("chkStudents","students-panel")})()</script>
+<script>(function(){
+var ACC='.pdf,.json,.sbm,image/*,video/*';
+function mkInp(dir){var i=document.createElement('input');i.type='file';i.multiple=true;if(dir)i.setAttribute('webkitdirectory','');i.accept=ACC;i.style.display='none';document.body.appendChild(i);return i}
+var inpF=mkInp(false),inpD=mkInp(true);
+var KIND=function(n,t){n=n.toLowerCase();if(/^image\//.test(t||'')||/\.(png|jpe?g|gif|webp|bmp|svg|avif|heic)$/.test(n))return'img';if(/\.pdf$/.test(n))return'pdf';if(/\.(json|sbm)$/.test(n))return'json';if(/^video\//.test(t||'')||/\.(mp4|webm|mov|m4v|ogv)$/.test(n))return'vid';return null};
+var TABS=[['img','Pic'],['pdf','Pdf'],['json','Json'],['vid','Video']],S={dir:null,stack:[],tab:'img',showDirs:false,sel:null,hint:null};
+function pane(){var p=document.getElementById('folderGal');if(p)return p;var ls=document.getElementById('studentsList');if(!ls)return null;
+ p=document.createElement('div');p.id='folderGal';
+ p.innerHTML='<div class="fg-tabs"></div><div class="fg-list"></div><div class="fg-foot"><span class="fg-n"></span><button class="fg-del" title="حذف الملف من القائمة">Delete</button><label class="fg-chk" title="إظهار المجلدات الفرعية"><input type="checkbox"><span>Folders</span></label></div>';
+ var tb=p.querySelector('.fg-tabs');TABS.forEach(function(t){var b=document.createElement('button');b.dataset.k=t[0];b.textContent=t[1];b.onclick=function(){S.tab=t[0];render()};tb.appendChild(b)});
+ p.querySelector('.fg-del').onclick=function(){if(S.sel&&S.dir&&S.dir.remove){S.dir.remove(S.sel);S.sel=null;render()}};
+ p.querySelector('.fg-chk input').onchange=function(){S.showDirs=this.checked;render()};
+ ls.after(p);return p}
+function sortIt(a){return a.sort(function(x,y){return x.name.localeCompare(y.name,undefined,{numeric:true})})}
+async function render(){var g=pane();if(!g)return;var l=g.querySelector('.fg-list');
+ g.querySelectorAll('.fg-tabs button').forEach(function(b){b.classList.toggle('on',b.dataset.k===S.tab)});
+ if(!S.dir){l.innerHTML='';g.querySelector('.fg-n').textContent='';return}
+ var res=await S.dir.list();var files=sortIt(res.files.filter(function(f){return f.kind===S.tab})),dirs=S.showDirs?sortIt(res.dirs):[];
+ l.innerHTML='';
+ if(S.path){var pe=document.createElement('div');pe.className='fg-path';pe.textContent=S.path;pe.title=S.path;l.appendChild(pe)}
+ if(S.hint){var hb=document.createElement('div');hb.className='fg-item fg-hint';hb.innerHTML='<span>إظهار باقي ملفات هذا المجلد</span>';hb.onclick=function(){window.__grant()};l.appendChild(hb)}
+ if(S.stack.length){var bk=document.createElement('div');bk.className='fg-item fg-dir';bk.innerHTML='<b class="k-dir">..</b><span>رجوع</span>';bk.onclick=function(){S.dir=S.stack.pop();render()};l.appendChild(bk)}
+ dirs.forEach(function(d){var it=document.createElement('div');it.className='fg-item fg-dir';it.innerHTML='<b class="k-dir">مجلد</b><span></span>';it.lastChild.textContent=d.name;it.onclick=function(){S.stack.push(S.dir);S.dir=d.node;render()};l.appendChild(it)});
+ files.forEach(function(f){var it=document.createElement('div');it.className='fg-item'+(S.sel===f?' on':'');var lb=TABS.filter(function(t){return t[0]===f.kind})[0][1];
+  it.innerHTML='<b class="k-'+f.kind+'">'+lb+'</b><span></span>';it.lastChild.textContent=f.name;it.title=f.name;
+  it.onclick=function(){S.sel=f;l.querySelectorAll('.fg-item').forEach(function(x){x.classList.remove('on')});it.classList.add('on');Promise.resolve(f.get()).then(function(file){if(window.processFile)processFile(file)})};l.appendChild(it)});
+ g.querySelector('.fg-n').textContent=files.length||''}
+function nodeFromHandle(h){return{name:h.name,list:async function(){var d=[],f=[];for await(var e of h.values()){if(e.kind==='directory')d.push({name:e.name,node:nodeFromHandle(e)});else{var k=KIND(e.name,'');if(k)(function(x){f.push({name:x.name,kind:k,get:function(){return x.getFile().then(function(fl){fl.mcPath=h.name+'/'+x.name;return fl})}})})(e)}}return{dirs:d,files:f}}}}
+function nodeFromTree(name,t){return{name:name,t:t,remove:function(f){t.f=t.f.filter(function(x){return x!==f})},list:async function(){var d=[];Object.keys(t.d).forEach(function(k){d.push({name:k,node:nodeFromTree(k,t.d[k])})});return{dirs:d,files:t.f}}}}
+function openRoot(n){S.path=null;S.dir=n;S.stack=[];S.sel=null;S.hint=null;render()}
+function fromInput(inp){var fl=Array.prototype.slice.call(inp.files);if(!fl.length)return null;var root={d:{},f:[]},rn='ملفات',first=null;
+ fl.forEach(function(f){var k=KIND(f.name,f.type);if(!k)return;var parts=(f.webkitRelativePath||'').split('/').filter(Boolean);var t=root;if(parts.length>1){rn=parts[0];for(var i=1;i<parts.length-1;i++){t=t.d[parts[i]]||(t.d[parts[i]]={d:{},f:[]})}}
+  var it={name:f.name,kind:k,get:function(){return f}};t.f.push(it);if(!first)first=it});
+ return{node:nodeFromTree(rn,root),first:first}}
+inpF.onchange=function(){var r=fromInput(inpF);inpF.value='';if(!r)return;if(S.dir&&S.dir.t&&!S.stack.length){var ex=S.dir.t.f;r.node.t.f.forEach(function(it){if(!ex.some(function(x){return x.name===it.name}))ex.push(it)});r.node=S.dir}openRoot(r.node);if(r.first){S.tab=r.first.kind;S.sel=r.first;render();Promise.resolve(r.first.get()).then(function(f){if(window.processFile)processFile(f)})}};
+inpD.onchange=function(){var r=fromInput(inpD);inpD.value='';if(!r)return;openRoot(r.node)};
+function idb(){return new Promise(function(ok,no){var r=indexedDB.open('mc-dirs',1);r.onupgradeneeded=function(){r.result.createObjectStore('roots',{autoIncrement:true})};r.onsuccess=function(){ok(r.result)};r.onerror=no})}
+async function rootsAll(){try{var d=await idb();return await new Promise(function(ok){var q=d.transaction('roots').objectStore('roots').getAll();q.onsuccess=function(){ok(q.result||[])};q.onerror=function(){ok([])}})}catch(e){return[]}}
+async function rootsAdd(h){try{var d=await idb();d.transaction('roots','readwrite').objectStore('roots').put(h)}catch(e){}}
+async function listFor(fh,roots){for(var i=0;i<roots.length;i++){var r=roots[i];try{var p=await r.resolve(fh);if(!p)continue;var q=await r.queryPermission({mode:'read'});if(q!=='granted'){q=await r.requestPermission({mode:'read'});if(q!=='granted')continue}
+  var d=r;for(var k=0;k<p.length-1;k++)d=await d.getDirectoryHandle(p[k]);return d}catch(e){}}return null}
+function showDir(dh,fh,kind){S.hint=null;S.tab=kind||S.tab;openRoot(nodeFromHandle(dh));S.pendName=fh.name}
+window.openFolder=async function(){
+ if(!window.showOpenFilePicker||!window.showDirectoryPicker){inpD.value='';inpD.click();return}
+ if(!(await rootsAll()).length){window.openFolderTree();return}
+ try{
+  var hs=await showOpenFilePicker({id:'lessons',multiple:false,types:[{description:'ملفات الدرس',accept:{'application/pdf':['.pdf'],'image/*':['.png','.jpg','.jpeg','.gif','.webp','.bmp','.svg','.avif'],'application/json':['.json','.sbm'],'video/*':['.mp4','.webm','.mov','.m4v','.ogv']}}]});
+  var fh=hs[0],file=await fh.getFile(),kind=KIND(file.name,file.type)||S.tab;
+  if(window.processFile)processFile(file);
+  var dh=await listFor(fh,await rootsAll());
+  if(dh){showDir(dh,fh,kind);S.sel=null;return}
+  var one={d:{},f:[{name:file.name,kind:kind,get:function(){return fh.getFile()}}]};S.tab=kind;openRoot(nodeFromTree('ملف',one));S.hint=fh;render();
+ }catch(e){if(!e||e.name!=='AbortError')console.warn(e)}};
+async function grant(){var fh=S.hint;if(!fh)return;try{var dh=await showDirectoryPicker({id:'lessons',startIn:fh,mode:'read'});await rootsAdd(dh);showDir(dh,fh,S.tab)}catch(e){}}
+window.openFolderTree=async function(){
+ if(window.showDirectoryPicker){try{var dh=await showDirectoryPicker({id:'lessons',mode:'read'});await rootsAdd(dh);openRoot(nodeFromHandle(dh));return}catch(err){if(err&&err.name==='AbortError')return}}
+ inpD.value='';inpD.click()};
+window.__grant=grant;
+/* ملفات مجلد الصفحة نفسه: تُعرض تلقائيًا عند الفتح (files.json أو قائمة المجلد من الخادم) */
+window.__openUrls=function(path,items){var cnt={};items.forEach(function(i){cnt[i.kind]=(cnt[i.kind]||0)+1});var best=TABS.map(function(t){return t[0]}).sort(function(a,b){return(cnt[b]||0)-(cnt[a]||0)})[0];
+ var tree={d:{},f:items.map(function(it){return{name:it.name,kind:it.kind,get:function(){return fetch(it.url).then(function(r){return r.blob()}).then(function(b){var fl=new File([b],it.name,{type:b.type||''});fl.mcPath=decodeURI(it.url.replace(location.origin,''));return fl})}}})};
+ openRoot(nodeFromTree('مجلد الصفحة',tree));S.tab=best;S.path=path;render()};
+function autoFolder(){var base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'');if(!/^https?:/.test(base))return;
+ var skip=/^(files|package|manifest|firebase)[^\/]*\.json$/i;
+ fetch(base+'files.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():Promise.reject()}).then(function(j){return(Array.isArray(j)?j:(j.files||[])).map(function(n){return typeof n==='string'?n:(n.path||n.name)})})
+ .catch(function(){return fetch(base,{cache:'no-cache'}).then(function(r){return r.ok?r.text():''}).then(function(t){var o=[],re=/href="([^"?#]+)"/gi,m;while((m=re.exec(t))){var h=m[1];if(/\/$/.test(h)||/^(https?:|\/|\.\.|mailto:)/.test(h))continue;try{h=decodeURIComponent(h)}catch(e){}o.push(h)}return o}).catch(function(){return[]})})
+ .then(function(names){var items=names.filter(function(n){return n&&!skip.test(n.split('/').pop())}).map(function(n){var nm=n.split('/').pop();return{name:nm,kind:KIND(nm,''),url:base+n.split('/').map(encodeURIComponent).join('/')}}).filter(function(x){return x.kind});
+  if(items.length&&!S.dir)window.__openUrls(decodeURI(base.replace(location.origin,'')||'/'),items)}).catch(function(){})}
+setTimeout(autoFolder,700);
+setTimeout(pane,300);
+})()</script>
+
+
+
+
+
+
+<!-- أُزيل كود استقبال WebRTC القديم: كان يرمي خطأ no-app ولا يعمل مع student-cam.js؛ الكاميرا الآن داخل exam.js -->
+
+
+
+
+
+
+
+
+
 </body>
 </html>
