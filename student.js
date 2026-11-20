@@ -238,6 +238,17 @@
 
         saveStudentProfile(true);
 
+        /* [WS1] يرسل الطالب بياناته إلى واتساب المدرس مباشرة (يُفتح فورًا ضمن ضغطة الزر حتى لا يحجبه المتصفح) */
+        try {
+            const wa = document.querySelector('.wa-btn'), tn = ((wa && wa.href.match(/wa\.me\/(\d+)/)) || [])[1] || '201011418992';
+            const gradeTxt = $('studentGrade').selectedOptions && $('studentGrade').selectedOptions[0] ? $('studentGrade').selectedOptions[0].textContent.trim() : grade;
+            const txt = ['السلام عليكم يا مستر، أرجو إرسال كود الدخول لي:', '', 'الاسم: ' + name, 'رقم الواتس: ' + phone, 'الصف: ' + gradeTxt,
+                'البلد: ' + (country || '-'), 'المحافظة: ' + (gov || '-'), 'القطر/المنطقة: ' + (distr || '-')].join('\n');
+            const w = window.open('https://wa.me/' + tn + '?text=' + encodeURIComponent(txt), '_blank');
+            if (!w) { toast('⚠ اسمح للصفحة بفتح واتساب (النوافذ المنبثقة) ثم اضغط «طلب كود» مرة أخرى', 'a'); return; }   /* لا يُسجَّل الطلب في الصفحة إلا بعد فتح واتساب فعلًا */
+            try { w.opener = null; } catch (e2) { }
+        } catch (e) { console.warn('[WS1]', e); return; }
+
         if (LOCAL_MODE || IS_TEST) {
             toast('✅ تم تسجيل طلبك (وضع تجريبي) — الكود التجريبي: 135');
             $('studentSecret').value = SECRET;
@@ -293,7 +304,7 @@
 
         try {
             await ref('codeRequests/' + uid).set(reqData);
-            toast('✅ تم إرسال طلبك للمدرس — سيصلك الكود على واتس قريبًا');
+            toast('✅ وصل طلبك للمدرس — أرسل رسالة واتساب التي فُتحت لك، وسيصلك الكود على واتس');
             if (btn) { btn.disabled = false; btn.textContent = '🔑 طلب كود'; btn.classList.add('btn-request'); }
         } catch (e) {
             console.error('[requestCode] فشل:', e);

@@ -127,7 +127,8 @@
         open: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
     };
 
-    const $ = s => win.querySelector(s);
+    let work = null;   /* [SB6] نافذة المشتركين التي انتقل إليها الجزء الأيمن (ملفات الطالب) */
+    const $ = s => win.querySelector(s) || (work && work.querySelector(s));
     const esc = s => { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; };
     const fmt = ts => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
     const fsize = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
@@ -146,7 +147,7 @@
         '.sl-r i{flex:0 0 7px;height:7px;border-radius:50%;background:#475569}.sl-r i.on{background:#22c55e}.sl-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}.sl-r small{font-size:9px;color:#94a3b8}.sl-r em{background:#dc2626;color:#fff;border-radius:8px;font-weight:700;font-size:9px;font-family:inherit;padding:0 5px;font-style:normal}.sl-r input{margin:0;width:13px;height:13px;accent-color:#16a34a;cursor:pointer}' +
         '.sl-f{display:flex;flex-direction:column;gap:4px;padding:5px 6px;flex-shrink:0}.sl-f div{display:flex;gap:4px}.sl-f>input{flex:none}.sl-f div input{flex:1}.sl-f input{min-width:0;height:24px;border:1px solid rgba(148,163,184,.28);border-radius:6px;background:rgba(0,0,0,.28);color:#e2e8f0;font-size:11px;font-family:inherit;padding:0 6px;outline:0;user-select:text;-webkit-user-select:text}.sl-f div input{width:50%}.sl-r small{background:rgba(0,0,0,.3);border:1px solid rgba(148,163,184,.25);border-radius:5px;padding:1px 5px;direction:ltr;color:#cbd5e1}.sl-p{border:0;background:transparent;cursor:pointer;font-size:11px;padding:0 2px;opacity:.75}.sl-p:hover{opacity:1}.sl-add.dirty{background:#16a34a;color:#fff;border-style:solid}.sl-q{flex-shrink:0;padding:0 5px}.sl-q .q-h{font-size:10px;color:#fbbf24;padding:2px 4px}.sl-q .q-r{display:flex;align-items:center;gap:4px;padding:4px 6px;margin-bottom:3px;border:1px solid rgba(251,191,36,.45);border-radius:6px;background:rgba(251,191,36,.08);color:#fde68a;font-size:11px;font-weight:700}.sl-q .q-r b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sl-q .q-r button{border:1px solid rgba(255,255,255,.25);background:#15803d;color:#fff;border-radius:5px;font-size:10px;font-family:inherit;cursor:pointer;padding:1px 6px}.sl-q .q-r button.x{background:transparent;color:#fca5a5}.sl-e{margin:auto;color:#64748b;font-size:11px;text-align:center;padding:10px}.sl-add{margin:0 6px 6px;height:24px;border:1px dashed rgba(148,163,184,.4);border-radius:6px;background:transparent;color:#94a3b8;font-weight:700;font-size:11px;font-family:inherit;cursor:pointer}.sl-add:hover{color:#fff;border-color:#d4af37}' +
         '.cb-sl,.cb-fp{background:linear-gradient(180deg,#0f3a2a,#082219)!important}.cb-fp .fp-tabs,.cb-fp .fp-list{background:transparent!important}.sl-s input{background:rgba(0,0,0,.28)!important}.sl-r:hover{background:rgba(255,255,255,.07)!important}.sl-r.on{background:rgba(255,255,255,.12)!important}' +
-        '#cbGh{display:none;position:absolute;left:0;right:0;top:0;bottom:0;z-index:25;background:#0b1424}#cbx.gr #cbGh{display:block}';
+        '#cbx .sl-f,#cbx #slAdd,#cbx .sl-r small,#cbx .sl-r .sl-p,#cbx .sl-r input{display:none!important}.cb-fp.exm{width:262px;flex-basis:262px}#cbGh{display:none;position:absolute;left:0;right:0;top:0;bottom:0;z-index:25;background:#0b1424}#cbx.gr #cbGh{display:block}';
 
     /* [SB1] شريط تمرير موحّد لكل النوافذ: أنحف، لون مختلف (تركوازي هادئ)، سهمان في أول وآخر الشريط */
     const SBS = ['#cbx *'];
@@ -366,13 +367,14 @@
     function drawQ() {
         const Q = document.getElementById('slQ'); if (!Q) return;
         const rs = (window.MC && MC.students && MC.students.codeRequests) ? MC.students.codeRequests() : [];
-        const sg = JSON.stringify(rs.map(r => [r.id, r.name, r.phone])); if (sg === Q._sig) return; Q._sig = sg;
+        const sg = JSON.stringify(rs.map(r => [r.id, r.name, r.phone, MC.students.isBlocked(r.phone)])); if (sg === Q._sig) return; Q._sig = sg;
         Q.innerHTML = rs.length ? '<div class="q-h">طلبات الكود (' + rs.length + ')</div>' : '';
         rs.forEach(r => {
-            const d = document.createElement('div'); d.className = 'q-r';
-            d.innerHTML = '<b title="' + esc(r.name) + ' — ' + esc(r.phone) + '">' + esc(r.name) + '</b><button class="s">🔑 كود</button><button class="x" title="رفض">✕</button>';
-            d.querySelector('.s').onclick = e => { e.stopPropagation(); MC.students.openCodeCard(Object.assign({ reqId: r.id }, r), e.currentTarget); };
-            d.querySelector('.x').onclick = () => MC.students.rejectCode(r.id);
+            const d = document.createElement('div'); d.className = 'q-r'; const bl = MC.students.isBlocked(r.phone); if (bl) d.style.opacity = '.55';
+            d.innerHTML = '<b title="' + esc(r.name) + ' — ' + esc(r.phone) + '">' + esc(r.name) + '</b><button class="as-s as-k"' + (bl ? ' disabled' : '') + ' title="' + (bl ? 'محظور' : 'توليد كود وتسجيله وإرساله لواتس الطالب') + '"><span class="' + (bl ? '' : 'kp') + '">🔑</span></button><label class="bl-k" title="حظر هذا الرقم من طلب الكود"><input type="checkbox"' + (bl ? ' checked' : '') + '>حظر</label><button class="rq-x" title="حذف هذا الطلب">×</button>';
+            d.querySelector('.rq-x').onclick = () => MC.students.rejectCode(r.id);
+            d.querySelector('.as-s').onclick = e => { e.stopPropagation(); MC.students.autoSend(r); };
+            d.querySelector('.bl-k input').onchange = e => { MC.students.setBlocked(r.phone, e.target.checked); Q._sig = ''; drawQ(); };
             Q.appendChild(d);
         });
     }
@@ -419,15 +421,27 @@
     let gSave = null;
     CB.gradeHost = function () {
         if (!cfg || role !== 't') return null;
+        if (work) {   /* [SB6] التصحيح داخل نافذة المشتركين بجانب ملفات الطالب */
+            try { MC.students.openSubs(true); } catch (e) { }
+            work.classList.add('gr'); const g = $('#cbGh'); g.style.bottom = '0'; return g;
+        }
         if (!shown) CB.open(cur);
         gSave = gSave || { nofp: win.classList.contains('nofp') };   /* [IN4] لا تغيير لحجم النافذة الحالي */
         collapsed = false; win.classList.remove('col'); win.classList.add('gr'); win.classList.remove('nofp');
         const gh = $('#cbGh'); gh.style.bottom = (ui.comp ? ui.comp.offsetHeight : 0) + 'px'; return gh;   /* لا يغطي شريط الرسائل السفلي */
     };
     CB.gradeDone = function () {
+        if (work) work.classList.remove('gr');
         win.classList.remove('gr'); if (!gSave) return;
         win.classList.toggle('nofp', gSave.nofp); gSave = null;
     };
+    /* [SB6] نقل الجزء الأيمن + العارض + مضيف التصحيح إلى نافذة المشتركين */
+    CB.adoptWork = function (o) {
+        if (!cfg || role !== 't' || work || !o || !o.root) return false;
+        const fp = $('#cbFp'), vw = $('#cbVw'), gh = $('#cbGh'); if (!fp || !vw || !gh) return false;
+        o.fp.appendChild(fp); o.ov.appendChild(vw); o.ov.appendChild(gh); work = o.root; fpSig = ''; updSide(); return true;
+    };
+    CB.select = function (conv) { if (!cfg || role !== 't') return; hideViewer(); fpSel = null; switchTo(conv || null); fpSig = ''; updSide(); };
     function switchTo(conv) {
         cur = conv; if (role === 't') { if (conv) attach(conv); drawChips(); } head(); render(); if (conv) markSeen(conv); if (role === 't') { const L = document.getElementById('slL'); if (L) L._sig = ''; drawSl(); }
     }
@@ -629,8 +643,8 @@
         });
         fp.addEventListener('dblclick', e => { const i = e.target.closest('.fp-i'); if (!i) return; const it = sideItems(fpKind).find(x => x.key === i.dataset.key); if (it && it.ex) { const p = peers().find(z => convOf(z) === cur); if (window.MCExam && MCExam.grade) MCExam.grade(it.ex, p ? p.name : 'طالب'); } });
         $('#cbVw').addEventListener('click', e => { if (e.target.closest('#vwBack')) { hideViewer(); return; } const b = e.target.closest('[data-a]'); if (b) act(b.dataset.a); });
-        $('#cbFpT').addEventListener('click', () => { win.classList.toggle('nofp'); });
-        $('#fpX').addEventListener('click', () => { win.classList.add('nofp'); });   /* [M10] إغلاق الجزء الأيمن */
+        $('#cbFpT').addEventListener('click', () => { if (work) { try { MC.students.openSubs(true); } catch (e) { } } else win.classList.toggle('nofp'); });
+        $('#fpX').addEventListener('click', () => { if (work) work.classList.remove('show'); else win.classList.add('nofp'); });   /* [M10] إغلاق الجزء الأيمن */
     }
     let exN = {};
     setInterval(() => {      /* إعادة الرسم عند وصول/تغيّر إجابات اختبار الطالب المفتوحة محادثته + إضاءة الظرف */
@@ -644,19 +658,21 @@
         if (role === 's') { cur = cfg.convKey(); attach(cur); attach('all'); head(); render(); $('#cbClear').style.display = 'none'; }
         else { cur = null; ui.chips.style.display = 'none'; head(); render(); }
         wireSl();
+        if (role === 't') { const tm = setInterval(() => { if (window.MC && MC.students && MC.students.mountSubs) { clearInterval(tm); try { MC.students.mountSubs(); } catch (e) { } } }, 400); }
     };
     CB.refresh = function () { if (!cfg || role !== 't') return; peers().forEach(p => attach(convOf(p))); if (shown) { drawChips(); head(); } };
     /* [DK1] تثبيت النافذة في أصل الصفحة: بين شريطي الأدوات الجانبيين (#left-bar و #right-bar) وفوق الشريط السفلي (#bottom) */
-    function dockWin() {
+    function dockWin(el) {
+        el = el && el.style ? el : win;
         const rc = id => { const el = document.getElementById(id); if (!el || getComputedStyle(el).display === 'none') return null; const r = el.getBoundingClientRect(); return r.width > 2 && r.height > 2 ? r : null; };
         const l = rc('left-bar'), r = rc('right-bar'), b = rc('bottom'), t = rc('top');
         if (!l || !r || !b) return;
         const a = l.left < r.left ? l : r, z = l.left < r.left ? r : l;
         const x1 = a.right, x2 = z.left, y1 = t && t.height < 90 ? t.bottom : 0, y2 = b.top;
         if (x2 - x1 < 320 || y2 - y1 < 260) return;
-        win.style.left = Math.round(x1) + 'px'; win.style.top = Math.round(y1) + 'px'; win.style.width = Math.round(x2 - x1) + 'px'; win.style.height = Math.round(y2 - y1) + 'px';
+        el.style.left = Math.round(x1) + 'px'; el.style.top = Math.round(y1) + 'px'; el.style.width = Math.round(x2 - x1) + 'px'; el.style.height = Math.round(y2 - y1) + 'px';
     }
-    CB.dock = dockWin;
+    CB.dock = dockWin; CB.dockEl = dockWin;
     CB.open = function (conv, anchor) {
         if (!cfg) return; const wasShown = shown; shown = true; win.classList.add('show'); collapsed = false; win.classList.remove('col');
         if (role === 't') { if (conv) cur = conv; else if (!cur && peers().length) cur = convOf(peers()[0]); peers().forEach(p => attach(convOf(p))); switchTo(cur); } else switchTo(cur);
