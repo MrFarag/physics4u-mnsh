@@ -85,6 +85,16 @@
         const fit = () => { const tb = document.querySelector('.top-bar'); if (tb) document.documentElement.style.setProperty('--tbh', Math.round(tb.getBoundingClientRect().height) + 'px'); };
         fit(); window.addEventListener('resize', fit); setTimeout(fit, 600);
     })();
+    /* [MC2] ألوان المايك: أحمر = أوقفه الطالب | باهت = غير مفعّل من المعلم | أخضر = مفعّل من الطرفين. العناوين أصغر. السبورة بلا هوامش */
+    (function () {
+        const st = document.createElement('style'); st.id = 'mc2Css';
+        st.textContent = '#micBtn{opacity:.45}#micBtn.on{opacity:1}' +
+            '#micBtn.live{opacity:1;background:#14532d!important;border-color:#22c55e!important;color:#4ade80!important}#micBtn.live .mic-svg{filter:drop-shadow(0 0 5px #22c55e)!important}#micBtn.live .mic-dots i{background:#4ade80!important}#micBtn.live .mic-dots i.lit{background:#4ade80!important;box-shadow:0 0 5px #22c55e!important}' +
+            '#micBtn.muted{opacity:1;background:#450a0a!important;border-color:#ef4444!important;color:#f87171!important}#micBtn.tmuted{opacity:.45}' +
+            '.sb-head,.sp-head{font-size:11px!important;padding-top:4px!important;padding-bottom:4px!important}.brand-name{font-size:12px!important}' +
+            '#slideBox,.fit-width #slideBox{margin:0 auto!important;outline:0!important}.view-wrap{padding:0!important}';
+        document.head.appendChild(st);
+    })();
     function toast(msg, cls) {
         const bx = $('toastBox'); if (bx) bx.innerHTML = '';   /* تنبيه واحد فقط داخل الشريط */
         const t = document.createElement('div');
@@ -936,8 +946,8 @@
         wrap.style.overflowX = (!isF && mode === 'width') ? 'hidden' : 'auto';
         wrap.style.background = (!isF && mode === 'width') ? (pg.bg || '') : '';   /* عند ملاءمة العرض تمتد خلفية السبورة */
         if (mode === 'one') scale = 1;
-        else if (mode === 'width') { scale = (W - 38) / pg.w; if (pg.h * scale > H) scale = (W - 38 - sb) / pg.w; }
-        else if (mode === 'page') scale = isF ? Math.min((wrap.clientWidth - 6) / pg.w, (H - 6) / pg.h) : Math.min((wrap.clientWidth - 38) / pg.w, (H - 38) / pg.h);
+        else if (mode === 'width') { scale = W / pg.w; if (pg.h * scale > H) scale = (W - sb) / pg.w; }   /* [MC2] بلا هوامش */
+        else if (mode === 'page') scale = isF ? Math.min((wrap.clientWidth - 6) / pg.w, (H - 6) / pg.h) : Math.min(wrap.clientWidth / pg.w, H / pg.h);
         if (pg.zoom && !isF) { mode = 'one'; scale = pg.zoom; wrap.style.overflowX = 'auto'; wrap.classList.remove('fit-width'); wrap.style.background = ''; }
         scale = Math.max(0.1, Math.min(5, scale));
         const next = { one: 'Fit', width: '100%', page: '100%', free: '100%', auto: 'Fit' };
