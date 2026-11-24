@@ -35,6 +35,7 @@
 .cb-body{flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;background:radial-gradient(circle at 20% 0,#0f1c33,#0a111f 60%);user-select:text;-webkit-user-select:text}
 .cb-empty{margin:auto;text-align:center;color:#64748b;font-size:13.5px;line-height:1.9;padding:20px}.cb-empty svg{width:48px;height:48px;fill:none;stroke:#334e7a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-bottom:8px}
 .cb-m{max-width:85%;width:fit-content;padding:5px 10px 3px;border-radius:12px;font-size:14px;line-height:1.45;word-break:break-word;display:flex;flex-direction:column;gap:3px;position:relative}
+.cb-dl2{background:none;border:0;color:inherit;opacity:.55;cursor:pointer;font:inherit;font-size:11px;padding:0 4px}.cb-dl2:hover{opacity:1}.cb-dl2.arm{color:#ef4444;opacity:1;font-weight:700}
 .cb-ed{background:none;border:none;color:inherit;opacity:.7;cursor:pointer;font:inherit;font-size:11px;padding:0 4px}.cb-ed:hover{opacity:1;text-decoration:underline}.cb-ted{font-size:10px;opacity:.7}
 .cb-m.me{align-self:flex-start;background:#7f1d1d;color:#ffe4e4;border-top-right-radius:4px}
 .cb-m.ot{align-self:flex-end;background:#14532d;color:#dcfce7;border-top-left-radius:4px}
@@ -255,6 +256,9 @@
         ui.body.addEventListener('click', e => {
             const im = e.target.closest('img.cb-img'); if (im) return lightbox(im.src, im.dataset.name);
             const fx = e.target.closest('[data-fix]'); if (fx) { const m = find(fx.dataset.fix); if (m && m.file) fixFile(m.file); return; }
+            const dl = e.target.closest('[data-del]');   /* [CB-DEL4] حذف رسالة واحدة (بتأكيد) */
+            if (dl) { if (!dl.dataset.arm) { dl.dataset.arm = 1; dl.classList.add('arm'); dl.textContent = 'تأكيد؟'; setTimeout(() => { if (dl.isConnected) { delete dl.dataset.arm; dl.classList.remove('arm'); dl.textContent = '🗑 حذف'; } }, 3000); return; }
+                const m = find(dl.dataset.del); if (m) { try { cfg.ref(pathOf(m.conv) + '/' + m.k).remove(); } catch (er) { } } return; }
             const ed = e.target.closest('[data-ed]'); if (ed) { const m = find(ed.dataset.ed); if (m) { editKey = ed.dataset.ed; ui.ta.value = m.text || ''; ui.ta.focus(); ui.ta.dispatchEvent(new Event('input')); ui.ta.placeholder = 'تعديل الرسالة… (Enter للحفظ)'; } return; }
             const b = e.target.closest('[data-open]'); if (b) { const m = find(b.dataset.open); if (m && m.file) openFile(m.file); }
         });
@@ -269,7 +273,7 @@
     function listFor(conv) {
         let a = Object.keys(store(conv)).map(k => Object.assign({ k, conv }, msgs[conv][k]));
         if (role === 's') a = a.concat(Object.keys(store('all')).map(k => Object.assign({ k, conv: 'all' }, msgs.all[k])));
-        if (role === 't') a = a.filter(x => !(x.from === 's' && x.file));      /* [M6] ملفات الطالب تُعرض في الشريط الجانبي لا في المحادثة */
+        /* [CB-DEL4] ملفات الطالب تظهر الآن في المحادثة نفسها (الشريط الجانبي حُذف) */
         if (role === 's') a = a.filter(x => !x.hw);      /* [M2] ملفات الواجب/الاختبار تصل للمدرس فقط ولا تظهر في رسائل الطالب */
         return a.sort((x, y) => (x.ts || 0) - (y.ts || 0));
     }
@@ -325,7 +329,7 @@
                 '<div class="cb-act"><a class="cb-a" href="' + f.data + '" download="' + esc(f.name) + '">' + IC.dl + ' تحميل</a>' + (role === 't' && /pdf/.test(f.type) ? '<button class="cb-a" data-open="' + m.k + '">' + IC.open + ' فتح في الملفات</button>' + (m.from === 's' ? '<button class="cb-a" data-fix="' + m.k + '">' + IC.fix + ' تصحيح</button>' : '') : '') + '</div>';
         }
         if (m.voice) h += '<audio class="cb-au" controls preload="metadata" src="' + m.voice.data + '"></audio>';
-        h += '<span class="cb-ts">' + fmt(m.ts || Date.now()) + (mine && m.text && !m.file && !m.voice && m.conv !== 'all' ? '<button class="cb-ed" data-ed="' + m.k + '">تعديل</button>' : '') + (mine ? '<b class="cb-st">' + (ack[m.k] === 'ok' ? ' ✓' : ack[m.k] === 'err' ? ' ✗ لم تُرسل' : ack[m.k] === 'wait' ? ' …' : '') + '</b>' : '') + '</span>';
+        h += '<span class="cb-ts">' + fmt(m.ts || Date.now()) + (role === 't' ? '<button class="cb-dl2" data-del="' + m.k + '" title="حذف الرسالة">🗑 حذف</button>' : '') + (mine && m.text && !m.file && !m.voice && m.conv !== 'all' ? '<button class="cb-ed" data-ed="' + m.k + '">تعديل</button>' : '') + (mine ? '<b class="cb-st">' + (ack[m.k] === 'ok' ? ' ✓' : ack[m.k] === 'err' ? ' ✗ لم تُرسل' : ack[m.k] === 'wait' ? ' …' : '') + '</b>' : '') + '</span>';
         d.innerHTML = h; return d;
     }
     function emptyEl() {
@@ -339,7 +343,6 @@
         ui.body.scrollTop = ui.body.scrollHeight; updSide();
     }
     function appendOne(m) {
-        if (role === 't' && m.from === 's' && m.file) { updSide(); return; }
         const em = ui.body.querySelector('.cb-empty'); if (em) em.remove();
         const near = ui.body.scrollHeight - ui.body.scrollTop - ui.body.clientHeight < 160 || m.from === role;
         ui.body.appendChild(node(m)); if (near) ui.body.scrollTop = ui.body.scrollHeight;

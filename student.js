@@ -88,12 +88,52 @@
     /* [MC2] ألوان المايك: أحمر = أوقفه الطالب | باهت = غير مفعّل من المعلم | أخضر = مفعّل من الطرفين. العناوين أصغر. السبورة بلا هوامش */
     (function () {
         const st = document.createElement('style'); st.id = 'mc2Css';
-        st.textContent = '#micBtn{opacity:.45}#micBtn.on{opacity:1}' +
+        st.textContent = '#micBtn:not(.live):not(.muted){background:transparent!important;border-color:#60a5fa!important;color:#dbeafe!important}#micBtn:not(.live):not(.muted) .mic-svg{stroke:currentColor!important}#micBtn.live,#micBtn.muted{filter:none!important}' +   /* [MC6] المايك غير المفعّل بنفس مظهر زر الكاميرا */
             '#micBtn.live{opacity:1;background:#14532d!important;border-color:#22c55e!important;color:#4ade80!important}#micBtn.live .mic-svg{filter:drop-shadow(0 0 5px #22c55e)!important}#micBtn.live .mic-dots i{background:#4ade80!important}#micBtn.live .mic-dots i.lit{background:#4ade80!important;box-shadow:0 0 5px #22c55e!important}' +
-            '#micBtn.muted{opacity:1;background:#450a0a!important;border-color:#ef4444!important;color:#f87171!important}#micBtn.tmuted{opacity:.45}' +
+            '#micBtn.muted{opacity:1;background:#450a0a!important;border-color:#ef4444!important;color:#f87171!important}#micBtn.tmuted{background:var(--panel2)!important;color:var(--text)!important}' +
             '.sb-head,.sp-head{font-size:11px!important;padding-top:4px!important;padding-bottom:4px!important}.brand-name{font-size:12px!important}' +
-            '#slideBox,.fit-width #slideBox{margin:0 auto!important;outline:0!important}.view-wrap{padding:0!important}';
+            '#slideBox,.fit-width #slideBox{margin:0 auto!important;outline:0!important}.view-wrap{padding:0!important}' +
+            'body.fit-full .slides-panel,body.fit-full .side-bar{display:none!important}' +
+            'html,body{height:100dvh!important;touch-action:pan-x pan-y!important;overscroll-behavior:none}body{position:fixed!important;inset:0!important;width:100%!important}.view-wrap{touch-action:pan-x pan-y!important}.bot{position:absolute!important;left:0!important;right:0!important;bottom:0!important;z-index:60!important;transform:none!important}.main-area{padding-bottom:var(--bot-h,56px)!important}' +
+            '.top-bar{position:relative}.top-bar .xs-btn{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;margin:0!important;z-index:5}' +
+            '.stats .live{flex-direction:column!important;gap:1px!important;font-size:9px!important;line-height:1!important;align-items:center}.stats .live .dot-live{width:6px!important;height:6px!important}' +
+            '.brand-name{display:flex!important;flex-direction:column;line-height:1!important;font-size:11px!important;gap:0}.brand-name span{display:block}' +   /* [MC4] الشريط السفلي ثابت ولا ينزلق بالتكبير */
+            '#tmBanner{top:7px!important;max-width:min(70vw,420px)!important;padding:2px 12px!important;font-size:11px!important;line-height:1.5!important;border-radius:20px!important;z-index:100000!important;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}' +
+            '.follow-btn{position:fixed!important;top:8px!important;left:50%!important;z-index:99990!important;padding:2px 12px!important;font-size:11px!important}';   /* [MC3] التنبيهات في الشريط العلوي فقط */
         document.head.appendChild(st);
+    })();
+    /* [RL1] شريط أدوات عمودي مستقل على اليمين (خارج السبورة) */
+    (function () {
+        const st = document.createElement('style'); st.id = 'railCss';
+        st.textContent =
+          'body .bot{position:absolute!important;top:42px!important;bottom:0!important;right:0!important;left:auto!important;width:58px!important;height:auto!important;min-height:0!important;flex-direction:column!important;justify-content:flex-start!important;align-items:center!important;overflow-y:auto!important;overflow-x:hidden!important;padding:6px 3px!important;gap:5px!important;border-top:0!important;border-left:1px solid var(--border,#334155)!important;z-index:60!important}' +
+          'body .bot .bb{width:48px!important;min-width:48px!important;height:44px!important;flex:0 0 auto!important}' +
+          'body .bot .zoomgrp{display:flex!important;flex-direction:column!important;gap:5px!important;align-items:center}' +
+          'body .bot .bb-txt{min-width:0!important;font-size:11px}body .bot .bb-sep{display:block!important;width:34px!important;height:1px!important;margin:2px 0!important}' +
+          'body .bot .rail-off{display:none!important}' +
+          'body .main-area{padding-bottom:0!important;padding-right:58px!important;box-sizing:border-box}' +
+          /* [TB1] الشريط العلوي: خروج أقصى اليمين، الزمن+مباشر في المنتصف، واتس+الاسم أقصى اليسار، والتنبيهات بين الخروج والمنتصف */
+          'body .top-bar{position:relative!important;justify-content:flex-start!important;gap:8px!important;padding:0 6px!important}' +
+          'body .top-bar #exitBtn{display:inline-flex!important;align-items:center;justify-content:center;width:34px!important;min-width:34px!important;height:28px!important;padding:0!important;border-radius:8px;border:1px solid #f87171;background:linear-gradient(135deg,#7f1d1d,#dc2626);color:#fee2e2;cursor:pointer;flex:0 0 auto}' +
+          'body .top-bar #exitBtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}body .top-bar #exitBtn .bl{display:none}' +
+          'body .top-bar #exitBtn{position:absolute!important;left:6px!important;top:50%!important;transform:translateY(-50%)!important;z-index:70!important;visibility:visible!important;opacity:1!important}body .top-bar .brand{gap:5px!important}body .top-bar{height:32px!important;min-height:32px!important}body .top-bar #exitBtn{height:24px!important;width:30px!important;min-width:30px!important}body .bot{top:var(--tbh,32px)!important}' +
+          'body .top-bar .wa-btn{width:20px!important;height:20px!important;font-size:11px!important}' +
+          'body .top-bar .brand-name{flex-direction:row!important;gap:4px!important;font:700 12px Cairo,sans-serif!important;color:#cbd5e1!important;white-space:nowrap}' +
+          'body .top-bar .welcome{display:none!important}' +
+          'body .top-bar .stats{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;gap:10px!important;white-space:nowrap}body .top-bar .stats span:nth-child(3){display:none!important}' +
+          'body #toastBox{left:48px!important;right:auto!important;transform:none!important;max-width:calc(50vw - 125px)!important}' +
+          'body #tmBanner{left:48px!important;right:auto!important;transform:none!important;max-width:calc(50vw - 125px)!important}body .follow-btn{left:48px!important;right:auto!important;transform:none!important}body .top-bar .xs-btn{left:48px!important;right:auto!important;transform:translateY(-50%)!important;max-width:calc(50vw - 125px)!important}' +
+          '@media(max-width:600px){body #toastBox,body #tmBanner,body .top-bar .xs-btn{max-width:calc(100vw - 48px - 150px)!important}}' +
+          '#snapBtn{background:linear-gradient(135deg,#065f46,#10b981)!important;color:#ecfdf5!important;border-color:#34d399!important}' +
+          /* [RL4] السبب الحقيقي لاختفاء القلم: student.css سطر 219 يخفي #penBtn و#saveBtn و#saveMenu بـ !important */
+          'body .bot #penBtn:not(.rail-off),body .bot #saveBtn:not(.rail-off){display:inline-flex!important}body #saveMenu[style*="flex"]{display:flex!important}' +
+          'body .bot #penBtn.pen-on{box-shadow:0 0 0 2px #f59e0b inset}';
+        document.head.appendChild(st);
+    })();
+    /* [MC5] ارتفاع الشريط السفلي يُقاس فيبقى مستقلًا في مكانه مهما كُبّرت السبورة */
+    (function () {
+        const set = () => { const b = document.querySelector('.bot'); document.documentElement.style.setProperty('--bot-h', '0px'); };
+        set(); window.addEventListener('resize', set); window.addEventListener('orientationchange', set); setTimeout(set, 600); setTimeout(set, 2000);
     })();
     function toast(msg, cls) {
         const bx = $('toastBox'); if (bx) bx.innerHTML = '';   /* تنبيه واحد فقط داخل الشريط */
@@ -593,7 +633,7 @@
         const b = $('micBtn'); if (!b) return; b.classList.add('hint');
         let h = document.getElementById('micHint');
         if (!h) { h = document.createElement('div'); h.id = 'micHint'; h.textContent = 'اضغط على المايك لتفعيله'; document.body.appendChild(h); clearTimeout(window.__mhT); window.__mhT = setTimeout(hideMicHint, 15000); }
-        const r = b.getBoundingClientRect(); h.style.left = Math.max(8, Math.min(innerWidth - 168, r.left + r.width / 2 - 80)) + 'px'; h.style.bottom = (innerHeight - r.top + 10) + 'px';
+        const r = b.getBoundingClientRect(); h.style.left = Math.max(8, r.left - 172) + 'px'; h.style.bottom = 'auto'; h.style.top = Math.max(6, r.top) + 'px';
         h.style.setProperty('--ax', (r.left + r.width / 2 - parseFloat(h.style.left)) + 'px');
     }
     function hideMicHint() { const b = $('micBtn'); if (b) b.classList.remove('hint'); const h = document.getElementById('micHint'); if (h) h.remove(); }
@@ -676,17 +716,85 @@
         if (viewMode === 'file' && String(fileMeta.cur) === String(n)) renderMain();
         else if (vis.file && viewMode === 'board' && !fileShown && String(fileMeta.cur) === String(n)) { fileShown = true; viewMode = 'file'; applyVis(); }
     }
-    let penOn = false, penCv = null, penDown = false;
-    function setPen(on) {
-        penOn = on; const b = $('penBtn'); if (b) b.classList.toggle('pen-on', on);
-        if (on && !penCv) {
-            penCv = document.createElement('canvas'); penCv.id = 'penCv'; const host = $('slideBox') || document.body; host.appendChild(penCv);
-            const pos = e => { const r = penCv.getBoundingClientRect(); return { x: (e.clientX - r.left) * penCv.width / r.width, y: (e.clientY - r.top) * penCv.height / r.height }; };
-            penCv.addEventListener('pointerdown', e => { penDown = true; penCv.setPointerCapture(e.pointerId); const c = penCv.getContext('2d'), p = pos(e); c.strokeStyle = '#7dd3fc'; c.lineWidth = 3 * penCv.width / penCv.getBoundingClientRect().width; c.lineCap = c.lineJoin = 'round'; c.beginPath(); c.moveTo(p.x, p.y); });
-            penCv.addEventListener('pointermove', e => { if (!penDown) return; const c = penCv.getContext('2d'), p = pos(e); c.lineTo(p.x, p.y); c.stroke(); });
-            penCv.addEventListener('pointerup', () => { penDown = false; });
-        }
-        if (penCv) { if (!on) { const c = penCv.getContext('2d'); c.clearRect(0, 0, penCv.width, penCv.height); } penCv.style.display = on ? 'block' : 'none'; if (on) { const r = penCv.parentNode.getBoundingClientRect(); penCv.width = Math.round(r.width); penCv.height = Math.round(r.height); } }
+    /* [SB1] سبورة الطالب: لوح مستقل في الثلث السفلي، خلفية داكنة، قلم فاتح، ممحاة، زر إغلاق. خطوطها تُرسَل للمعلم (studentInk/<id>) */
+    let penOn = false, penCv = null, penDown = false, sbBox = null, sbStrokes = [], sbEraser = false, sbCur = null;
+    let SB_COL = '#fde047'; const SB_W = 0.006, SB_COLS = ['#fde047', '#6ee7b7', '#f9a8d4'];   /* [SB5] 3 ألوان فاتحة */
+    const penCur = (col, er) => { const svg = er ? "<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'><path d='M3 17l9-9 6 6-6 6H6z' fill='#f9a8d4' stroke='#111' stroke-width='1.3'/></svg>" : "<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 24 24'><path d='M3 21l1.5-5L16 4.5 19.5 8 8 19.5z' fill='" + col + "' stroke='#111' stroke-width='1.2'/><path d='M3 21l1.5-5 3.5 3.5z' fill='#111'/></svg>"; return 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '") ' + (er ? '4 20' : '3 21') + ', crosshair'; };
+    function sbDraw() {
+        if (!penCv) return; const c = penCv.getContext('2d'); c.clearRect(0, 0, penCv.width, penCv.height); c.lineCap = c.lineJoin = 'round';
+        sbStrokes.concat(sbCur ? [sbCur] : []).forEach(st => { if (!st.pts.length) return; c.strokeStyle = st.c; c.lineWidth = Math.max(2, SB_W * penCv.width); c.beginPath();
+            st.pts.forEach((q, k) => k ? c.lineTo(q[0] * penCv.width, q[1] * penCv.width) : c.moveTo(q[0] * penCv.width, q[1] * penCv.width));
+            if (st.pts.length === 1) c.lineTo(st.pts[0][0] * penCv.width + 0.1, st.pts[0][1] * penCv.width); c.stroke(); });
+    }
+    function sbSize() { if (!penCv || !sbBox || sbBox.style.display === 'none') return; const r = penCv.getBoundingClientRect(); const w = Math.round(r.width), h = Math.round(r.height); if (w > 10 && h > 10 && (penCv.width !== w || penCv.height !== h)) { penCv.width = w; penCv.height = h; } sbDraw(); }
+    /* [SB2] السبورة قابلة للتحريك داخل الحيّز: من الشريط الأيمن (الأدوات) حتى حافة الشاشة اليسرى (السكرول) ومن أسفل الشريط العلوي للأسفل */
+    function sbRegion() { const b = document.querySelector('.bot'), tb = document.querySelector('.top-bar'); return { l: 0, r: b ? b.getBoundingClientRect().left : innerWidth - 58, t: tb ? tb.getBoundingClientRect().bottom : 42, b: innerHeight }; }
+    function sbPlace(reset) {
+        if (!sbBox) return; const R = sbRegion(), W = R.r - R.l, H = R.b - R.t;
+        let w = reset || !sbBox._w ? W : Math.min(sbBox._w, W), h = reset || !sbBox._h ? Math.round(innerHeight / 3) : Math.min(sbBox._h, H);
+        let l = reset || sbBox._l == null ? R.l : sbBox._l, t = reset || sbBox._t == null ? R.b - h : sbBox._t;
+        l = Math.max(R.l, Math.min(R.r - w, l)); t = Math.max(R.t, Math.min(R.b - h, t));
+        Object.assign(sbBox, { _w: w, _h: h, _l: l, _t: t }); const S = sbBox.style; S.left = l + 'px'; S.top = t + 'px'; S.width = w + 'px'; S.height = h + 'px';
+    }
+    /* [SB4] إرسال لحظي: يُرسَل الخط أثناء الكتابة (كل ~80ms) لا عند رفع الإصبع */
+    function sbFlush(st, force) {
+        if (!st || !st.r) return; const now = Date.now(); if (!force && now - st.t < 80) return; st.t = now;
+        try { let pts = st.pts; if (pts.length > 600) { const k = pts.length / 600; pts = Array.from({ length: 600 }, (_, n) => st.pts[Math.floor(n * k)]); pts.push(st.pts[st.pts.length - 1]); }
+            st.r.set({ p: pts.map(q => q[0].toFixed(4) + ',' + q[1].toFixed(4)).join(';'), c: st.c, w: SB_W, a: +(penCv.width / Math.max(1, penCv.height)).toFixed(3), ts: now }); } catch (er) { }
+    }
+    const penSvg = col => '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 21l1.5-5L16 4.5 19.5 8 8 19.5z" fill="' + col + '" stroke="#0f172a" stroke-width="1.2"/><path d="M3 21l1.5-5 3.5 3.5z" fill="#0f172a"/></svg>';
+    function sbBuild() {
+        if (sbBox) return;
+        const st = document.createElement('style'); st.textContent =
+            '#sBoard{position:fixed;left:0;top:60vh;width:300px;height:33.3vh;z-index:55;background-color:#12170b;background-image:linear-gradient(rgba(190,210,120,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(190,210,120,.07) 1px,transparent 1px);background-size:20px 20px;border:3px solid #f59e0b;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.6);display:none;flex-direction:column;direction:rtl;box-sizing:border-box}' +
+            '#sBoard .sbh{cursor:move;touch-action:none;user-select:none;height:32px;flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:0 6px;background:linear-gradient(#64748b,#475569);color:#f1f5f9;font:700 12px Cairo,sans-serif;border-radius:6px 6px 0 0}' +
+            '#sBoard .sbh button{height:24px;min-width:30px;padding:0 6px;white-space:nowrap;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:0 0 auto;border-radius:6px;border:1px solid #94a3b8;background:#334155;color:#f1f5f9;font:700 12px Cairo,sans-serif;cursor:pointer}' +
+            '#sBoard .sbh button.pc{min-width:26px;padding:0 4px}#sBoard .sbh button.on{background:#f59e0b;color:#1a1405;border-color:#fde047}#sBoard .sbh .sx{background:#7f1d1d;border-color:#fca5a5;margin-right:auto}' +
+            '#sBoard .sbc{flex:1;min-height:0;position:relative;overflow:hidden;border-radius:0 0 6px 6px}#penCv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}' +
+            '#sBoard .rz{position:absolute;z-index:5;touch-action:none}#sBoard .rz.n,#sBoard .rz.s{left:12px;right:12px;height:12px;cursor:ns-resize}#sBoard .rz.n{top:-6px}#sBoard .rz.s{bottom:-6px}' +
+            '#sBoard .rz.e,#sBoard .rz.w{top:12px;bottom:12px;width:12px;cursor:ew-resize}#sBoard .rz.e{right:-6px}#sBoard .rz.w{left:-6px}' +
+            '#sBoard .rz.ne,#sBoard .rz.nw,#sBoard .rz.se,#sBoard .rz.sw{width:20px;height:20px}#sBoard .rz.ne{top:-6px;right:-6px;cursor:nesw-resize}#sBoard .rz.nw{top:-6px;left:-6px;cursor:nwse-resize}#sBoard .rz.se{bottom:-6px;right:-6px;cursor:nwse-resize}#sBoard .rz.sw{bottom:-6px;left:-6px;cursor:nesw-resize}';
+        document.head.appendChild(st);
+        sbBox = document.createElement('div'); sbBox.id = 'sBoard';
+        sbBox.innerHTML = '<div class="sbh"><span>سبورتي</span><button class="pc on" data-c="0" title="قلم أصفر">'+penSvg(SB_COLS[0])+'</button><button class="pc" data-c="1" title="قلم أخضر">'+penSvg(SB_COLS[1])+'</button><button class="pc" data-c="2" title="قلم وردي">'+penSvg(SB_COLS[2])+'</button><button id="sbEr" title="ممحاة">🧽</button><button id="sbClr" title="مسح الكل">🗑</button><button class="sx" id="sbX" title="إغلاق السبورة">✕</button></div><div class="sbc"><canvas id="penCv"></canvas></div>';
+        document.body.appendChild(sbBox); penCv = sbBox.querySelector('#penCv');
+        const rr = () => ref('studentInk/' + myId);
+        const npos = e => { const r = penCv.getBoundingClientRect(); return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.max(0, (e.clientY - r.top) / r.width)]; };   /* y بوحدة العرض: مقياس واحد = لا تشويه عند تغيير الحجم */
+        const eraseAt = q => { const rad = 0.035; let ch = false;
+            sbStrokes = sbStrokes.filter(st => { const hit = st.pts.some(p => Math.hypot((p[0] - q[0]) * penCv.width, (p[1] - q[1]) * penCv.width) < rad * penCv.width); if (hit) { ch = true; try { rr().child(st.key).remove(); } catch (er) { } } return !hit; });
+            if (ch) sbDraw(); };
+        penCv.addEventListener('pointerdown', e => { e.preventDefault(); penDown = true; try { penCv.setPointerCapture(e.pointerId); } catch (er) { } const q = npos(e); if (sbEraser) eraseAt(q); else { sbCur = { c: SB_COL, pts: [q], t: 0 }; try { const r0 = rr().push(); sbCur.r = r0; sbCur.key = r0.key; } catch (er) { } sbDraw(); sbFlush(sbCur, true); } });
+        penCv.addEventListener('pointermove', e => { if (!penDown) return; e.preventDefault(); const q = npos(e); if (sbEraser) eraseAt(q); else if (sbCur) { sbCur.pts.push(q); sbDraw(); sbFlush(sbCur, false); } });
+        const end = () => { if (!penDown) return; penDown = false; const st = sbCur; sbCur = null; if (!st || sbEraser) return;
+            sbStrokes.push(st); sbFlush(st, true);
+            sbDraw(); };
+        penCv.addEventListener('pointerup', end); penCv.addEventListener('pointercancel', end); penCv.addEventListener('lostpointercapture', end);
+        const pcs = [...sbBox.querySelectorAll('.pc')];
+        const setTool = (er, ci) => { sbEraser = er; if (ci != null) SB_COL = SB_COLS[ci]; sbBox.querySelector('#sbEr').classList.toggle('on', er); pcs.forEach((b, k) => b.classList.toggle('on', !er && SB_COLS[k] === SB_COL)); penCv.style.cursor = penCur(SB_COL, er); };
+        pcs.forEach((b, k) => b.onclick = () => setTool(false, k)); sbBox.querySelector('#sbEr').onclick = () => setTool(true); setTool(false, 0);
+        penCv.addEventListener('touchstart', e => e.preventDefault(), { passive: false }); penCv.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+        sbBox.querySelector('#sbClr').onclick = () => { sbStrokes = []; sbDraw(); try { rr().remove(); } catch (er) { } };
+        sbBox.querySelector('#sbX').onclick = () => setPen(false);
+        const hd = sbBox.querySelector('.sbh');
+        const act = (mode, e) => { e.preventDefault(); e.stopPropagation(); const sx = e.clientX, sy = e.clientY, o = { l: sbBox._l, t: sbBox._t, w: sbBox._w, h: sbBox._h }, R = sbRegion(), MINW = 170, MINH = 110;
+            const mv = ev => { const dx = ev.clientX - sx, dy = ev.clientY - sy; let l = o.l, t = o.t, w = o.w, h = o.h;
+                if (mode === 'move') { l += dx; t += dy; }
+                else { if (mode.includes('e')) w = Math.max(MINW, Math.min(R.r - o.l, o.w + dx)); if (mode.includes('s')) h = Math.max(MINH, Math.min(R.b - o.t, o.h + dy));
+                    if (mode.includes('w')) { w = Math.max(MINW, Math.min(o.l + o.w - R.l, o.w - dx)); l = o.l + o.w - w; } if (mode.includes('n')) { h = Math.max(MINH, Math.min(o.t + o.h - R.t, o.h - dy)); t = o.t + o.h - h; } }
+                Object.assign(sbBox, { _l: l, _t: t, _w: w, _h: h }); sbPlace(false); sbSize(); };
+            const up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); };
+            addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up); };
+        hd.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; act('move', e); });
+        ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].forEach(m => { const h = document.createElement('div'); h.className = 'rz ' + m; h.addEventListener('pointerdown', e => act(m, e)); sbBox.appendChild(h); });
+        window.addEventListener('resize', () => setTimeout(() => { sbPlace(false); sbSize(); }, 100)); window.addEventListener('orientationchange', () => setTimeout(sbSize, 300));
+    }
+    function setPen(on) {   /* إظهار/إخفاء السبورة فقط (الخطوط تبقى) */
+        penOn = on; const b = $('penBtn'); if (b) b.classList.toggle('pen-on', on);   /* [SB3] الزر ثابت «سبورة» (لا يتحوّل لقلم) */
+        if (on) sbBuild(); if (!sbBox) return;
+        sbBox.style.display = on ? 'flex' : 'none'; if (on) { if (sbBox._l == null) sbPlace(true); else sbPlace(false); setTimeout(sbSize, 30); }
+    }
+    function penWipe() {   /* المعلم أوقف القلم: إخفاء ومسح */
+        setPen(false); if (sbStrokes.length || penCv) { sbStrokes = []; sbCur = null; sbDraw(); try { ref('studentInk/' + myId).remove(); } catch (er) { } }
     }
     function applyVis() {
         const fileOk = !!(vis.file && fileMeta && fileMeta.n);
@@ -695,8 +803,8 @@
         if (!fileOk && viewMode === 'file') viewMode = 'board';
         $('fileBtn').style.display = 'none';
         viewMode = fileReady ? 'file' : 'board';
-        $('penBtn').style.display = tools.pen ? '' : 'none'; if (!tools.pen) setPen(false);
-        $('saveBtn').style.display = tools.save ? '' : 'none';
+        $('penBtn').style.display = ''; $('penBtn').classList.toggle('rail-off', !tools.pen); if (!tools.pen) penWipe();   /* [RL2] class بدل style (كانت قاعدة !important تُلغي الإخفاء) */
+        $('saveBtn').style.display = ''; $('saveBtn').classList.toggle('rail-off', !tools.save);
         if (!tools.save) $('saveMenu').style.display = 'none';
         const hide = viewMode === 'board' && !vis.board;
         $('hiddenMsg').style.display = hide ? 'flex' : 'none';
@@ -792,7 +900,7 @@
         if (!items.length) { toast('لا يوجد ما يُحفظ الآن', 'a'); return; }
         m.innerHTML = items.map(i => '<button data-k="' + i[0] + '">' + i[1] + '</button>').join('');
         const r = $('saveBtn').getBoundingClientRect();
-        m.style.display = 'flex'; m.style.left = Math.max(6, r.left) + 'px'; m.style.bottom = (window.innerHeight - r.top + 6) + 'px';
+        m.style.display = 'flex'; m.style.left = 'auto'; m.style.right = (window.innerWidth - r.left + 6) + 'px'; m.style.bottom = 'auto'; m.style.top = Math.max(6, r.top) + 'px';
     });
     $('saveMenu').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; $('saveMenu').style.display = 'none'; SAVE[b.dataset.k](); });
     document.addEventListener('click', () => { $('saveMenu').style.display = 'none'; });
@@ -937,9 +1045,10 @@
     }
 
     function computeScale(pg) {
-        const W = wrap.offsetWidth, H = wrap.clientHeight, sb = (wrap.offsetWidth - wrap.clientWidth) || 9;
         /* [FV1] الملف: يبدأ بحجمه الطبيعي 100% عند left=0 / top=0 ثابتًا (لا يتبع تكبير المدرس ولا تمريره)، وزر Fit يلاءم الصفحة كاملة فلا حاجة لتحريك الشاشة */
         const isF = viewMode === 'file';
+        document.body.classList.toggle('fit-full', (isF ? fitF : fitMode) === (isF ? 'page' : 'width'));   /* [MC3] عند Fit تختفي اللوحات الجانبية فتملأ السبورة الشاشة */
+        const W = wrap.offsetWidth, H = wrap.clientHeight, sb = (wrap.offsetWidth - wrap.clientWidth) || 9;
         wrap.classList.toggle('is-file', isF);
         let mode = isF ? fitF : fitMode;
         wrap.classList.toggle('fit-width', !isF && mode === 'width');
@@ -947,7 +1056,7 @@
         wrap.style.background = (!isF && mode === 'width') ? (pg.bg || '') : '';   /* عند ملاءمة العرض تمتد خلفية السبورة */
         if (mode === 'one') scale = 1;
         else if (mode === 'width') { scale = W / pg.w; if (pg.h * scale > H) scale = (W - sb) / pg.w; }   /* [MC2] بلا هوامش */
-        else if (mode === 'page') scale = isF ? Math.min((wrap.clientWidth - 6) / pg.w, (H - 6) / pg.h) : Math.min(wrap.clientWidth / pg.w, H / pg.h);
+        else if (mode === 'page') scale = Math.min(wrap.clientWidth / pg.w, H / pg.h);
         if (pg.zoom && !isF) { mode = 'one'; scale = pg.zoom; wrap.style.overflowX = 'auto'; wrap.classList.remove('fit-width'); wrap.style.background = ''; }
         scale = Math.max(0.1, Math.min(5, scale));
         const next = { one: 'Fit', width: '100%', page: '100%', free: '100%', auto: 'Fit' };
@@ -1058,7 +1167,7 @@
         scale = Math.max(0.1, Math.min(5, sc));
         box.style.width = Math.round(pg.w * scale) + 'px';
         box.style.height = Math.round(pg.h * scale) + 'px';
-        wrap.classList.remove('fit-width'); wrap.style.overflowX = 'auto';
+        wrap.classList.remove('fit-width'); wrap.style.overflowX = 'auto'; document.body.classList.remove('fit-full');
         curK = Math.min(scale * dpr(), 4096 / Math.max(pg.w, pg.h));
         baseCv.width = liveCv.width = Math.round(pg.w * curK);
         baseCv.height = liveCv.height = Math.round(pg.h * curK);
@@ -1066,6 +1175,34 @@
         $('zoomVal').textContent = Math.round(scale * 100) + '%';
         $('fitBtn').querySelector('.bl').textContent = '100%'; $('fitBtn').dataset.mode = 'free';
     }
+    /* [MC4] تكبير السبورة/الملف بالإصبعين (Pinch) مع بقاء النقطة بين الإصبعين ثابتة */
+    (function () {
+        let d0 = 0, s0 = 1, k = 1, on = false, px = 0, py = 0, cx0 = 0, cy0 = 0;
+        const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        wrap.addEventListener('touchstart', e => {
+            if (e.touches.length !== 2) return;
+            const pg = pagesData[curId()]; if (!pg || box.style.display === 'none') return;
+            on = true; d0 = dist(e.touches) || 1; s0 = scale; k = 1;
+            cx0 = (e.touches[0].clientX + e.touches[1].clientX) / 2; cy0 = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            const r = box.getBoundingClientRect(); px = (cx0 - r.left) / s0; py = (cy0 - r.top) / s0;
+            box.style.transformOrigin = (cx0 - r.left) + 'px ' + (cy0 - r.top) + 'px';
+        }, { passive: true });
+        wrap.addEventListener('touchmove', e => {
+            if (!on || e.touches.length !== 2) return; e.preventDefault();
+            k = Math.max(0.3 / s0, Math.min(5 / s0, dist(e.touches) / d0)); box.style.transform = 'scale(' + k + ')';
+        }, { passive: false });
+        const end = e => {
+            if (!on || (e.touches && e.touches.length >= 2)) return; on = false;
+            box.style.transform = ''; box.style.transformOrigin = '';
+            if (Math.abs(k - 1) < 0.02) return;
+            if (viewMode === 'file') fitF = 'free'; else fitMode = 'free';
+            renderMainWithScale(s0 * k);
+            const r2 = box.getBoundingClientRect();
+            wrap.scrollLeft += (r2.left + px * scale) - cx0; wrap.scrollTop += (r2.top + py * scale) - cy0;
+        };
+        wrap.addEventListener('touchend', end); wrap.addEventListener('touchcancel', end);
+        ['gesturestart', 'gesturechange', 'gestureend'].forEach(g => document.addEventListener(g, e => e.preventDefault()));   /* iOS: لا يكبّر الصفحة كلها */
+    })();
     $('fitBtn').addEventListener('click', () => {
         const m = $('fitBtn').dataset.mode || 'one';
         if (viewMode === 'file') fitF = (m === 'page') ? 'one' : 'page';   /* [FV1] ملف: 100% ⇄ Fit كامل الصفحة */
@@ -1098,8 +1235,10 @@
             im.src = url;
         });
     }
-    f.addEventListener('change', async () => {
-        const file = f.files && f.files[0]; if (!file) return;
+    const sn = document.getElementById('snapFile'), sb = document.getElementById('snapBtn');   /* [RL3] كاميرا: التقاط صورة وإرسالها للمعلم */
+    if (sb && sn) { sb.addEventListener('click', () => { if (typeof approved !== 'undefined' && !approved) return; sn.value = ''; sn.click(); }); sn.addEventListener('change', () => { if (sn.files && sn.files[0]) sendFile(sn.files[0]); }); }
+    f.addEventListener('change', () => { if (f.files && f.files[0]) sendFile(f.files[0]); });
+    async function sendFile(file) {
         if (Date.now() - last < 8000) { toast('انتظر قليلًا قبل إرسال واجب آخر', 'a'); return; }
         try {
             let data, type;
@@ -1112,7 +1251,7 @@
             await ref('homework').push({ id: myId, name: myName, fname: String(file.name).slice(0, 80), type: type, data: data, ts: Date.now() });
             toast('✅ تم إرسال الواجب للمدرس');
         } catch (e) { toast('تعذر إرسال الواجب: ' + ((e && (e.code || e.message)) || ''), 'a'); }
-    });
+    }
 })();
 
 })();
@@ -1152,7 +1291,7 @@
         const v = a.muted ? 0 : Math.round((a.volume == null ? 1 : a.volume) * 100);
         p.innerHTML = '<span>🔈</span><input type="range" min="0" max="100" value="' + v + '"><b id="volVal">' + v + '</b>';
         document.body.appendChild(p);
-        const r = b.getBoundingClientRect(); p.style.left = Math.max(6, Math.min(innerWidth - p.offsetWidth - 6, r.left + r.width / 2 - p.offsetWidth / 2)) + 'px'; p.style.bottom = (innerHeight - r.top + 8) + 'px';
+        const r = b.getBoundingClientRect(); p.style.left = Math.max(6, r.left - p.offsetWidth - 8) + 'px'; p.style.bottom = 'auto'; p.style.top = Math.max(6, r.top) + 'px';
         const inp = p.querySelector('input');
         inp.oninput = () => {
             const x = +inp.value; a.volume = x / 100; a.muted = x === 0; p.querySelector('#volVal').textContent = x;
