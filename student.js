@@ -126,7 +126,7 @@
           '@media(max-width:600px){body #toastBox,body #tmBanner,body .top-bar .xs-btn{max-width:calc(100vw - 48px - 150px)!important}}' +
           '#snapBtn{background:linear-gradient(135deg,#065f46,#10b981)!important;color:#ecfdf5!important;border-color:#34d399!important}' +
           /* [RL4] السبب الحقيقي لاختفاء القلم: student.css سطر 219 يخفي #penBtn و#saveBtn و#saveMenu بـ !important */
-          'body .bot #penBtn:not(.rail-off),body .bot #saveBtn:not(.rail-off){display:inline-flex!important}body #saveMenu[style*="flex"]{display:flex!important}' +
+          'body .bot #penBtn,body .bot #saveBtn:not(.rail-off){display:inline-flex!important}body .bot #penBtn.dis{opacity:.38!important;filter:grayscale(.7)}body #saveMenu[style*="flex"]{display:flex!important}' +
           'body .bot #penBtn.pen-on{box-shadow:0 0 0 2px #f59e0b inset}';
         document.head.appendChild(st);
     })();
@@ -793,6 +793,26 @@
         if (on) sbBuild(); if (!sbBox) return;
         sbBox.style.display = on ? 'flex' : 'none'; if (on) { if (sbBox._l == null) sbPlace(true); else sbPlace(false); setTimeout(sbSize, 30); }
     }
+    /* [SB7] تحرير المعلم لسبورة الطالب: خطوط studentInk/<myId> هي المرجع (تشمل خطوط المعلم) + عرض سبورة طالب للكل (inkShare) */
+    function sbParse(o) { const out = []; Object.keys(o || {}).forEach(k => { const v = o[k]; if (!v || !v.p) return; out.push({ key: k, c: v.c || '#fde047', pts: v.p.split(';').map(t => t.split(',').map(Number)) }); }); return out; }
+    let sbListening = null;
+    function sbListen() {
+        if (!myId || sbListening === myId) return; const first = !sbListening;
+        if (sbListening) { try { ref('studentInk/' + sbListening).off(); } catch (er) { } } sbListening = myId;
+        try { ref('studentInk/' + myId).on('value', sn => { sbStrokes = sbParse(sn.val()); sbDraw(); }); } catch (er) { }
+        if (first) { try { ref('inkShare').on('value', sn => { shareData = sn.val(); shareDraw(); }); } catch (er) { } setInterval(shareDraw, 1500); window.addEventListener('resize', () => setTimeout(shareDraw, 150)); }
+    }
+    let shareData = null, shareCv = null;
+    function shareDraw() {
+        const box = document.getElementById('slideBox'); if (!box) return;
+        if (!shareData || !shareData.strokes) { if (shareCv) shareCv.style.display = 'none'; return; }
+        if (!shareCv || shareCv.parentNode !== box) { shareCv = document.createElement('canvas'); shareCv.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:40'; box.appendChild(shareCv); }
+        shareCv.style.display = 'block'; const W = Math.max(1, box.clientWidth), H = Math.max(1, box.clientHeight); if (shareCv.width !== W || shareCv.height !== H) { shareCv.width = W; shareCv.height = H; }
+        const c = shareCv.getContext('2d'); c.clearRect(0, 0, W, H); c.lineCap = c.lineJoin = 'round';
+        Object.keys(shareData.strokes).forEach(k => { const v = shareData.strokes[k]; if (!v || !v.p) return; const pts = v.p.split(';').map(t => t.split(',').map(Number)); c.strokeStyle = v.c || '#fde047'; c.lineWidth = Math.max(2, (v.w || 0.006) * W); c.beginPath();
+            pts.forEach((q, i) => i ? c.lineTo(q[0] * W, q[1] * W) : c.moveTo(q[0] * W, q[1] * W)); if (pts.length === 1) c.lineTo(pts[0][0] * W + 0.1, pts[0][1] * W); c.stroke(); });
+        c.font = '700 13px Cairo,sans-serif'; c.fillStyle = 'rgba(15,23,42,.75)'; const tx = '✏️ سبورة: ' + (shareData.name || 'طالب'); c.fillRect(W - c.measureText(tx).width - 18, 6, c.measureText(tx).width + 12, 22); c.fillStyle = '#fde68a'; c.fillText(tx, W - c.measureText(tx).width - 12, 22);
+    }
     function penWipe() {   /* المعلم أوقف القلم: إخفاء ومسح */
         setPen(false); if (sbStrokes.length || penCv) { sbStrokes = []; sbCur = null; sbDraw(); try { ref('studentInk/' + myId).remove(); } catch (er) { } }
     }
@@ -803,7 +823,7 @@
         if (!fileOk && viewMode === 'file') viewMode = 'board';
         $('fileBtn').style.display = 'none';
         viewMode = fileReady ? 'file' : 'board';
-        $('penBtn').style.display = ''; $('penBtn').classList.toggle('rail-off', !tools.pen); if (!tools.pen) penWipe();   /* [RL2] class بدل style (كانت قاعدة !important تُلغي الإخفاء) */
+        sbListen(); $('penBtn').style.display = ''; $('penBtn').classList.toggle('dis', !tools.pen); if (!tools.pen) penWipe();   /* [SB6] زر السبورة ثابت وخافت عند عدم التفعيل */   /* [RL2] class بدل style (كانت قاعدة !important تُلغي الإخفاء) */
         $('saveBtn').style.display = ''; $('saveBtn').classList.toggle('rail-off', !tools.save);
         if (!tools.save) $('saveMenu').style.display = 'none';
         const hide = viewMode === 'board' && !vis.board;
@@ -1156,7 +1176,7 @@
     }
     $('prevBtn').addEventListener('click', () => step(-1));
     $('nextBtn').addEventListener('click', () => step(1));
-    $('penBtn').addEventListener('click', () => setPen(!penOn));
+    $('penBtn').addEventListener('click', () => { if ($('penBtn').classList.contains('dis')) return; setPen(!penOn); });
     $('zoomIn').addEventListener('click', () => { if (viewMode === 'file') fitF = 'free'; else fitMode = 'free'; scale *= 1.15; renderMainFree(); });
     $('zoomOut').addEventListener('click', () => { if (viewMode === 'file') fitF = 'free'; else fitMode = 'free'; scale /= 1.15; renderMainFree(); });
     function renderMainFree() {            /* تكبير يدوي: نحفظ المقياس ثم نرسم */
